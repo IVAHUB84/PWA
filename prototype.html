@@ -1346,16 +1346,11 @@ body {
   <div class="screen" id="s-admin-feed">
     <div class="status-bar"><span class="time">9:41</span><div class="dynamic-island"></div><div class="icons"><svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".7"/><rect x="4.5" y="5.5" width="3" height="6.5" rx=".7"/><rect x="9" y="3" width="3" height="9" rx=".7"/><rect x="13.5" y="0" width="3" height="12" rx=".7"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="8" cy="11" r="1.2" fill="currentColor" stroke="none"/><path d="M4.8 7.8a4.5 4.5 0 016.4 0" stroke-width="1.5"/><path d="M2 5a8 8 0 0112 0" stroke-width="1.5"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="20" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".4"/><path d="M22 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/><rect x="2" y="2" width="15" height="8" rx="2.5" fill="currentColor"/></svg></div></div>
     <div class="admin-header" style="display:flex;align-items:center;justify-content:space-between;">
-      <div><div class="admin-brand">CMS · Лента студии</div><div class="admin-title" style="font-size:19px;">5 публикаций</div></div>
+      <div><div class="admin-brand">CMS · Лента студии</div><div id="adminFeedCount" class="admin-title" style="font-size:19px;">0 публикаций</div></div>
       <button onclick="go('s-admin-post')" style="background:rgba(255,255,255,0.15);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;padding:8px 14px;cursor:pointer;font-family:inherit;">+ Новый</button>
     </div>
-    <div class="scroll" style="padding-top:8px;">
-      <div class="post-row" onclick="go('s-admin-post')"><div class="post-thumb" style="background:linear-gradient(135deg,#F4C2A1,#C9956C);">✨</div><div class="post-info"><div class="post-cap">Ламинирование бровей: результат до 6 недель</div><div class="post-date">24 мая · Брови</div></div><span class="post-status pub">Опубл.</span></div>
-      <div class="post-row" onclick="go('s-admin-post')"><div class="post-thumb" style="background:linear-gradient(135deg,#E8C4F0,#C48FD8);">💅</div><div class="post-info"><div class="post-cap">Весенняя коллекция оттенков уже в студии</div><div class="post-date">22 мая · Ногти</div></div><span class="post-status pub">Опубл.</span></div>
-      <div class="post-row" onclick="go('s-admin-post')"><div class="post-thumb" style="background:linear-gradient(135deg,#C8E6C9,#66BB6A);">🌿</div><div class="post-info"><div class="post-cap">Ультразвуковая чистка + кислотный пилинг</div><div class="post-date">20 мая · Лицо</div></div><span class="post-status pub">Опубл.</span></div>
-      <div class="post-row" onclick="go('s-admin-post')"><div class="post-thumb" style="background:linear-gradient(135deg,#F8BBD0,#E91E8C);">💆</div><div class="post-info"><div class="post-cap">Техника балаяж без фольги — новинка сезона</div><div class="post-date">18 мая · Волосы</div></div><span class="post-status pub">Опубл.</span></div>
-      <div class="post-row" onclick="go('s-admin-post')" style="border-bottom:none;"><div class="post-thumb" style="background:var(--surface);font-size:22px;">📝</div><div class="post-info"><div class="post-cap">Маникюр + педикюр: акция до 31 мая</div><div class="post-date">Черновик · Акции</div></div><span class="post-status draft">Черновик</span></div>
-      <div style="height:20px;"></div>
+    <div class="scroll" style="padding-top:8px;" id="adminFeedList">
+      <div style="padding:40px 20px;text-align:center;color:rgba(255,255,255,0.4);font-size:14px;">Публикаций пока нет</div>
     </div>
     <div class="tab-bar">
       <div class="tab" onclick="go('s-admin','tab')"><div class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div><div class="tab-label">Сводка</div></div>
@@ -1396,16 +1391,10 @@ body {
   <!-- ══ ADMIN: CLIENTS ══ -->
   <div class="screen" id="s-admin-clients">
     <div class="status-bar"><span class="time">9:41</span><div class="dynamic-island"></div><div class="icons"><svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".7"/><rect x="4.5" y="5.5" width="3" height="6.5" rx=".7"/><rect x="9" y="3" width="3" height="9" rx=".7"/><rect x="13.5" y="0" width="3" height="12" rx=".7"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="8" cy="11" r="1.2" fill="currentColor" stroke="none"/><path d="M4.8 7.8a4.5 4.5 0 016.4 0" stroke-width="1.5"/><path d="M2 5a8 8 0 0112 0" stroke-width="1.5"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="20" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".4"/><path d="M22 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/><rect x="2" y="2" width="15" height="8" rx="2.5" fill="currentColor"/></svg></div></div>
-    <div class="admin-header"><div class="admin-brand">Клиентская база</div><div class="admin-title">1 247 клиентов</div></div>
-    <div style="padding:10px 20px 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-2);">Согласия: 🔔 уведомл. &nbsp; 🎁 акции &nbsp; 📸 фото &nbsp; 💬 отзывы</div>
-    <div style="margin:0 20px 12px;background:var(--surface);border-radius:10px;height:38px;display:flex;align-items:center;padding:0 12px;gap:8px;"><span style="color:var(--text-2);font-size:14px;">🔍</span><input style="background:none;border:none;outline:none;font-size:14px;color:var(--text);flex:1;font-family:inherit;" placeholder="Имя или телефон…"></div>
-    <div class="scroll" style="padding-bottom:20px;">
-      <div class="client-row"><div class="client-av" style="background:linear-gradient(135deg,#F4C2A1,#E8956C);">АК</div><div class="client-info"><div class="client-name">Анна Кузнецова</div><div class="client-phone">+7 912 345-67-89</div><div class="consent-dots"><div class="consent-dot on"></div><div class="consent-dot on"></div><div class="consent-dot on"></div><div class="consent-dot on"></div></div></div><div style="font-size:12px;color:var(--text-2);white-space:nowrap;">12 визитов</div></div>
-      <div class="client-row"><div class="client-av" style="background:linear-gradient(135deg,#A8D8EA,#7EC8E3);color:#2d6a85;">АВ</div><div class="client-info"><div class="client-name">Анна Волкова</div><div class="client-phone">+7 903 210-44-18</div><div class="consent-dots"><div class="consent-dot on"></div><div class="consent-dot on"></div><div class="consent-dot off"></div><div class="consent-dot on"></div></div></div><div style="font-size:12px;color:var(--text-2);white-space:nowrap;">8 визитов</div></div>
-      <div class="client-row"><div class="client-av" style="background:linear-gradient(135deg,#C8E6C9,#81C784);color:#2d6a3a;">СМ</div><div class="client-info"><div class="client-name">Светлана Миронова</div><div class="client-phone">+7 916 677-33-11</div><div class="consent-dots"><div class="consent-dot on"></div><div class="consent-dot off"></div><div class="consent-dot off"></div><div class="consent-dot off"></div></div></div><div style="font-size:12px;color:var(--text-2);white-space:nowrap;">5 визитов</div></div>
-      <div class="client-row"><div class="client-av" style="background:linear-gradient(135deg,#F8BBD0,#F48FB1);color:#8a2d5a;">ТЛ</div><div class="client-info"><div class="client-name">Тамара Лебедева</div><div class="client-phone">+7 965 444-22-00</div><div class="consent-dots"><div class="consent-dot on"></div><div class="consent-dot on"></div><div class="consent-dot on"></div><div class="consent-dot off"></div></div></div><div style="font-size:12px;color:var(--text-2);white-space:nowrap;">3 визита</div></div>
-      <div class="client-row"><div class="client-av" style="background:linear-gradient(135deg,#F4C2A1,#E8956C);">ЕС</div><div class="client-info"><div class="client-name">Екатерина Смирнова</div><div class="client-phone">+7 911 888-66-44</div><div class="consent-dots"><div class="consent-dot on"></div><div class="consent-dot on"></div><div class="consent-dot on"></div><div class="consent-dot on"></div></div></div><div style="font-size:12px;color:var(--text-2);white-space:nowrap;">18 визитов</div></div>
-      <div class="client-row" style="border-bottom:none;"><div class="client-av" style="background:linear-gradient(135deg,#D1C4E9,#9575CD);color:#4a2d8a;">НП</div><div class="client-info"><div class="client-name">Надежда Павлова</div><div class="client-phone">+7 926 123-45-67</div><div class="consent-dots"><div class="consent-dot on"></div><div class="consent-dot off"></div><div class="consent-dot on"></div><div class="consent-dot on"></div></div></div><div style="font-size:12px;color:var(--text-2);white-space:nowrap;">1 визит</div></div>
+    <div class="admin-header"><div class="admin-brand">Клиентская база</div><div id="adminClientsCount" class="admin-title">Загрузка…</div></div>
+    <div style="margin:10px 20px 12px;background:var(--surface);border-radius:10px;height:38px;display:flex;align-items:center;padding:0 12px;gap:8px;"><span style="color:var(--text-2);font-size:14px;">🔍</span><input id="adminClientsSearch" style="background:none;border:none;outline:none;font-size:14px;color:var(--text);flex:1;font-family:inherit;" placeholder="Имя или телефон…" oninput="filterAdminClients(this.value)"></div>
+    <div class="scroll" style="padding-bottom:20px;" id="adminClientsList">
+      <div style="padding:40px 20px;text-align:center;color:var(--text-2);font-size:14px;">Загрузка…</div>
     </div>
     <div class="tab-bar">
       <div class="tab" onclick="go('s-admin','tab')"><div class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div><div class="tab-label">Сводка</div></div>
@@ -1422,62 +1411,8 @@ body {
       <div><div class="admin-brand">Push-кампании</div><div class="admin-title">Рассылки</div></div>
       <button onclick="go('s-admin-push-new')" style="background:rgba(255,255,255,0.15);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;padding:8px 14px;cursor:pointer;font-family:inherit;">+ Новая</button>
     </div>
-    <div class="scroll" style="padding-bottom:20px;">
-      <div class="section-header" style="padding-top:14px;"><span class="section-title">Запланированные</span><span style="font-size:12px;color:var(--green);font-weight:700;">2 активных</span></div>
-      <div class="push-hist-row">
-        <div class="push-hist-icon sched">⏰</div>
-        <div class="push-hist-info">
-          <div class="push-hist-name">Напоминание о записи</div>
-          <div class="push-hist-meta">26 мая, 10:00 · 1 247 получателей</div>
-        </div>
-        <button onclick="go('s-admin-push-new')" style="background:var(--surface);border:none;border-radius:8px;font-size:12px;font-weight:700;padding:6px 10px;cursor:pointer;color:var(--text-2);font-family:inherit;flex-shrink:0;">Ред.</button>
-      </div>
-      <div class="push-hist-row">
-        <div class="push-hist-icon sched">🎁</div>
-        <div class="push-hist-info">
-          <div class="push-hist-name">Спецпредложение — Маникюр</div>
-          <div class="push-hist-meta">31 мая, 18:00 · 96 получателей</div>
-        </div>
-        <button onclick="go('s-admin-push-new')" style="background:var(--surface);border:none;border-radius:8px;font-size:12px;font-weight:700;padding:6px 10px;cursor:pointer;color:var(--text-2);font-family:inherit;flex-shrink:0;">Ред.</button>
-      </div>
-      <div class="section-header" style="padding-top:20px;"><span class="section-title">История отправок</span></div>
-      <div class="push-hist-row">
-        <div class="push-hist-icon">📅</div>
-        <div class="push-hist-info">
-          <div class="push-hist-name">Напоминание о записи</div>
-          <div class="push-hist-meta">24 мая · 1 247 отправлено</div>
-          <div class="push-hist-stats">
-            <div><div class="push-hs-val">1 247</div><div class="push-hs-lbl">отправлено</div></div>
-            <div><div class="push-hs-val" style="color:var(--accent);">32%</div><div class="push-hs-lbl">открыто</div></div>
-            <div><div class="push-hs-val" style="color:var(--green);">21</div><div class="push-hs-lbl">записей</div></div>
-          </div>
-        </div>
-      </div>
-      <div class="push-hist-row">
-        <div class="push-hist-icon">🎁</div>
-        <div class="push-hist-info">
-          <div class="push-hist-name">Спецпредложение — Ламинирование</div>
-          <div class="push-hist-meta">15 мая · 384 отправлено</div>
-          <div class="push-hist-stats">
-            <div><div class="push-hs-val">384</div><div class="push-hs-lbl">отправлено</div></div>
-            <div><div class="push-hs-val" style="color:var(--accent);">48%</div><div class="push-hs-lbl">открыто</div></div>
-            <div><div class="push-hs-val" style="color:var(--green);">34</div><div class="push-hs-lbl">записей</div></div>
-          </div>
-        </div>
-      </div>
-      <div class="push-hist-row" style="border-bottom:none;">
-        <div class="push-hist-icon">🔔</div>
-        <div class="push-hist-info">
-          <div class="push-hist-name">Возвращение клиента</div>
-          <div class="push-hist-meta">1 мая · 612 отправлено</div>
-          <div class="push-hist-stats">
-            <div><div class="push-hs-val">612</div><div class="push-hs-lbl">отправлено</div></div>
-            <div><div class="push-hs-val" style="color:var(--accent);">18%</div><div class="push-hs-lbl">открыто</div></div>
-            <div><div class="push-hs-val" style="color:var(--green);">9</div><div class="push-hs-lbl">записей</div></div>
-          </div>
-        </div>
-      </div>
-      <div style="padding:12px 20px;"><button class="btn-ghost" style="font-size:13px;color:var(--text-2);">Архив кампаний (8) →</button></div>
+    <div class="scroll" style="padding-bottom:20px;" id="adminPushList">
+      <div style="padding:40px 20px;text-align:center;color:var(--text-2);font-size:14px;">Рассылок пока нет</div>
     </div>
     <div class="tab-bar">
       <div class="tab" onclick="go('s-admin','tab')"><div class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div><div class="tab-label">Сводка</div></div>
@@ -1500,7 +1435,7 @@ body {
         <span class="chip" onclick="pushTplChip(this,'custom')">Свой текст</span>
       </div></div>
       <div style="padding:0 20px 10px;"><div class="label">Текст уведомления</div></div>
-      <textarea class="admin-textarea" id="pushNewText" rows="3" oninput="pushPreviewUpdate(this.value)" placeholder="Введите текст уведомления…">Завтра в 14:00 — Ламинирование бровей у Марии Соколовой. Ждём вас!</textarea>
+      <textarea class="admin-textarea" id="pushNewText" rows="3" oninput="pushPreviewUpdate(this.value)" placeholder="Введите текст уведомления…">Напоминаем о вашей записи завтра. Ждём вас в студии!</textarea>
       <div style="padding:0 20px 10px;"><div class="label">Аудитория</div></div>
       <div class="audience-row sel" id="naud1" onclick="selectNewAudience('naud1')"><div class="aud-check on" id="naud1-chk">✓</div><div><div style="font-size:14px;font-weight:700;">Все клиенты</div><div style="font-size:12px;color:var(--text-2);">1 247 получателей</div></div></div>
       <div class="audience-row" id="naud2" onclick="selectNewAudience('naud2')"><div class="aud-check" id="naud2-chk"></div><div><div style="font-size:14px;font-weight:700;">Активные за 30 дней</div><div style="font-size:12px;color:var(--text-2);">384 получателя</div></div></div>
@@ -1519,7 +1454,7 @@ body {
         </div>
       </div>
       <div style="padding:0 20px 10px;"><div class="label">Предпросмотр</div></div>
-      <div class="push-preview"><div class="push-p-icon" id="pushNewIcon">📅</div><div style="flex:1;"><div class="push-p-title" id="pushNewTitle">Studio · Напоминание о визите</div><div class="push-p-body" id="pushNewPreview">Завтра в 14:00 — Ламинирование бровей у Марии Соколовой. Ждём вас!</div></div></div>
+      <div class="push-preview"><div class="push-p-icon" id="pushNewIcon">📅</div><div style="flex:1;"><div class="push-p-title" id="pushNewTitle">Реснички · Напоминание о визите</div><div class="push-p-body" id="pushNewPreview">Напоминаем о вашей записи завтра. Ждём вас в студии!</div></div></div>
       <div style="padding:16px 20px 0;"><button class="btn-primary" id="pushNewSendBtn" onclick="sendNewPush()">Отправить сейчас</button></div>
     </div>
   </div>
@@ -3115,8 +3050,11 @@ function onEnterScreen(id) {
     }
   }
   if (id === 's-profile')  renderProfileScreen();
-  if (id === 's-review')   renderReviewScreen();
-  if (id === 's-admin')    renderAdminDashboard();
+  if (id === 's-review')         renderReviewScreen();
+  if (id === 's-admin')          renderAdminDashboard();
+  if (id === 's-admin-feed')     renderAdminFeed();
+  if (id === 's-admin-clients')  renderAdminClients();
+  if (id === 's-admin-push')     renderAdminPush();
   if (id === 's-register') {
     const phone = localStorage.getItem('yc_reg_phone') || '';
     const el = document.getElementById('regPhone');
@@ -3240,8 +3178,144 @@ function adminCat(el) {
   el.classList.add('active');
 }
 
-function publishPost() {
+function publishPost(draft) {
+  const cat = document.querySelector('#s-admin-post .hscroll .chip.active');
+  const ta  = document.querySelector('#s-admin-post .admin-textarea');
+  const text = ta ? ta.value.trim() : '';
+  if (!text) { alert('Добавьте текст публикации'); return; }
+  const catName = cat ? cat.textContent.trim() : 'Другое';
+  const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]');
+  posts.unshift({
+    id: Date.now(),
+    cat: catName,
+    text,
+    date: new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }),
+    draft: !!draft
+  });
+  localStorage.setItem('yc_feed_posts', JSON.stringify(posts));
+  if (ta) ta.value = '';
   go('s-admin-feed', 'tab');
+}
+
+let _adminAllClients = [];
+
+function renderAdminFeed() {
+  const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]');
+  const countEl = document.getElementById('adminFeedCount');
+  const listEl  = document.getElementById('adminFeedList');
+  const pub = posts.filter(p => !p.draft).length;
+  if (countEl) countEl.textContent = pub + ' публикаци' + (pub === 1 ? 'я' : pub < 5 ? 'и' : 'й');
+  if (!listEl) return;
+  if (!posts.length) {
+    listEl.innerHTML = '<div style="padding:40px 20px;text-align:center;color:rgba(255,255,255,0.4);font-size:14px;">Публикаций пока нет.<br>Нажмите «+ Новый» чтобы создать.</div>';
+    return;
+  }
+  const _CAT_ICONS = { 'Брови':'✨','Ногти':'💅','Лицо':'🌿','Волосы':'💆','Тело':'🧖','Акции':'🎁' };
+  listEl.innerHTML = posts.map((p, i) => {
+    const icon = _CAT_ICONS[p.cat] || '📝';
+    const last = i === posts.length - 1 ? 'border-bottom:none;' : '';
+    return `<div class="post-row" style="${last}">
+      <div class="post-thumb" style="background:var(--surface);font-size:22px;">${icon}</div>
+      <div class="post-info"><div class="post-cap">${esc(p.text.slice(0, 60))}</div><div class="post-date">${p.date} · ${esc(p.cat)}</div></div>
+      <span class="post-status ${p.draft ? 'draft' : 'pub'}">${p.draft ? 'Черновик' : 'Опубл.'}</span>
+      <button onclick="deletePost(${p.id})" style="background:none;border:none;color:var(--text-2);font-size:16px;cursor:pointer;padding:4px;flex-shrink:0;">✕</button>
+    </div>`;
+  }).join('') + '<div style="height:20px;"></div>';
+}
+
+function deletePost(id) {
+  const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => p.id !== id);
+  localStorage.setItem('yc_feed_posts', JSON.stringify(posts));
+  renderAdminFeed();
+}
+
+async function renderAdminClients() {
+  const listEl  = document.getElementById('adminClientsList');
+  const countEl = document.getElementById('adminClientsCount');
+  if (listEl) listEl.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--text-2);font-size:14px;">Загрузка…</div>';
+  const r = await YC.get(`/records/${YC.company}`, { count: 200 });
+  if (!r.success || !r.data) {
+    if (listEl) listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-2);">Не удалось загрузить</div>';
+    return;
+  }
+  const seen = new Map();
+  r.data.forEach(rec => {
+    const c = rec.client;
+    if (!c || !c.id) return;
+    if (!seen.has(c.id)) seen.set(c.id, { id: c.id, name: c.name || '—', phone: c.phone || '', visits: 0 });
+    seen.get(c.id).visits++;
+  });
+  _adminAllClients = [...seen.values()].sort((a, b) => b.visits - a.visits);
+  if (countEl) countEl.textContent = _adminAllClients.length + ' клиентов';
+  _renderClientRows(_adminAllClients);
+}
+
+function _renderClientRows(clients) {
+  const listEl = document.getElementById('adminClientsList');
+  if (!listEl) return;
+  if (!clients.length) {
+    listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-2);">Ничего не найдено</div>';
+    return;
+  }
+  const _GRADS = ['linear-gradient(135deg,#F4C2A1,#E8956C)','linear-gradient(135deg,#A8D8EA,#7EC8E3)','linear-gradient(135deg,#C8E6C9,#81C784)','linear-gradient(135deg,#F8BBD0,#F48FB1)','linear-gradient(135deg,#D1C4E9,#9575CD)'];
+  listEl.innerHTML = clients.map((c, i) => {
+    const initials = c.name.trim().split(/\s+/).map(w => w[0] || '').join('').slice(0, 2).toUpperCase() || '?';
+    const grad = _GRADS[i % _GRADS.length];
+    const visits = c.visits + ' визит' + (c.visits === 1 ? '' : c.visits < 5 ? 'а' : 'ов');
+    const border = i === clients.length - 1 ? 'border-bottom:none;' : '';
+    return `<div class="client-row" style="${border}">
+      <div class="client-av" style="background:${grad};">${initials}</div>
+      <div class="client-info">
+        <div class="client-name">${esc(c.name)}</div>
+        <div class="client-phone">${esc(c.phone)}</div>
+      </div>
+      <div style="font-size:12px;color:var(--text-2);white-space:nowrap;">${visits}</div>
+    </div>`;
+  }).join('');
+}
+
+function filterAdminClients(q) {
+  if (!_adminAllClients.length) return;
+  const lq = q.toLowerCase();
+  const filtered = q ? _adminAllClients.filter(c =>
+    c.name.toLowerCase().includes(lq) || c.phone.includes(lq)
+  ) : _adminAllClients;
+  _renderClientRows(filtered);
+}
+
+function renderAdminPush() {
+  const listEl = document.getElementById('adminPushList');
+  if (!listEl) return;
+  const campaigns = JSON.parse(localStorage.getItem('yc_push_campaigns') || '[]');
+  if (!campaigns.length) {
+    listEl.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--text-2);font-size:14px;">Рассылок пока нет.<br>Нажмите «+ Новая» чтобы создать.</div>';
+    return;
+  }
+  const sched = campaigns.filter(c => c.scheduled);
+  const sent  = campaigns.filter(c => !c.scheduled);
+  let html = '';
+  if (sched.length) {
+    html += `<div class="section-header" style="padding-top:14px;"><span class="section-title">Запланированные</span><span style="font-size:12px;color:var(--green);font-weight:700;">${sched.length} активных</span></div>`;
+    html += sched.map(c => `<div class="push-hist-row">
+      <div class="push-hist-icon sched">⏰</div>
+      <div class="push-hist-info"><div class="push-hist-name">${esc(c.title)}</div><div class="push-hist-meta">${esc(c.date)} · ${esc(c.audience)}</div></div>
+      <button onclick="deletePushCampaign(${c.id})" style="background:var(--surface);border:none;border-radius:8px;font-size:12px;font-weight:700;padding:6px 10px;cursor:pointer;color:var(--red);font-family:inherit;flex-shrink:0;">Удал.</button>
+    </div>`).join('');
+  }
+  if (sent.length) {
+    html += `<div class="section-header" style="padding-top:20px;"><span class="section-title">Отправлено</span></div>`;
+    html += sent.map((c, i) => `<div class="push-hist-row" style="${i===sent.length-1?'border-bottom:none;':''}">
+      <div class="push-hist-icon">${esc(c.icon)}</div>
+      <div class="push-hist-info"><div class="push-hist-name">${esc(c.title)}</div><div class="push-hist-meta">${esc(c.date)}</div></div>
+    </div>`).join('');
+  }
+  listEl.innerHTML = html;
+}
+
+function deletePushCampaign(id) {
+  const campaigns = JSON.parse(localStorage.getItem('yc_push_campaigns') || '[]').filter(c => c.id !== id);
+  localStorage.setItem('yc_push_campaigns', JSON.stringify(campaigns));
+  renderAdminPush();
 }
 
 function selectAudience(id) {
@@ -3269,10 +3343,10 @@ function selectNewAudience(id) {
 }
 
 const PUSH_TEMPLATES = {
-  remind: { icon:'📅', title:'Studio · Напоминание о визите',    text:'Завтра в 14:00 — Ламинирование бровей у Марии Соколовой. Ждём вас!' },
-  promo:  { icon:'🎁', title:'Studio · Специальное предложение', text:'Только для вас: 20% на Маникюр до 31 мая. Запишитесь сейчас!' },
-  return: { icon:'🔔', title:'Studio · Ждём вас снова',         text:'Скучаем! Прошло 45 дней с вашего последнего визита. Записаться снова →' },
-  custom: { icon:'💬', title:'Studio · Сообщение',              text:'' },
+  remind: { icon:'📅', title:'Реснички · Напоминание о визите',    text:'Напоминаем о вашей записи завтра. Ждём вас в студии!' },
+  promo:  { icon:'🎁', title:'Реснички · Специальное предложение', text:'Только для вас: скидка 20% на следующую процедуру. Запишитесь сейчас!' },
+  return: { icon:'🔔', title:'Реснички · Ждём вас снова',         text:'Скучаем! Давно не видели вас в студии. Записаться снова →' },
+  custom: { icon:'💬', title:'Реснички · Сообщение',              text:'' },
 };
 
 function pushTplChip(el, key) {
@@ -3304,10 +3378,22 @@ function pushSchedToggle(mode) {
 }
 
 function sendNewPush() {
+  const isScheduled = document.getElementById('segLater')?.classList.contains('active');
+  const text  = document.getElementById('pushNewText')?.value.trim() || '';
+  const title = document.getElementById('pushNewTitle')?.textContent || 'Реснички';
+  const icon  = document.getElementById('pushNewIcon')?.textContent || '📅';
+  if (!text) { alert('Введите текст уведомления'); return; }
+  const audRow = document.querySelector('.audience-row.sel');
+  const audience = audRow ? audRow.querySelector('[style*="font-weight:700"]')?.textContent || 'Все клиенты' : 'Все клиенты';
+  const campaigns = JSON.parse(localStorage.getItem('yc_push_campaigns') || '[]');
+  campaigns.unshift({
+    id: Date.now(), icon, title: text.slice(0, 50), date: new Date().toLocaleDateString('ru-RU', { day:'numeric', month:'long' }),
+    audience, scheduled: isScheduled
+  });
+  localStorage.setItem('yc_push_campaigns', JSON.stringify(campaigns));
   const screen = document.getElementById('s-admin-push-new');
   const toast = document.createElement('div');
-  toast.textContent = document.getElementById('pushNewSendBtn').textContent === 'Запланировать'
-    ? 'Рассылка запланирована ✓' : 'Рассылка отправлена ✓';
+  toast.textContent = isScheduled ? 'Рассылка запланирована ✓' : 'Рассылка отправлена ✓';
   toast.style.cssText = 'position:absolute;bottom:80px;left:20px;right:20px;background:var(--primary);color:#fff;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:700;text-align:center;z-index:300;';
   screen.appendChild(toast);
   setTimeout(() => { toast.remove(); go('s-admin-push', 'tab'); }, 1800);
