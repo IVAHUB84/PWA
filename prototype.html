@@ -937,11 +937,11 @@ body {
         <div><div class="prof-name" id="profName"></div><div class="prof-phone" id="profPhone"></div></div>
       </div>
       <div style="padding:0 20px 6px;"><div class="label">Избранный мастер</div></div>
-      <div class="settings-group">
-        <div class="s-row">
-          <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#F4C2A1,#E8956C);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">👩</div>
-          <div style="flex:1;"><div style="font-size:15px;font-weight:700;">Мария Соколова</div><div style="font-size:12px;color:var(--text-2);">Мастер бровей</div></div>
-          <button class="btn-ghost">Изменить</button>
+      <div class="settings-group" id="profFavMasterBlock">
+        <div class="s-row" id="profFavMasterRow">
+          <div id="profFavAv" style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#F4C2A1,#E8956C);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">👩</div>
+          <div style="flex:1;"><div id="profFavName" style="font-size:15px;font-weight:700;">—</div><div id="profFavRole" style="font-size:12px;color:var(--text-2);">Не выбран</div></div>
+          <button class="btn-ghost" onclick="go('s-services','tab')">Записаться</button>
         </div>
       </div>
       <div style="padding:16px 20px 6px;"><div class="label">Уведомления</div></div>
@@ -966,17 +966,8 @@ body {
         </div>
       </div>
       <div style="padding:0 20px 6px;"><div class="label">Последние визиты</div></div>
-      <div class="settings-group" style="margin-bottom:20px;">
-        <div class="s-row" onclick="rebook('svc1')">
-          <div style="width:36px;height:36px;border-radius:10px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:16px;">✨</div>
-          <div style="flex:1;"><div style="font-size:14px;font-weight:600;">Ламинирование бровей</div><div style="font-size:12px;color:var(--text-2);">Мария С. · 10 апреля</div></div>
-          <button class="btn-ghost" style="font-size:13px;">Повторить</button>
-        </div>
-        <div class="s-row" onclick="rebook('svc2')">
-          <div style="width:36px;height:36px;border-radius:10px;background:#E8F4F8;display:flex;align-items:center;justify-content:center;font-size:16px;">💅</div>
-          <div style="flex:1;"><div style="font-size:14px;font-weight:600;">Маникюр с покрытием</div><div style="font-size:12px;color:var(--text-2);">Ольга К. · 28 марта</div></div>
-          <button class="btn-ghost" style="font-size:13px;">Повторить</button>
-        </div>
+      <div class="settings-group" id="profRecentVisits" style="margin-bottom:20px;">
+        <div style="padding:14px 16px;font-size:13px;color:var(--text-2);">Загрузка…</div>
       </div>
       <div style="padding:0 20px 32px;text-align:center;">
         <button style="background:none;border:none;color:var(--red);font-size:15px;font-weight:600;cursor:pointer;" onclick="logout()">Выйти из аккаунта</button>
@@ -2258,6 +2249,47 @@ function renderProfileScreen() {
   if (phoneEl) phoneEl.textContent = s.email || s.phone;
   if (avEl) avEl.textContent = initials;
   if (homeAv) homeAv.textContent = initials;
+
+  const fav = MASTERS_DATA.find(m => m.fav);
+  const favNameEl = document.getElementById('profFavName');
+  const favRoleEl = document.getElementById('profFavRole');
+  const favAvEl   = document.getElementById('profFavAv');
+  if (fav) {
+    if (favNameEl) favNameEl.textContent = fav.name;
+    if (favRoleEl) favRoleEl.textContent = fav.role;
+    if (favAvEl) {
+      if (_hasRealAvatar(fav)) {
+        favAvEl.innerHTML = `<img src="${fav.avatar_big||fav.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.outerHTML='<span style=\\"font-size:18px;\\">👩</span>'">`;
+      } else {
+        favAvEl.textContent = getInitials(fav.name);
+        favAvEl.style.fontSize = '14px';
+        favAvEl.style.fontWeight = '800';
+      }
+    }
+  } else {
+    if (favNameEl) favNameEl.textContent = 'Не выбран';
+    if (favRoleEl) favRoleEl.textContent = 'Выберите на экране мастеров';
+    if (favAvEl) { favAvEl.textContent = '👩'; favAvEl.style.fontSize = '18px'; }
+  }
+
+  const recentEl = document.getElementById('profRecentVisits');
+  if (recentEl) {
+    const now = new Date();
+    const past = _loadStoredRecords()
+      .filter(r => r.status !== 'cancelled' && new Date(r.datetime.replace(' ','T')) <= now)
+      .sort((a, b) => new Date(b.datetime) - new Date(a.datetime))
+      .slice(0, 2);
+    if (past.length) {
+      recentEl.innerHTML = past.map(r => `
+        <div class="s-row" onclick="rebook('${r.svcId}')">
+          <div style="width:36px;height:36px;border-radius:10px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:16px;">✨</div>
+          <div style="flex:1;"><div style="font-size:14px;font-weight:600;">${esc(r.svcName)}</div><div style="font-size:12px;color:var(--text-2);">${esc(r.masterName)} · ${_fmtDatetime(r.datetime)}</div></div>
+          <button class="btn-ghost" style="font-size:13px;">Повторить</button>
+        </div>`).join('');
+    } else {
+      recentEl.innerHTML = '<div style="padding:14px 16px;font-size:13px;color:var(--text-2);">Визитов пока нет</div>';
+    }
+  }
 }
 
 // ── OTP VERIFY (email login) ──
