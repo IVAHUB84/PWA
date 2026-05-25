@@ -1422,7 +1422,7 @@ function setTx(el, x, animated) {
 
 function go(id, mode) {
   const current = navHistory[navHistory.length - 1];
-  if (current === id) return;
+  if (current === id) { onEnterScreen(id); return; }
   const fromEl = document.getElementById(current);
   const toEl   = document.getElementById(id);
   if (!toEl) return;
