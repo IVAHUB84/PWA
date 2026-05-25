@@ -2505,13 +2505,18 @@ function cancelRecord(id, hash) {
 
 async function confirmCancel() {
   const id = state._cancelId;
-  const hash = state._cancelHash;
   if (!id) return;
   const btn = document.querySelector('#s-cancel .btn-danger');
   if (btn) { btn.disabled = true; btn.textContent = 'Отменяем…'; }
-  const r = await fetch(`${YC.base}/user/records/${id}/${hash}`, {
-    method: 'DELETE', headers: YC._h()
-  }).then(res => res.json()).catch(() => ({ success: false }));
+  let r = { success: false };
+  try {
+    const res = await fetch(`${YC.base}/records/${YC.company}/${id}`, {
+      method: 'DELETE', headers: YC._h()
+    });
+    r = await res.json();
+    console.log('cancel response:', r);
+  } catch(e) { console.error('cancel error:', e); }
+  if (btn) { btn.disabled = false; btn.textContent = 'Да, отменить запись'; }
   const records = _loadStoredRecords();
   const idx = records.findIndex(x => String(x.id) === String(id));
   if (idx !== -1) { records[idx].status = 'cancelled'; localStorage.setItem('yc_records', JSON.stringify(records)); }
@@ -2519,7 +2524,7 @@ async function confirmCancel() {
   state._cancelHash = null;
   go('s-home', 'tab');
   renderHomeHero();
-  if (!r.success) alert('Запись отменена локально. Если ошибка повторится — позвоните в студию.');
+  if (!r.success) alert(r.meta?.message || 'Не удалось отменить через API. Запись отменена локально — позвоните в студию для подтверждения.');
 }
 
 // ── DATA MODEL ──
