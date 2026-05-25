@@ -998,15 +998,15 @@ body {
       <div class="login-logo">🌸</div>
       <div class="login-brand">БьютиФлайБар</div>
       <div class="login-sub">Студия эпиляции и перманентного макияжа<br>Троицкий бульвар, 4, Троицк</div>
-      <div class="login-lbl">Email</div>
+      <div class="login-lbl">Номер телефона</div>
       <div class="login-field">
-        <input type="email" inputmode="email" class="login-phone" id="loginEmail"
-          placeholder="your@email.com" value=""
+        <input type="tel" inputmode="tel" class="login-phone" id="loginPhone"
+          placeholder="+7 (999) 000-00-00" value=""
           style="background:none;border:none;outline:none;font-size:17px;font-weight:500;font-family:inherit;flex:1;color:var(--text);">
       </div>
       <div id="loginError" style="color:var(--red);font-size:13px;padding:0 0 8px;display:none;"></div>
-      <button class="btn-primary" id="loginBtn" onclick="sendEmailCode()">Получить код →</button>
-      <div class="login-hint">Отправим код подтверждения на почту.<br>Вход доступен только для клиентов студии.</div>
+      <button class="btn-primary" id="loginBtn" onclick="sendCodeByPhone()">Получить код →</button>
+      <div class="login-hint">Найдём вас по номеру и отправим код на почту.<br>Вход доступен только для клиентам студии.</div>
       <div class="login-divider" style="margin-top:24px;">для сотрудников студии</div>
       <button onclick="go('s-admin','tab')" style="width:100%;padding:14px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -1042,9 +1042,14 @@ body {
         <input type="text" class="login-phone" id="regName" placeholder="Имя и фамилия"
           style="background:none;border:none;outline:none;font-size:17px;font-weight:500;font-family:inherit;flex:1;color:var(--text);">
       </div>
-      <div class="login-lbl" style="margin-top:12px;">Телефон <span style="color:var(--text-2);font-weight:400;">(необязательно)</span></div>
+      <div class="login-lbl" style="margin-top:12px;">Телефон</div>
       <div class="login-field">
-        <input type="tel" inputmode="numeric" class="login-phone" id="regPhone" placeholder="+7 (___) ___-__-__"
+        <input type="tel" inputmode="tel" class="login-phone" id="regPhone" placeholder="+7 (___) ___-__-__"
+          style="background:none;border:none;outline:none;font-size:17px;font-weight:500;font-family:inherit;flex:1;color:var(--text);">
+      </div>
+      <div class="login-lbl" style="margin-top:12px;">Email <span style="color:var(--text-2);font-weight:400;">(для кода подтверждения)</span></div>
+      <div class="login-field">
+        <input type="email" inputmode="email" class="login-phone" id="regEmail" placeholder="your@email.com"
           style="background:none;border:none;outline:none;font-size:17px;font-weight:500;font-family:inherit;flex:1;color:var(--text);">
       </div>
       <div id="regError" style="color:var(--red);font-size:13px;padding:4px 0 0;display:none;"></div>
@@ -2137,7 +2142,7 @@ function getSession() {
 }
 function saveSession(data) { localStorage.setItem('yc_session', JSON.stringify(data)); }
 function clearSession() {
-  ['yc_session','yc_records','yc_phone','yc_client_name','yc_otp','yc_reg_email'].forEach(k => localStorage.removeItem(k));
+  ['yc_session','yc_records','yc_phone','yc_client_name','yc_otp','yc_reg_email','yc_reg_phone','yc_reg_client_id'].forEach(k => localStorage.removeItem(k));
 }
 function logout() { clearSession(); go('s-login'); }
 
@@ -2167,10 +2172,21 @@ async function verifyOtp() {
   if (Date.now() > stored.expiry) { _setOtpError('Код истёк, запросите новый'); return; }
   if (stored.code !== entered) { _setOtpError('Неверный код'); return; }
 
-  const email = stored.email;
+  const { email, phone, client_id, client_name } = stored;
   localStorage.removeItem('yc_otp');
 
-  // Если уже есть локальная сессия для этого email — не нужна регистрация
+  // Если OTP был по телефону и у нас уже есть client_id — сразу сохраняем сессию
+  if (client_id) {
+    saveSession({ email: email || '', user_token: '', name: client_name || '', phone: phone || '', client_id });
+    _otpClear();
+    renderHomeHero();
+    renderProfileScreen();
+    if (state._bookAfterLogin) { state._bookAfterLogin = false; go('s-services', 'tab'); }
+    else { go('s-home', 'tab'); }
+    return;
+  }
+
+  // Иначе: вход по email (обратная совместимость)
   const existing = getSession();
   if (existing && existing.email === email) {
     _otpClear();
@@ -2294,6 +2310,106 @@ function _normalizePhone(raw) {
   return d.slice(-11);
 }
 
+async function sendCodeByPhone() {
+  _authContext = 'login';
+  const input = document.getElementById('loginPhone');
+  const errEl = document.getElementById('loginError');
+  const btn = document.getElementById('loginBtn');
+  if (!input) return;
+  const phone = _normalizePhone(input.value);
+  if (phone.length !== 11) {
+    if (errEl) { errEl.textContent = 'Введите корректный номер телефона'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (errEl) errEl.style.display = 'none';
+  if (btn) { btn.disabled = true; btn.textContent = 'Ищем…'; }
+
+  const client = await _findClientByPhone(phone);
+  if (btn) { btn.disabled = false; btn.textContent = 'Получить код →'; }
+
+  if (!client) {
+    localStorage.setItem('yc_reg_phone', phone);
+    go('s-register');
+    return;
+  }
+
+  const email = client.email || '';
+  if (!email) {
+    localStorage.setItem('yc_reg_phone', phone);
+    localStorage.setItem('yc_reg_client_id', String(client.id));
+    if (errEl) { errEl.textContent = 'Email не найден. Введите email для получения кода.'; errEl.style.display = 'block'; }
+    _showPhoneEmailInput(phone, client);
+    return;
+  }
+
+  const code = String(Math.floor(1000 + Math.random() * 9000));
+  localStorage.setItem('yc_otp', JSON.stringify({ code, email, phone, client_id: client.id, client_name: client.name || '', expiry: Date.now() + 10 * 60 * 1000 }));
+  if (btn) { btn.disabled = true; btn.textContent = 'Отправляем…'; }
+  try {
+    await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
+      to_email: email, name: client.name || 'Клиент', phone: '', topic: 'Код подтверждения', message: code, agreement: 'да'
+    });
+    go('s-otp');
+    const sub = document.getElementById('otpSub');
+    if (sub) sub.textContent = 'Отправили код на ' + email;
+  } catch(e) {
+    const msg = e?.text || e?.message || JSON.stringify(e) || 'неизвестная ошибка';
+    if (errEl) { errEl.textContent = 'Ошибка: ' + msg; errEl.style.display = 'block'; }
+  }
+  if (btn) { btn.disabled = false; btn.textContent = 'Получить код →'; }
+}
+
+function _showPhoneEmailInput(phone, client) {
+  const wrap = document.querySelector('#s-login .login-wrap');
+  if (!wrap) return;
+  const existing = document.getElementById('loginEmailFallback');
+  if (existing) return;
+  const div = document.createElement('div');
+  div.id = 'loginEmailFallback';
+  div.innerHTML = `
+    <div class="login-lbl" style="margin-top:12px;">Email для кода</div>
+    <div class="login-field">
+      <input type="email" inputmode="email" id="loginEmailFb" placeholder="your@email.com"
+        style="background:none;border:none;outline:none;font-size:17px;font-weight:500;font-family:inherit;flex:1;color:var(--text);">
+    </div>
+    <button class="btn-primary" style="margin-top:8px;" onclick="_sendCodeToFallbackEmail('${phone}',${client.id},'${client.name||''}')">Отправить код →</button>`;
+  const btn = document.getElementById('loginBtn');
+  if (btn) btn.parentNode.insertBefore(div, btn.nextSibling);
+}
+
+async function _sendCodeToFallbackEmail(phone, clientId, clientName) {
+  const errEl = document.getElementById('loginError');
+  const emailEl = document.getElementById('loginEmailFb');
+  if (!emailEl) return;
+  const email = emailEl.value.trim().toLowerCase();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (errEl) { errEl.textContent = 'Введите корректный email'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (errEl) errEl.style.display = 'none';
+  const code = String(Math.floor(1000 + Math.random() * 9000));
+  localStorage.setItem('yc_otp', JSON.stringify({ code, email, phone: String(phone), client_id: clientId, client_name: clientName, expiry: Date.now() + 10 * 60 * 1000 }));
+  try {
+    await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
+      to_email: email, name: clientName || 'Клиент', phone: '', topic: 'Код подтверждения', message: code, agreement: 'да'
+    });
+    go('s-otp');
+  } catch(e) {
+    const msg = e?.text || e?.message || JSON.stringify(e) || 'ошибка';
+    if (errEl) { errEl.textContent = 'Ошибка: ' + msg; errEl.style.display = 'block'; }
+  }
+}
+
+async function _findClientByPhone(phone) {
+  try {
+    const r = await YC.get(`/clients/${YC.company}`, { phone });
+    if (r.success && Array.isArray(r.data) && r.data.length) {
+      return r.data.find(c => _normalizePhone(c.phone || '') === phone) || r.data[0];
+    }
+  } catch {}
+  return null;
+}
+
 async function sendEmailCode() {
   _authContext = 'login';
   const input = document.getElementById('loginEmail');
@@ -2315,7 +2431,6 @@ async function sendEmailCode() {
     });
     go('s-otp');
   } catch(e) {
-    console.error('EmailJS error:', e);
     const msg = e?.text || e?.message || JSON.stringify(e) || 'неизвестная ошибка';
     if (errEl) { errEl.textContent = 'Ошибка: ' + msg; errEl.style.display = 'block'; }
   }
@@ -2337,6 +2452,7 @@ async function retryEmail() {
 async function registerClient() {
   const nameEl = document.getElementById('regName');
   const phoneEl = document.getElementById('regPhone');
+  const emailEl = document.getElementById('regEmail');
   const errEl = document.getElementById('regError');
   const btn = document.getElementById('regBtn');
   const name = nameEl ? nameEl.value.trim() : '';
@@ -2344,10 +2460,14 @@ async function registerClient() {
     if (errEl) { errEl.textContent = 'Введите имя'; errEl.style.display = 'block'; }
     return;
   }
+  const email = (emailEl ? emailEl.value.trim().toLowerCase() : '') || localStorage.getItem('yc_reg_email') || '';
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (errEl) { errEl.textContent = 'Введите корректный email'; errEl.style.display = 'block'; }
+    return;
+  }
   if (errEl) errEl.style.display = 'none';
   if (btn) { btn.disabled = true; btn.textContent = 'Создаём…'; }
-  const email = localStorage.getItem('yc_reg_email') || '';
-  const phone = phoneEl ? _normalizePhone(phoneEl.value) : '';
+  const phone = (phoneEl ? _normalizePhone(phoneEl.value) : '') || localStorage.getItem('yc_reg_phone') || '';
   const body = { name, email };
   if (phone.length === 11) body.phone = phone;
   const r = await YC.post(`/clients/${YC.company}`, body);
@@ -2359,8 +2479,10 @@ async function registerClient() {
   const clientId = r.data?.id || r.data?.client_id || null;
   saveSession({ email, user_token: '', name, phone: phone.length === 11 ? phone : '', client_id: clientId });
   localStorage.removeItem('yc_reg_email');
+  localStorage.removeItem('yc_reg_phone');
   if (nameEl) nameEl.value = '';
   if (phoneEl) phoneEl.value = '';
+  if (emailEl) emailEl.value = '';
   renderHomeHero();
   renderProfileScreen();
   if (state._bookAfterLogin) { state._bookAfterLogin = false; go('s-services', 'tab'); }
@@ -2797,6 +2919,18 @@ function onEnterScreen(id) {
   if (id === 's-history')  renderHistoryScreen();
   if (id === 's-home')     renderHomeHero();
   if (id === 's-profile')  renderProfileScreen();
+  if (id === 's-register') {
+    const phone = localStorage.getItem('yc_reg_phone') || '';
+    const el = document.getElementById('regPhone');
+    if (el && phone) el.value = '+' + phone;
+    const emailEl = document.getElementById('regEmail');
+    const storedEmail = localStorage.getItem('yc_reg_email') || '';
+    if (emailEl && storedEmail) emailEl.value = storedEmail;
+  }
+  if (id === 's-login') {
+    const fb = document.getElementById('loginEmailFallback');
+    if (fb) fb.remove();
+  }
   if (id === 's-otp') {
     ['otp1','otp2','otp3','otp4'].forEach(i => { const el=document.getElementById(i); if(el){el.value='';el.classList.remove('filled');} });
     const stored = JSON.parse(localStorage.getItem('yc_otp') || 'null');
