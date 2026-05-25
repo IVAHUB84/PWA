@@ -2631,8 +2631,8 @@ function _renderHistoryFromCache() {
           </div>
           <div style="font-size:16px;font-weight:800;margin-bottom:12px;">${esc(r.svcName)}</div>
           <div style="display:flex;gap:8px;">
-            <button class="hero-btn" style="font-size:13px;" onclick="rescheduleRecord('${r.id}')">Перенести</button>
-            <button class="hero-btn" style="font-size:13px;" onclick="cancelRecord('${r.id}','${r.hash}')">Отменить</button>
+            <button class="hero-btn" style="font-size:13px;" onclick="rescheduleRecord(${JSON.stringify(r.id)})">Перенести</button>
+            <button class="hero-btn" style="font-size:13px;" onclick="cancelRecord(${JSON.stringify(r.id)},${JSON.stringify(r.hash)})">Отменить</button>
           </div>
         </div>`).join('');
     }
@@ -2650,7 +2650,7 @@ function _renderHistoryFromCache() {
         <div class="hist-visit"${i === past.length-1 ? ' style="margin-bottom:24px;"' : ''}>
           <div class="hist-emoji" style="background:var(--accent-light);">✨</div>
           <div style="flex:1;"><div style="font-size:14px;font-weight:700;margin-bottom:2px;">${esc(r.svcName)}</div><div style="font-size:12px;color:var(--text-2);">${esc(r.masterName)} · ${_fmtDatetime(r.datetime)}</div></div>
-          <div style="text-align:right;"><div style="font-size:14px;font-weight:700;margin-bottom:2px;">${r.price}</div><button class="btn-ghost" style="font-size:12px;display:block;margin-bottom:4px;" onclick="rebook('${r.svcId}')">Повторить</button><button class="btn-ghost" style="font-size:12px;color:var(--accent);" onclick="openRateVisit('${r.id}','${r.masterId}','${esc(r.masterName)}','${esc(r.svcName)}','${r.datetime}')">Оценить</button></div>
+          <div style="text-align:right;"><div style="font-size:14px;font-weight:700;margin-bottom:2px;">${r.price}</div><button class="btn-ghost" style="font-size:12px;display:block;margin-bottom:4px;" onclick="rebook('${r.svcId}')">Повторить</button><button class="btn-ghost" style="font-size:12px;color:var(--accent);" onclick="openRateVisit(${JSON.stringify(r.id)},${JSON.stringify(r.masterId)},${JSON.stringify(r.masterName)},${JSON.stringify(r.svcName)},${JSON.stringify(r.datetime)})">Оценить</button></div>
         </div>`).join('');
     }
   }
@@ -2705,8 +2705,8 @@ function renderHomeHero() {
     <div class="hero-service">${esc(next.svcName)}</div>
     <div class="hero-dt">${_fmtDatetime(next.datetime)} · ${next.dur} мин</div>
     <div class="hero-actions">
-      <button class="hero-btn" onclick="event.stopPropagation();rescheduleRecord('${next.id}')">Перенести</button>
-      <button class="hero-btn" onclick="event.stopPropagation();cancelRecord('${next.id}','${next.hash}')">Отменить</button>
+      <button class="hero-btn" onclick="event.stopPropagation();rescheduleRecord(${JSON.stringify(next.id)})">Перенести</button>
+      <button class="hero-btn" onclick="event.stopPropagation();cancelRecord(${JSON.stringify(next.id)},${JSON.stringify(next.hash)})">Отменить</button>
     </div>
   </div>`;
 }
@@ -2720,7 +2720,7 @@ function _renderHomeFeedPreview() {
   const _ICONS = { 'Брови':'✨','Ногти':'💅','Лицо':'🌿','Волосы':'💆','Тело':'🧖','Акции':'🎁' };
   const icon = _ICONS[p.cat] || '📝';
   const thumb = p.image
-    ? `<img src="${p.image}" style="width:44px;height:44px;object-fit:cover;border-radius:10px;flex-shrink:0;">`
+    ? `<img src="${esc(p.image)}" style="width:44px;height:44px;object-fit:cover;border-radius:10px;flex-shrink:0;">`
     : `<div style="font-size:36px;flex-shrink:0;">${icon}</div>`;
   const preview = p.text.length > 60 ? p.text.slice(0, 60) + '…' : p.text;
   el.innerHTML = `${thumb}<div style="flex:1;"><div style="font-size:14px;font-weight:700;margin-bottom:3px;">${esc(preview)}</div><div style="font-size:12px;color:var(--text-2);">${esc(p.date)} · ${esc(p.cat)}</div></div>`;
@@ -3077,8 +3077,8 @@ function onEnterScreen(id) {
       _fetchAndMergeServerRecords(_hs.client_id).then(() => renderHomeHero());
     }
     _ghRead().then(gh => {
-      if (gh) {
-        localStorage.setItem('yc_feed_posts', JSON.stringify(gh.posts || []));
+      if (gh && gh.sha !== null) {
+        localStorage.setItem('yc_feed_posts', JSON.stringify(gh.posts));
         _renderHomeFeedPreview();
       }
     });
@@ -3253,6 +3253,7 @@ function _onPostImagePicked(input) {
 function _onProfilePhotoPicked(input) {
   const file = input.files && input.files[0];
   if (!file) return;
+  if (!file.type.startsWith('image/')) { alert('Выберите файл изображения'); return; }
   const reader = new FileReader();
   reader.onload = e => {
     const img = new Image();
@@ -3341,11 +3342,11 @@ function _renderAdminFeedFromCache() {
     const icon = _CAT_ICONS[p.cat] || '📝';
     const last = i === posts.length - 1 ? 'border-bottom:none;' : '';
     const thumb = p.image
-      ? `<img src="${p.image}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`
+      ? `<img src="${esc(p.image)}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`
       : icon;
     return `<div class="post-row" style="${last}">
       <div class="post-thumb" style="background:var(--surface);font-size:22px;overflow:hidden;">${thumb}</div>
-      <div class="post-info"><div class="post-cap">${esc(p.text.slice(0, 60))}</div><div class="post-date">${p.date} · ${esc(p.cat)}</div></div>
+      <div class="post-info"><div class="post-cap">${esc(p.text.slice(0, 60))}</div><div class="post-date">${esc(p.date)} · ${esc(p.cat)}</div></div>
       <span class="post-status ${p.draft ? 'draft' : 'pub'}">${p.draft ? 'Черновик' : 'Опубл.'}</span>
       <button onclick="deletePost(${p.id})" style="background:none;border:none;color:var(--text-2);font-size:16px;cursor:pointer;padding:4px;flex-shrink:0;">✕</button>
     </div>`;
@@ -3710,11 +3711,11 @@ async function renderClientFeed() {
   }
 
   const gh = await _ghRead();
-  if (gh && gh.posts.length) {
+  if (gh && gh.sha !== null && gh.posts.length) {
     const published = gh.posts.filter(p => !p.draft);
     localStorage.setItem('yc_feed_posts', JSON.stringify(gh.posts));
     _paintFeed(el, published);
-  } else if (gh) {
+  } else if (gh && gh.sha !== null && !gh.posts.length) {
     localStorage.setItem('yc_feed_posts', '[]');
     _paintFeed(el, []);
   } else if (!cached.length) {
@@ -3732,7 +3733,7 @@ function _paintFeed(el, posts) {
     const icon = _CAT_ICONS2[p.cat] || '📝';
     const mb = i === posts.length - 1 ? ' style="margin-bottom:24px;"' : '';
     const photoContent = p.image
-      ? `<img src="${p.image}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:0;">`
+      ? `<img src="${esc(p.image)}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:0;">`
       : `<div class="feed-photo-inner"><div class="feed-photo-icon">${icon}</div></div><div class="feed-photo-overlay"></div>`;
     return `<div class="feed-card"${mb}>
       <div class="feed-photo" style="${p.image ? 'overflow:hidden;' : 'background:' + grad + ';'}">
