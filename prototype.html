@@ -1240,82 +1240,8 @@ body {
   <div class="screen" id="s-feed">
     <div class="status-bar"><span class="time">9:41</span><div class="dynamic-island"></div><div class="icons"><svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".7"/><rect x="4.5" y="5.5" width="3" height="6.5" rx=".7"/><rect x="9" y="3" width="3" height="9" rx=".7"/><rect x="13.5" y="0" width="3" height="12" rx=".7"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="8" cy="11" r="1.2" fill="currentColor" stroke="none"/><path d="M4.8 7.8a4.5 4.5 0 016.4 0" stroke-width="1.5"/><path d="M2 5a8 8 0 0112 0" stroke-width="1.5"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="20" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".4"/><path d="M22 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/><rect x="2" y="2" width="15" height="8" rx="2.5" fill="currentColor"/></svg></div></div>
     <div class="nav-bar"><button class="back-btn" onclick="back()">‹ Назад</button><div style="font-size:17px;font-weight:700;">Лента студии</div><div style="width:60px;"></div></div>
-    <div class="scroll" style="padding-top:8px;">
-      <div class="feed-card">
-        <div class="feed-photo" style="background:linear-gradient(135deg,#F4C2A1 0%,#C9956C 55%,#A8743E 100%);">
-          <div class="feed-photo-inner"><div class="feed-photo-icon">✨</div></div>
-          <div class="feed-photo-overlay"></div>
-        </div>
-        <div class="feed-body">
-          <div class="feed-tag">Ламинирование бровей</div>
-          <div class="feed-caption">Идеальный изгиб и форма — результат держится до 6 недель. Мария работает в технике русского ламинирования, которая сохраняет природную структуру волоска.</div>
-          <div class="feed-meta">24 мая · Мария Соколова</div>
-        </div>
-        <div class="feed-actions">
-          <button class="feed-like" onclick="likeFeed(this)">❤ 23</button>
-          <button class="feed-book" onclick="quickBook('svc1')">Записаться →</button>
-        </div>
-      </div>
-      <div class="feed-card">
-        <div class="feed-photo" style="background:linear-gradient(135deg,#E8C4F0 0%,#C48FD8 55%,#9B5BB5 100%);">
-          <div class="feed-photo-inner"><div class="feed-photo-icon">💅</div></div>
-          <div class="feed-photo-overlay"></div>
-        </div>
-        <div class="feed-body">
-          <div class="feed-tag">Маникюр с покрытием</div>
-          <div class="feed-caption">Весенняя коллекция оттенков уже в студии! Более 200 цветов гель-лака, укрепление, французский маникюр и nail-art по запросу.</div>
-          <div class="feed-meta">22 мая · Ольга Климова</div>
-        </div>
-        <div class="feed-actions">
-          <button class="feed-like" onclick="likeFeed(this)">❤ 41</button>
-          <button class="feed-book" onclick="quickBook('svc2')">Записаться →</button>
-        </div>
-      </div>
-      <div class="feed-card">
-        <div class="feed-photo" style="background:linear-gradient(135deg,#C8E6C9 0%,#66BB6A 55%,#388E3C 100%);">
-          <div class="feed-photo-inner"><div class="feed-photo-icon">🌿</div></div>
-          <div class="feed-photo-overlay"></div>
-        </div>
-        <div class="feed-body">
-          <div class="feed-tag">Глубокое очищение лица</div>
-          <div class="feed-caption">Ультразвуковая чистка + кислотный пилинг + маска. Кожа буквально дышит. Рекомендуем курсом раз в 4–6 недель для поддержания результата.</div>
-          <div class="feed-meta">20 мая · Елена Романова</div>
-        </div>
-        <div class="feed-actions">
-          <button class="feed-like" onclick="likeFeed(this)">❤ 18</button>
-          <button class="feed-book" onclick="quickBook('svc3')">Записаться →</button>
-        </div>
-      </div>
-      <div class="feed-card">
-        <div class="feed-photo" style="background:linear-gradient(135deg,#F8BBD0 0%,#E91E8C 55%,#880E4F 100%);">
-          <div class="feed-photo-inner"><div class="feed-photo-icon">💆</div></div>
-          <div class="feed-photo-overlay"></div>
-        </div>
-        <div class="feed-body">
-          <div class="feed-tag">Новинка · Окрашивание</div>
-          <div class="feed-caption">Техника балаяж без фольги — мягкий переход от корней к кончикам. Результат держится до 4 месяцев, минимальный уход в домашних условиях.</div>
-          <div class="feed-meta">18 мая · Дарья Михайлова</div>
-        </div>
-        <div class="feed-actions">
-          <button class="feed-like" onclick="likeFeed(this)">❤ 56</button>
-          <button class="feed-book" onclick="quickBook('svc4')">Записаться →</button>
-        </div>
-      </div>
-      <div class="feed-card" style="margin-bottom:24px;">
-        <div class="feed-photo" style="background:linear-gradient(135deg,#FFF8E1 0%,#FFA000 55%,#E65100 100%);">
-          <div class="feed-photo-inner"><div class="feed-photo-icon">🎁</div></div>
-          <div class="feed-photo-overlay"></div>
-        </div>
-        <div class="feed-body">
-          <div class="feed-tag">Акция до 31 мая</div>
-          <div class="feed-caption">Маникюр + педикюр в один день — скидка 15%. Запишитесь на оба сразу и сэкономьте время и деньги. Ольга и Дарья работают в паре!</div>
-          <div class="feed-meta">15 мая · Студия</div>
-        </div>
-        <div class="feed-actions">
-          <button class="feed-like" onclick="likeFeed(this)">❤ 89</button>
-          <button class="feed-book" onclick="go('s-services')">Смотреть →</button>
-        </div>
-      </div>
+    <div class="scroll" id="feedList" style="padding-top:8px;">
+      <div style="padding:40px 20px;text-align:center;color:var(--text-2);font-size:14px;">Загрузка…</div>
     </div>
   </div>
 
@@ -3074,6 +3000,7 @@ function onEnterScreen(id) {
     }
   }
   if (id === 's-profile')  renderProfileScreen();
+  if (id === 's-feed')           renderClientFeed();
   if (id === 's-review')         renderReviewScreen();
   if (id === 's-admin')          renderAdminDashboard();
   if (id === 's-admin-feed')      renderAdminFeed();
@@ -3456,21 +3383,26 @@ function sendNewPush() {
   });
   localStorage.setItem('yc_push_campaigns', JSON.stringify(campaigns));
 
-  if (!isScheduled && 'Notification' in window) {
-    const send = () => new Notification('Реснички, сестрички', { body: text, icon: './icon-192.png' });
-    if (Notification.permission === 'granted') {
-      send();
-    } else if (Notification.permission !== 'denied') {
-      Notification.requestPermission().then(p => { if (p === 'granted') send(); });
-    }
-  }
-
   const screen = document.getElementById('s-admin-push-new');
+  if (isScheduled) {
+    _showAdminToast(screen, 'Рассылка запланирована ✓');
+    setTimeout(() => go('s-admin-push', 'tab'), 1800);
+  } else {
+    _sendNotification('Реснички, сестрички', text).then(ok => {
+      _showAdminToast(screen, ok ? 'Уведомление отправлено ✓' : 'Сохранено (уведомления отключены)');
+      setTimeout(() => go('s-admin-push', 'tab'), 2000);
+    });
+  }
+}
+
+function _showAdminToast(screen, msg) {
+  const existing = screen.querySelector('._admin-toast');
+  if (existing) existing.remove();
   const toast = document.createElement('div');
-  toast.textContent = isScheduled ? 'Рассылка запланирована ✓' : 'Уведомление отправлено ✓';
+  toast.className = '_admin-toast';
+  toast.textContent = msg;
   toast.style.cssText = 'position:absolute;bottom:80px;left:20px;right:20px;background:var(--primary);color:#fff;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:700;text-align:center;z-index:300;';
   screen.appendChild(toast);
-  setTimeout(() => { toast.remove(); go('s-admin-push', 'tab'); }, 1800);
 }
 
 function sendPush() {
@@ -3490,6 +3422,70 @@ function openReview(platform) {
   window.open(REVIEW_URLS[platform], '_blank');
   const doneEl = document.getElementById(platform === '2gis' ? 'done2gis' : 'doneYandex');
   if (doneEl) doneEl.style.display = 'block';
+}
+
+// ── CLIENT FEED ──
+const _CAT_GRADS = {
+  'Брови': 'linear-gradient(135deg,#F4C2A1,#C9956C)',
+  'Ногти': 'linear-gradient(135deg,#E8C4F0,#C48FD8)',
+  'Лицо':  'linear-gradient(135deg,#C8E6C9,#66BB6A)',
+  'Волосы':'linear-gradient(135deg,#F8BBD0,#E91E8C)',
+  'Тело':  'linear-gradient(135deg,#B3E5FC,#039BE5)',
+  'Акции': 'linear-gradient(135deg,#FFF8E1,#FFA000)',
+};
+const _CAT_ICONS2 = { 'Брови':'✨','Ногти':'💅','Лицо':'🌿','Волосы':'💆','Тело':'🧖','Акции':'🎁' };
+
+function renderClientFeed() {
+  const el = document.getElementById('feedList');
+  if (!el) return;
+  const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => !p.draft);
+  if (!posts.length) {
+    el.innerHTML = '<div style="padding:60px 20px;text-align:center;color:var(--text-2);font-size:14px;">Публикаций пока нет.<br>Следите за обновлениями!</div>';
+    return;
+  }
+  const svcId = (SERVICES_DATA[0] && SERVICES_DATA[0].id) || 'svc1';
+  el.innerHTML = posts.map((p, i) => {
+    const grad = _CAT_GRADS[p.cat] || 'linear-gradient(135deg,#eee,#ccc)';
+    const icon = _CAT_ICONS2[p.cat] || '📝';
+    const mb = i === posts.length - 1 ? ' style="margin-bottom:24px;"' : '';
+    return `<div class="feed-card"${mb}>
+      <div class="feed-photo" style="background:${grad};">
+        <div class="feed-photo-inner"><div class="feed-photo-icon">${icon}</div></div>
+        <div class="feed-photo-overlay"></div>
+      </div>
+      <div class="feed-body">
+        <div class="feed-tag">${esc(p.cat)}</div>
+        <div class="feed-caption">${esc(p.text)}</div>
+        <div class="feed-meta">${esc(p.date)}</div>
+      </div>
+      <div class="feed-actions">
+        <button class="feed-like" onclick="likeFeed(this)">❤ 0</button>
+        <button class="feed-book" onclick="go('s-services')">Записаться →</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── PUSH NOTIFICATION ──
+async function _sendNotification(title, body) {
+  if (!('Notification' in window)) return false;
+  let perm = Notification.permission;
+  if (perm === 'default') {
+    perm = await Notification.requestPermission();
+  }
+  if (perm !== 'granted') return false;
+  try {
+    if ('serviceWorker' in navigator) {
+      const reg = await navigator.serviceWorker.ready;
+      await reg.showNotification(title, { body, icon: './icon-192.png', badge: './icon-192.png' });
+    } else {
+      new Notification(title, { body, icon: './icon-192.png' });
+    }
+    return true;
+  } catch(e) {
+    try { new Notification(title, { body }); return true; } catch {}
+    return false;
+  }
 }
 
 // ── FEED LIKE ──
