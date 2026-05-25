@@ -1,4 +1,4 @@
-const CACHE = 'resnichki-v1';
+const CACHE = 'resnichki-v2';
 const ASSETS = [
   './prototype.html',
   './manifest.json',

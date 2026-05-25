@@ -2631,7 +2631,9 @@ function renderHomeHero() {
 
   const records = _loadStoredRecords();
   const now = new Date();
-  const next = records.find(r => new Date(r.datetime.replace(' ', 'T')) > now);
+  const upcoming = records.filter(r => r.status !== 'cancelled' && new Date(r.datetime.replace(' ', 'T')) > now);
+  upcoming.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+  const next = upcoming[0] || null;
 
   if (!next) {
     el.innerHTML = `<div style="margin:0 20px 16px;padding:20px;background:var(--surface);border-radius:18px;text-align:center;">
@@ -2662,27 +2664,27 @@ async function _fetchAndMergeServerRecords(clientId) {
   try {
     const r = await YC.get(`/records/${YC.company}`, { client_id: clientId, count: 50 });
     if (!r.success || !Array.isArray(r.data)) return;
-    const local = _loadStoredRecords();
-    const localIds = new Set(local.map(x => String(x.id)));
-    let changed = false;
-    for (const rec of r.data) {
-      if (localIds.has(String(rec.id))) continue;
+    const now = new Date();
+    const serverRecords = r.data.map(rec => {
       const svc = rec.services && rec.services[0];
       const staff = rec.staff || {};
       const dt = (rec.date || '').replace('T', ' ').slice(0, 16) + ':00';
-      local.push({
+      return {
         id: rec.id, hash: rec.record_hash || '',
         svcName: svc ? svc.title : 'Услуга', svcId: svc ? String(svc.id) : '',
         masterName: staff.name || 'Мастер', masterId: staff.id ? String(staff.id) : '',
         ycStaffId: rec.staff_id || (staff.id || null),
         ycSvcId: svc ? svc.id : null,
         seanceLength: rec.seance_length || 3600,
-        datetime: dt, price: svc ? (svc.cost ? svc.cost + ' ₽' : '') : '', dur: svc ? Math.round((rec.seance_length || 3600) / 60) : 60,
-        status: rec.deleted ? 'cancelled' : (new Date(dt.replace(' ', 'T')) > new Date() ? 'upcoming' : 'past')
-      });
-      changed = true;
-    }
-    if (changed) localStorage.setItem('yc_records', JSON.stringify(local));
+        datetime: dt,
+        price: svc ? (svc.cost ? svc.cost + ' ₽' : '') : '',
+        dur: Math.round((rec.seance_length || 3600) / 60),
+        status: rec.deleted ? 'cancelled' : (new Date(dt.replace(' ', 'T')) > now ? 'upcoming' : 'past')
+      };
+    });
+    serverRecords.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+    localStorage.setItem('yc_records', JSON.stringify(serverRecords));
+    return serverRecords;
   } catch {}
 }
 
@@ -2940,7 +2942,13 @@ function onEnterScreen(id) {
   if (id === 's-slots')  { updateSlotsScreen(); loadDates(); }
   if (id === 's-confirm')  updateConfirmScreen();
   if (id === 's-history')  renderHistoryScreen();
-  if (id === 's-home')     renderHomeHero();
+  if (id === 's-home') {
+    renderHomeHero();
+    const _hs = getSession();
+    if (_hs && _hs.client_id) {
+      _fetchAndMergeServerRecords(_hs.client_id).then(() => renderHomeHero());
+    }
+  }
   if (id === 's-profile')  renderProfileScreen();
   if (id === 's-register') {
     const phone = localStorage.getItem('yc_reg_phone') || '';
