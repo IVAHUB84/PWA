@@ -2260,19 +2260,33 @@ async function _rescheduleWithSession(session) {
   const id = state._rescheduleId;
   const datetime = `${state.dateISO || new Date().toISOString().slice(0,10)} ${state.slot || '10:00'}:00`;
 
-  // Берём YCLIENTS numeric IDs из сохранённой записи
-  const records = _loadStoredRecords();
-  const rec = records.find(x => String(x.id) === String(id));
-  const ycStaffId = rec?.ycStaffId || null;
-  const ycSvcId = rec?.ycSvcId || null;
+  // Fetch full record from YCLIENTS to get required fields for PUT
+  let ycStaffId = null, ycSvcId = null, seanceLength = 3600;
+  try {
+    const fr = await YC.get(`/record/${YC.company}/${id}`);
+    if (fr.success && fr.data) {
+      ycStaffId = fr.data.staff_id;
+      ycSvcId = fr.data.services && fr.data.services[0] && fr.data.services[0].id;
+      seanceLength = fr.data.seance_length || 3600;
+    }
+  } catch {}
 
-  const body = { datetime };
+  // Fallback to stored record IDs
+  if (!ycStaffId || !ycSvcId) {
+    const records = _loadStoredRecords();
+    const rec = records.find(x => String(x.id) === String(id));
+    ycStaffId = ycStaffId || rec?.ycStaffId || null;
+    ycSvcId = ycSvcId || rec?.ycSvcId || null;
+  }
+
+  const body = { datetime, seance_length: seanceLength };
+  if (session.client_id) body.client = { id: parseInt(session.client_id), phone: session.phone || '' };
   if (ycStaffId) body.staff_id = parseInt(ycStaffId);
-  if (ycSvcId) body.services = [{ id: parseInt(ycSvcId) }];
+  if (ycSvcId) body.services = [{ id: parseInt(ycSvcId), amount: 1 }];
 
-  const r = await YC.post(`/records/${YC.company}/${id}`, body, 'PUT');
+  const r = await YC.post(`/record/${YC.company}/${id}`, body, 'PUT');
 
-  // Оптимистично обновляем UI — даже если YCLIENTS вернул ошибку
+  const records = _loadStoredRecords();
   const idx = records.findIndex(x => String(x.id) === String(id));
   if (idx !== -1) { records[idx].datetime = datetime; localStorage.setItem('yc_records', JSON.stringify(records)); }
   state._rescheduleId = null;
@@ -2660,7 +2674,10 @@ async function _fetchAndMergeServerRecords(clientId) {
         id: rec.id, hash: rec.record_hash || '',
         svcName: svc ? svc.title : 'Услуга', svcId: svc ? String(svc.id) : '',
         masterName: staff.name || 'Мастер', masterId: staff.id ? String(staff.id) : '',
-        datetime: dt, price: '', dur: svc ? (svc.duration || 60) : 60,
+        ycStaffId: rec.staff_id || (staff.id || null),
+        ycSvcId: svc ? svc.id : null,
+        seanceLength: rec.seance_length || 3600,
+        datetime: dt, price: svc ? (svc.cost ? svc.cost + ' ₽' : '') : '', dur: svc ? Math.round((rec.seance_length || 3600) / 60) : 60,
         status: rec.deleted ? 'cancelled' : (new Date(dt.replace(' ', 'T')) > new Date() ? 'upcoming' : 'past')
       });
       changed = true;
@@ -2697,27 +2714,23 @@ async function confirmCancel() {
 
   const records = _loadStoredRecords();
   const idx = records.findIndex(x => String(x.id) === String(id));
-  const hash = (idx !== -1 ? records[idx].hash : '') || state._cancelHash || '';
 
-  // Оптимистично обновляем UI сразу
   if (idx !== -1) { records[idx].status = 'cancelled'; localStorage.setItem('yc_records', JSON.stringify(records)); }
   state._cancelId = null;
   state._cancelHash = null;
   go('s-home', 'tab');
   renderHomeHero();
 
-  console.log('Cancel API call: id=', id, 'hash=', hash, 'userToken=', YC.userToken);
   try {
-    const res = await fetch(`${YC.base}/user/bookrecords/${YC.userToken}/${id}/${hash}`, {
+    const res = await fetch(`${YC.base}/record/${YC.company}/${id}`, {
       method: 'DELETE',
-      headers: { 'Accept': 'application/vnd.yclients.v2+json', 'Content-Type': 'application/json' }
+      headers: YC._h()
     });
     const body = await res.json().catch(() => null);
-    console.log('Cancel API response:', body);
-    if (body?.success === false) {
+    if (body && body.success === false) {
       alert(`Запись удалена локально, но в YCLIENTS ошибка: ${body?.meta?.message || '?'}\nУточните отмену у администратора.`);
     }
-  } catch(e) { console.log('Cancel fetch error:', e); }
+  } catch(e) {}
 }
 
 // ── DATA MODEL ──
