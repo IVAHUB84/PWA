@@ -2002,13 +2002,19 @@ async function initApp() {
     }
     if (staffRes.success && staffRes.data && staffRes.data.length) {
       const storedFavs = new Set(JSON.parse(localStorage.getItem('yc_favs') || '[]'));
-      MASTERS_DATA = staffRes.data.map((m, i) => ({
-        id: String(m.id), name: m.name, short: _makeShort(m.name),
-        role: m.specialization || 'Мастер', exp: '',
-        avatar: m.avatar_big || m.avatar || '',
-        emoji: '👩', grad: _GRADS[i % _GRADS.length],
-        cats: [], fav: storedFavs.has(String(m.id)), avail: true, availText: '● Есть окна сегодня'
-      }));
+      const staticByName = {};
+      MASTERS_DATA.forEach(m => { staticByName[m.name.trim().toLowerCase()] = m; });
+      MASTERS_DATA = staffRes.data.map((m, i) => {
+        const sm = staticByName[m.name.trim().toLowerCase()];
+        return {
+          id: String(m.id), name: m.name, short: _makeShort(m.name),
+          role: m.specialization || sm?.role || 'Мастер', exp: sm?.exp || '',
+          avatar: m.avatar_big || m.avatar || '',
+          emoji: '👩', grad: sm?.grad || _GRADS[i % _GRADS.length],
+          cats: sm?.cats || [],
+          fav: storedFavs.has(String(m.id)), avail: true, availText: '● Есть окна сегодня'
+        };
+      });
     }
     const cur = document.querySelector('.screen.active');
     if (cur && cur.id === 's-services') renderServices();
@@ -2717,9 +2723,11 @@ async function _fetchAndMergeServerRecords(clientId) {
       };
     });
     const local = JSON.parse(localStorage.getItem('yc_records') || '[]');
-    const serverIds = new Set(serverRecords.map(r => String(r.id)));
+    const localCancelledIds = new Set(local.filter(r => r.status === 'cancelled').map(r => String(r.id)));
+    const filteredServer = serverRecords.filter(r => !localCancelledIds.has(String(r.id)));
+    const serverIds = new Set(filteredServer.map(r => String(r.id)));
     const localOnly = local.filter(r => !serverIds.has(String(r.id)));
-    const merged = [...serverRecords, ...localOnly];
+    const merged = [...filteredServer, ...localOnly];
     merged.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
     localStorage.setItem('yc_records', JSON.stringify(merged));
     return merged;
@@ -2945,6 +2953,11 @@ async function renderMasters() {
     }
   } catch(e) { console.warn('[renderMasters]', e); }
   if (!masters.length) masters = MASTERS_DATA;
+  const svcCat = svc.cat;
+  if (svcCat) {
+    const bycat = masters.filter(m => m.cats && m.cats.includes(svcCat));
+    if (bycat.length) masters = bycat;
+  }
   list.innerHTML = masters.map((m, i) => _masterCardHtml(m, i, masters.length)).join('');
 }
 
@@ -3224,6 +3237,7 @@ async function publishPost(draft) {
     date: new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }),
     draft: !!draft
   };
+  await _ghPullToLocal();
   const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]');
   posts.unshift(post);
   localStorage.setItem('yc_feed_posts', JSON.stringify(posts));
@@ -3237,6 +3251,7 @@ async function publishPost(draft) {
 }
 
 async function deletePost(id) {
+  await _ghPullToLocal();
   const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => p.id !== id);
   localStorage.setItem('yc_feed_posts', JSON.stringify(posts));
   renderAdminFeed();
@@ -3246,6 +3261,11 @@ async function deletePost(id) {
 let _adminAllClients = [];
 
 function renderAdminFeed() {
+  _renderAdminFeedFromCache();
+  _ghPullToLocal().then(updated => { if (updated) _renderAdminFeedFromCache(); });
+}
+
+function _renderAdminFeedFromCache() {
   const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]');
   const countEl = document.getElementById('adminFeedCount');
   const listEl  = document.getElementById('adminFeedList');
@@ -3336,7 +3356,7 @@ function renderAdminPush() {
     return;
   }
   const sched = campaigns.filter(c => c.scheduled);
-  const sent  = campaigns.filter(c => !c.scheduled);
+  const sent  = campaigns.filter(c => !c.scheduled).sort((a, b) => b.id - a.id);
   let html = '';
   if (sched.length) {
     html += `<div class="section-header" style="padding-top:14px;"><span class="section-title">Запланированные</span><span style="font-size:12px;color:var(--green);font-weight:700;">${sched.length} активных</span></div>`;
@@ -3347,11 +3367,21 @@ function renderAdminPush() {
     </div>`).join('');
   }
   if (sent.length) {
-    html += `<div class="section-header" style="padding-top:20px;"><span class="section-title">Отправлено</span></div>`;
-    html += sent.map((c, i) => `<div class="push-hist-row" style="${i===sent.length-1?'border-bottom:none;':''}">
-      <div class="push-hist-icon">${esc(c.icon)}</div>
-      <div class="push-hist-info"><div class="push-hist-name">${esc(c.title)}</div><div class="push-hist-meta">${esc(c.date)}</div></div>
-    </div>`).join('');
+    const collapsed = window._pushSentCollapsed || false;
+    const arrow = collapsed ? '›' : '⌄';
+    html += `<div class="section-header" style="padding-top:20px;cursor:pointer;user-select:none;" onclick="window._pushSentCollapsed=!window._pushSentCollapsed;renderAdminPush();">
+      <span class="section-title">Отправлено</span>
+      <span style="font-size:13px;color:var(--text-2);font-weight:700;">${sent.length} ${arrow}</span>
+    </div>`;
+    if (!collapsed) {
+      html += sent.map((c, i) => {
+        const timeStr = c.time ? ` · ${c.time}` : '';
+        return `<div class="push-hist-row" style="${i===sent.length-1?'border-bottom:none;':''}">
+          <div class="push-hist-icon">${esc(c.icon)}</div>
+          <div class="push-hist-info"><div class="push-hist-name">${esc(c.title)}</div><div class="push-hist-meta">${esc(c.date)}${timeStr} · ${esc(c.audience)}</div></div>
+        </div>`;
+      }).join('');
+    }
   }
   listEl.innerHTML = html;
 }
@@ -3471,6 +3501,7 @@ function sendNewPush() {
   campaigns.unshift({
     id: Date.now(), icon, title: text.slice(0, 50),
     date: new Date().toLocaleDateString('ru-RU', { day:'numeric', month:'long' }),
+    time: new Date().toLocaleTimeString('ru-RU', { hour:'2-digit', minute:'2-digit' }),
     audience, scheduled: isScheduled
   });
   localStorage.setItem('yc_push_campaigns', JSON.stringify(campaigns));
@@ -3552,6 +3583,18 @@ async function _ghWrite(posts, sha, token) {
     if (r.status === 401) { localStorage.removeItem('yc_gh_token'); return false; }
     return r.ok;
   } catch { return false; }
+}
+
+async function _ghPullToLocal() {
+  const gh = await _ghRead();
+  if (!gh || !gh.posts || !gh.posts.length) return false;
+  const local = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]');
+  const localIds = new Set(local.map(p => p.id));
+  const ghOnly = gh.posts.filter(p => !localIds.has(p.id));
+  if (!ghOnly.length) return false;
+  const merged = [...local, ...ghOnly].sort((a, b) => b.id - a.id);
+  localStorage.setItem('yc_feed_posts', JSON.stringify(merged));
+  return true;
 }
 
 async function _ghSyncPosts(postsToWrite) {
