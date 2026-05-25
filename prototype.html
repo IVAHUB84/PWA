@@ -851,28 +851,7 @@ body {
         <button class="btn-ghost" onclick="go('s-masters')">Все →</button>
       </div>
       <div class="hscroll-wrap">
-        <div class="hscroll" style="padding-bottom:16px;">
-          <div class="master-card-sm" onclick="bookWithMaster('m1')">
-            <div class="master-av-sm" style="background:linear-gradient(135deg,#F4B8CF,#E8729A);"><div class="av-initials">МС</div></div>
-            <div class="master-name-sm">Мария С.</div>
-            <div class="master-role-sm">ПМ / Брови</div>
-          </div>
-          <div class="master-card-sm" onclick="bookWithMaster('m2')">
-            <div class="master-av-sm" style="background:linear-gradient(135deg,#B8EFE0,#6DC9AF);"><div class="av-initials" style="color:#1a6e55;">ОК</div></div>
-            <div class="master-name-sm">Ольга К.</div>
-            <div class="master-role-sm">Эпиляция</div>
-          </div>
-          <div class="master-card-sm" onclick="bookWithMaster('m3')">
-            <div class="master-av-sm" style="background:linear-gradient(135deg,#EDACC3,#C8547F);"><div class="av-initials">ЕР</div></div>
-            <div class="master-name-sm">Елена Р.</div>
-            <div class="master-role-sm">Ресницы</div>
-          </div>
-          <div class="master-card-sm" onclick="bookWithMaster('m4')">
-            <div class="master-av-sm" style="background:linear-gradient(135deg,#C5F0E4,#72C8B0);"><div class="av-initials" style="color:#1a6e55;">ДМ</div></div>
-            <div class="master-name-sm">Дарья М.</div>
-            <div class="master-role-sm">ПМ</div>
-          </div>
-        </div>
+        <div class="hscroll" id="homeMastersList" style="padding-bottom:16px;"></div>
       </div>
     </div>
     <div class="tab-bar">
@@ -2366,6 +2345,16 @@ function renderHomeHero() {
   const name = localStorage.getItem('yc_client_name');
   if (gr && name) gr.textContent = `Привет, ${name.split(' ')[0]} 👋`;
 
+  const ml = document.getElementById('homeMastersList');
+  if (ml && MASTERS_DATA.length) {
+    ml.innerHTML = MASTERS_DATA.slice(0, 4).map(m => `
+      <div class="master-card-sm" onclick="bookWithMaster('${m.id}')">
+        <div class="master-av-sm" style="background:${m.grad};overflow:hidden;">${_hasRealAvatar(m)?`<img src="${m.avatar_big||m.avatar}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">`:`<div class="av-initials">${getInitials(m.name)}</div>`}</div>
+        <div class="master-name-sm">${m.short || m.name}</div>
+        <div class="master-role-sm">${m.role}</div>
+      </div>`).join('');
+  }
+
   const records = _loadStoredRecords();
   const now = new Date();
   const next = records.find(r => new Date(r.datetime.replace(' ', 'T')) > now);
@@ -2448,6 +2437,19 @@ function getService() { return SERVICES_DATA.find(s => s.id === state.serviceId)
 function getMaster()  { return state.masterId ? MASTERS_DATA.find(m => m.id === state.masterId) : null; }
 function getInitials(name) { return name.split(' ').map(w => w[0]).join('').slice(0, 2); }
 
+const _NO_AVATAR = ['no-master-sm.png', 'no-master.png'];
+function _hasRealAvatar(m) {
+  const url = m.avatar_big || m.avatar || '';
+  return url && !_NO_AVATAR.some(s => url.includes(s));
+}
+function _avatarHtml(m, size = 48, grad = null) {
+  const bg = grad || m.grad || 'linear-gradient(135deg,#F4B8CF,#E8729A)';
+  if (_hasRealAvatar(m)) {
+    return `<img src="${m.avatar_big || m.avatar}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.outerHTML='<div style=\\"width:${size}px;height:${size}px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:${Math.round(size*0.35)}px;font-weight:800;color:#fff;\\">${getInitials(m.name)}</div>'">`;
+  }
+  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:${Math.round(size*0.35)}px;font-weight:800;color:#fff;flex-shrink:0;">${getInitials(m.name)}</div>`;
+}
+
 // ── FILTER ──
 function filterCategory(cat) {
   state.category = cat;
@@ -2519,7 +2521,7 @@ function renderMasters() {
     const styleAttr = styles.length ? ` style="${styles.join(';')}"` : '';
     const click     = m.avail ? ` onclick="selectMaster('${m.id}')"` : '';
     return `<div class="master-card${m.fav ? ' fav' : ''}"${styleAttr}${click}>
-      <div class="master-av" style="background:${m.grad};"><div class="av-initials">${getInitials(m.name)}</div>${favBadge}</div>
+      <div class="master-av" style="background:${m.grad};">${_hasRealAvatar(m) ? `<img src="${m.avatar_big||m.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.style.display='none'">` : `<div class="av-initials">${getInitials(m.name)}</div>`}${favBadge}</div>
       <div class="master-info">
         <div class="master-name">${m.name}${favChip}</div>
         <div class="master-role">${m.role} · стаж ${m.exp}</div>
@@ -2547,7 +2549,7 @@ function updateSlotsScreen() {
   if (strip) {
     if (m) {
       strip.innerHTML = `
-        <div style="width:48px;height:48px;border-radius:50%;background:${m.grad};display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.12);"><div class="av-initials" style="font-size:17px;">${getInitials(m.name)}</div></div>
+        <div style="width:48px;height:48px;border-radius:50%;background:${m.grad};overflow:hidden;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:center;">${_hasRealAvatar(m)?`<img src="${m.avatar_big||m.avatar}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">`:`<div class="av-initials" style="font-size:17px;">${getInitials(m.name)}</div>`}</div>
         <div><div style="font-size:15px;font-weight:700;">${m.name}</div><div style="font-size:13px;color:var(--text-2);">${m.role}</div></div>
         ${m.fav ? '<div class="heart">❤️</div>' : ''}`;
     } else {
