@@ -1958,8 +1958,8 @@ runScenario = function(key) {
 // ── EMAILJS ──
 const EMAILJS = {
   serviceId:  'service_m2fr45h',
-  templateId: 'YOUR_TEMPLATE_ID',
-  publicKey:  'YOUR_PUBLIC_KEY'
+  templateId: 'template_0wps847',
+  publicKey:  'B16bxReUihFyj_-OI'
 };
 emailjs.init(EMAILJS.publicKey);
 
@@ -2255,7 +2255,7 @@ async function sendEmailCode() {
   localStorage.setItem('yc_otp', JSON.stringify({ code, email, expiry: Date.now() + 10 * 60 * 1000 }));
   try {
     await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
-      to_email: email, code, studio_name: 'БьютиФлайБар'
+      to_email: email, name: 'Клиент', phone: '', topic: 'Код подтверждения', message: code, agreement: 'да'
     });
     go('s-otp');
   } catch(e) {
@@ -2271,7 +2271,7 @@ async function retryEmail() {
   localStorage.setItem('yc_otp', JSON.stringify({ code, email: stored.email, expiry: Date.now() + 10 * 60 * 1000 }));
   try {
     await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
-      to_email: stored.email, code, studio_name: 'БьютиФлайБар'
+      to_email: stored.email, name: 'Клиент', phone: '', topic: 'Код подтверждения', message: stored.code, agreement: 'да'
     });
   } catch {}
 }
