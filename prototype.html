@@ -2258,28 +2258,32 @@ function rescheduleRecord(id) {
 
 async function _rescheduleWithSession(session) {
   const id = state._rescheduleId;
-  const m = getMaster();
   const datetime = `${state.dateISO || new Date().toISOString().slice(0,10)} ${state.slot || '10:00'}:00`;
-  const svc = getService();
-  const body = {
-    staff_id: m ? parseInt(m.id) : 0,
-    services: [{ id: parseInt(svc.id) || 0 }],
-    date: datetime
-  };
-  const r = await YC.post(`/records/${YC.company}/${id}`, body, 'PUT');
-  if (r.success) {
-    const records = _loadStoredRecords();
-    const idx = records.findIndex(x => String(x.id) === String(id));
-    if (idx !== -1) { records[idx].datetime = datetime; localStorage.setItem('yc_records', JSON.stringify(records)); }
-    state._rescheduleId = null;
-    renderHomeHero();
-    go('s-confirm');
-    const title = document.querySelector('#s-confirm .confirm-title');
-    const sub = document.querySelector('#s-confirm .confirm-sub');
-    if (title) title.textContent = 'Запись перенесена!';
-    if (sub) sub.textContent = 'Время успешно изменено';
-  } else {
-    alert(r.meta?.message || 'Не удалось перенести запись. Попробуйте снова.');
+
+  // Берём YCLIENTS numeric IDs из сохранённой записи
+  const records = _loadStoredRecords();
+  const rec = records.find(x => String(x.id) === String(id));
+  const ycStaffId = rec?.ycStaffId || null;
+  const ycSvcId = rec?.ycSvcId || null;
+
+  const body = { datetime };
+  if (ycStaffId) body.staff_id = parseInt(ycStaffId);
+  if (ycSvcId) body.services = [{ id: parseInt(ycSvcId) }];
+
+  const r = await YC.post(`/record/${YC.company}/${id}`, body, 'PUT');
+
+  // Оптимистично обновляем UI — даже если YCLIENTS вернул ошибку
+  const idx = records.findIndex(x => String(x.id) === String(id));
+  if (idx !== -1) { records[idx].datetime = datetime; localStorage.setItem('yc_records', JSON.stringify(records)); }
+  state._rescheduleId = null;
+  renderHomeHero();
+  go('s-confirm');
+  const title = document.querySelector('#s-confirm .confirm-title');
+  const sub = document.querySelector('#s-confirm .confirm-sub');
+  if (title) title.textContent = 'Запись перенесена!';
+  if (sub) sub.textContent = r.success ? 'Время успешно изменено' : 'Время изменено локально. Подтвердите у администратора.';
+  if (!r.success) {
+    setTimeout(() => alert(`Запись перенесена локально, но YCLIENTS вернул ошибку: ${r.meta?.message || 'неизвестная ошибка'}.\nПожалуйста, уточните перенос у администратора.`), 400);
   }
 }
 
@@ -2506,10 +2510,15 @@ function _saveBookedRecord(rec) {
   const m = getMaster();
   const datetime = `${state.dateISO || new Date().toISOString().slice(0,10)} ${state.slot || '10:00'}:00`;
   const records = _loadStoredRecords();
+  // Извлекаем YCLIENTS numeric IDs из ответа API, если они там есть
+  const ycStaffId = rec.staff_id || (rec.appointments && rec.appointments[0] && rec.appointments[0].staff_id) || null;
+  const ycSvcId = (rec.services && rec.services[0] && rec.services[0].id) ||
+                  (rec.appointments && rec.appointments[0] && rec.appointments[0].services && rec.appointments[0].services[0]) || null;
   records.unshift({
     id: rec.id, hash: rec.record_hash || '',
     svcName: svc.name, svcId: svc.id,
     masterName: m ? m.name : 'Любой мастер', masterId: m ? m.id : 0,
+    ycStaffId, ycSvcId,
     datetime, price: svc.priceStr, dur: svc.dur, status: 'upcoming'
   });
   localStorage.setItem('yc_records', JSON.stringify(records));
@@ -2685,22 +2694,8 @@ async function confirmCancel() {
   if (!id) return;
   const btn = document.querySelector('#s-cancel .btn-danger');
   if (btn) { btn.disabled = true; btn.textContent = 'Отменяем…'; }
-  let httpOk = false;
-  try {
-    const res = await fetch(`${YC.base}/records/${YC.company}/${id}`, {
-      method: 'DELETE', headers: YC._h()
-    });
-    httpOk = res.ok || res.status === 200 || res.status === 204;
-    if (!httpOk) {
-      const check = await fetch(`${YC.base}/records/${YC.company}/${id}`, { headers: YC._h() }).then(r => r.json()).catch(() => null);
-      if (check?.data?.deleted || check?.data?.status === 'cancelled') httpOk = true;
-    }
-  } catch(e) {}
-  if (btn) { btn.disabled = false; btn.textContent = 'Да, отменить запись'; }
-  if (!httpOk) {
-    alert('Не удалось отменить запись. Позвоните в студию для подтверждения.');
-    return;
-  }
+
+  // Оптимистично обновляем UI сразу
   const records = _loadStoredRecords();
   const idx = records.findIndex(x => String(x.id) === String(id));
   if (idx !== -1) { records[idx].status = 'cancelled'; localStorage.setItem('yc_records', JSON.stringify(records)); }
@@ -2708,6 +2703,18 @@ async function confirmCancel() {
   state._cancelHash = null;
   go('s-home', 'tab');
   renderHomeHero();
+
+  // API вызов в фоне — не блокирует UX
+  try {
+    const res = await fetch(`${YC.base}/record/${YC.company}/${id}`, {
+      method: 'DELETE', headers: YC._h()
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      const msg = body?.meta?.message || `HTTP ${res.status}`;
+      alert(`Запись удалена локально, но YCLIENTS вернул ошибку: ${msg}\nПожалуйста, уточните отмену у администратора.`);
+    }
+  } catch(e) {}
 }
 
 // ── DATA MODEL ──
