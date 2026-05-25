@@ -1045,7 +1045,7 @@ body {
     </div>
     <div class="cancel-warning">⚠️ Отмена менее чем за 24 часа может повлечь штраф 50% от стоимости. Студия свяжется с вами.</div>
     <div style="padding:0 20px;">
-      <button class="btn-danger" onclick="go('s-home','tab')">Да, отменить запись</button>
+      <button class="btn-danger" onclick="confirmCancel()">Да, отменить запись</button>
       <button class="btn-secondary" onclick="back()">Оставить запись</button>
     </div>
   </div>
@@ -2077,6 +2077,7 @@ async function loadTimes(iso) {
   state.dateISO = iso;
   const d = new Date(iso + 'T00:00:00');
   const dateStr = d.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+  state.dateFull = dateStr;
   if (lbl) lbl.textContent = 'Доступное время — ' + dateStr;
   el.innerHTML = '<div style="padding:12px;color:var(--text-2);font-size:13px;">Загрузка…</div>';
   const staffId = m ? m.id : 0;
@@ -2198,7 +2199,7 @@ async function _bookWithSession(session) {
     go('s-confirm');
   } else {
     _authContext = 'booking';
-    const smsR = await YC.post(`/book_code/${YC.company}`, { phone: session.phone });
+    await YC.post(`/book_code/${YC.company}`, { phone: session.phone });
     localStorage.setItem('yc_phone', session.phone);
     go('s-otp');
   }
@@ -2295,7 +2296,15 @@ function _fmtDatetime(datetime) {
 
 // ── HISTORY SCREEN ──
 function renderHistoryScreen() {
-  const records = _loadStoredRecords();
+  _renderHistoryFromCache();
+  const session = getSession();
+  if (session && session.user_token) {
+    _fetchAndMergeServerRecords(session.user_token).then(() => _renderHistoryFromCache());
+  }
+}
+
+function _renderHistoryFromCache() {
+  const records = _loadStoredRecords().filter(r => r.status !== 'cancelled');
   const now = new Date();
   const upcoming = records.filter(r => new Date(r.datetime.replace(' ', 'T')) > now);
   const past     = records.filter(r => new Date(r.datetime.replace(' ', 'T')) <= now);
@@ -2350,8 +2359,9 @@ function renderHomeHero() {
   const gr = document.getElementById('homeGreeting');
   if (!el) return;
 
-  const name = localStorage.getItem('yc_client_name');
-  if (gr && name) gr.textContent = `Привет, ${name.split(' ')[0]} 👋`;
+  const session = getSession();
+  const name = session ? session.name : '';
+  if (gr) gr.textContent = name ? `Привет, ${name.split(' ')[0]} 👋` : 'Привет 👋';
 
   const ml = document.getElementById('homeMastersList');
   if (ml && MASTERS_DATA.length) {
@@ -2390,20 +2400,73 @@ function renderHomeHero() {
   </div>`;
 }
 
+// ── SERVER HISTORY ──
+async function _fetchAndMergeServerRecords(userToken) {
+  try {
+    const headers = {
+      'Authorization': `Bearer ${YC.token}, User ${userToken}`,
+      'Accept': 'application/vnd.yclients.v2+json'
+    };
+    const r = await fetch(`${YC.base}/user/records?page=1&count=50`, { headers })
+      .then(res => res.json()).catch(() => ({ success: false }));
+    if (!r.success || !Array.isArray(r.data)) return;
+    const local = _loadStoredRecords();
+    const localIds = new Set(local.map(x => String(x.id)));
+    let changed = false;
+    for (const rec of r.data) {
+      if (localIds.has(String(rec.id))) continue;
+      const svc = rec.services && rec.services[0];
+      const staff = rec.staff || {};
+      const dt = (rec.date || '').replace('T', ' ').slice(0, 16) + ':00';
+      local.push({
+        id: rec.id, hash: rec.record_hash || '',
+        svcName: svc ? svc.title : 'Услуга', svcId: svc ? String(svc.id) : '',
+        masterName: staff.name || 'Мастер', masterId: staff.id ? String(staff.id) : '',
+        datetime: dt, price: '', dur: svc ? (svc.duration || 60) : 60,
+        status: rec.deleted ? 'cancelled' : 'upcoming'
+      });
+      changed = true;
+    }
+    if (changed) localStorage.setItem('yc_records', JSON.stringify(local));
+  } catch {}
+}
+
 // ── CANCEL REAL BOOKING ──
-async function cancelRecord(id, hash) {
-  if (!confirm('Отменить запись?')) return;
+function cancelRecord(id, hash) {
+  const records = _loadStoredRecords();
+  const rec = records.find(r => String(r.id) === String(id));
+  if (!rec) return;
+  state._cancelId = id;
+  state._cancelHash = hash;
+  const cancelCard = document.querySelector('#s-cancel .cancel-card');
+  if (cancelCard) {
+    cancelCard.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <div style="width:44px;height:44px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--accent);flex-shrink:0;">${getInitials(rec.masterName)}</div>
+        <div><div style="font-size:15px;font-weight:700;">${rec.masterName}</div><div style="font-size:12px;color:var(--text-2);">Мастер</div></div>
+      </div>
+      <div style="font-size:17px;font-weight:800;margin-bottom:6px;">${rec.svcName}</div>
+      <div style="font-size:14px;color:var(--text-2);">${_fmtDatetime(rec.datetime)} · ${rec.dur} мин${rec.price ? ' · ' + rec.price : ''}</div>`;
+  }
+  go('s-cancel');
+}
+
+async function confirmCancel() {
+  const id = state._cancelId;
+  const hash = state._cancelHash;
+  if (!id) return;
+  const btn = document.querySelector('#s-cancel .btn-danger');
+  if (btn) { btn.disabled = true; btn.textContent = 'Отменяем…'; }
   const r = await fetch(`${YC.base}/user/records/${id}/${hash}`, {
     method: 'DELETE', headers: YC._h()
   }).then(res => res.json()).catch(() => ({ success: false }));
-
   const records = _loadStoredRecords();
-  const idx = records.findIndex(r => String(r.id) === String(id));
+  const idx = records.findIndex(x => String(x.id) === String(id));
   if (idx !== -1) { records[idx].status = 'cancelled'; localStorage.setItem('yc_records', JSON.stringify(records)); }
-
-  renderHistoryScreen();
+  state._cancelId = null;
+  state._cancelHash = null;
+  go('s-home', 'tab');
   renderHomeHero();
-
   if (!r.success) alert('Запись отменена локально. Если ошибка повторится — позвоните в студию.');
 }
 
@@ -2440,6 +2503,8 @@ const state = {
   dateISO: '',
   slot: '14:00',
   _bookAfterLogin: false,
+  _cancelId: null,
+  _cancelHash: null,
 };
 
 function getService() { return SERVICES_DATA.find(s => s.id === state.serviceId) || SERVICES_DATA[0]; }
