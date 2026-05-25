@@ -10,6 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="БьютиФлайБар">
 <link rel="apple-touch-icon" href="icon-180.png">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 a, button, [onclick], .tab, .chip, .svc-card, .master-card, .slot, .hero-card, .hist-visit, .hist-upcoming {
@@ -997,16 +998,15 @@ body {
       <div class="login-logo">🌸</div>
       <div class="login-brand">БьютиФлайБар</div>
       <div class="login-sub">Студия эпиляции и перманентного макияжа<br>Троицкий бульвар, 4, Троицк</div>
-      <div class="login-lbl">Номер телефона</div>
+      <div class="login-lbl">Email</div>
       <div class="login-field">
-        <span style="font-size:20px;">🇷🇺</span>
-        <input type="tel" inputmode="numeric" class="login-phone" id="loginPhone"
-          placeholder="+7 (___) ___-__-__" value=""
+        <input type="email" inputmode="email" class="login-phone" id="loginEmail"
+          placeholder="your@email.com" value=""
           style="background:none;border:none;outline:none;font-size:17px;font-weight:500;font-family:inherit;flex:1;color:var(--text);">
       </div>
       <div id="loginError" style="color:var(--red);font-size:13px;padding:0 0 8px;display:none;"></div>
-      <button class="btn-primary" id="loginBtn" onclick="sendSmsCode()">Получить код →</button>
-      <div class="login-hint">Отправим SMS с кодом подтверждения.<br>Вход доступен только для клиентов студии.</div>
+      <button class="btn-primary" id="loginBtn" onclick="sendEmailCode()">Получить код →</button>
+      <div class="login-hint">Отправим код подтверждения на почту.<br>Вход доступен только для клиентов студии.</div>
       <div class="login-divider" style="margin-top:24px;">для сотрудников студии</div>
       <button onclick="go('s-admin','tab')" style="width:100%;padding:14px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -1019,15 +1019,37 @@ body {
   <div class="screen" id="s-otp">
     <div class="status-bar"><span class="time">9:41</span><div class="dynamic-island"></div><div class="icons"><svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".7"/><rect x="4.5" y="5.5" width="3" height="6.5" rx=".7"/><rect x="9" y="3" width="3" height="9" rx=".7"/><rect x="13.5" y="0" width="3" height="12" rx=".7"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="8" cy="11" r="1.2" fill="currentColor" stroke="none"/><path d="M4.8 7.8a4.5 4.5 0 016.4 0" stroke-width="1.5"/><path d="M2 5a8 8 0 0112 0" stroke-width="1.5"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="20" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".4"/><path d="M22 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/><rect x="2" y="2" width="15" height="8" rx="2.5" fill="currentColor"/></svg></div></div>
     <div class="nav-bar"><button class="back-btn" onclick="back()">‹ Назад</button></div>
-    <div class="page-title">Код из SMS</div>
-    <div class="page-sub" id="otpSub">Отправили SMS с кодом</div>
+    <div class="page-title">Код из письма</div>
+    <div class="page-sub" id="otpSub">Отправили код на почту</div>
     <div class="otp-row">
       <input class="otp-box" type="text" inputmode="numeric" maxlength="1" id="otp1" oninput="otpInput(this,1)">
       <input class="otp-box" type="text" inputmode="numeric" maxlength="1" id="otp2" oninput="otpInput(this,2)">
       <input class="otp-box" type="text" inputmode="numeric" maxlength="1" id="otp3" oninput="otpInput(this,3)">
       <input class="otp-box" type="text" inputmode="numeric" maxlength="1" id="otp4" oninput="otpInput(this,4)" placeholder="·">
     </div>
-    <div class="otp-hint">Не пришёл код? <button class="btn-ghost" style="font-size:14px;" onclick="retrySms()">Отправить снова</button></div>
+    <div class="otp-hint">Не пришёл код? <button class="btn-ghost" style="font-size:14px;" onclick="retryEmail()">Отправить снова</button></div>
+  </div>
+
+  <!-- ══ REGISTER ══ -->
+  <div class="screen" id="s-register">
+    <div class="status-bar"><span class="time">9:41</span><div class="dynamic-island"></div><div class="icons"><svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".7"/><rect x="4.5" y="5.5" width="3" height="6.5" rx=".7"/><rect x="9" y="3" width="3" height="9" rx=".7"/><rect x="13.5" y="0" width="3" height="12" rx=".7"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="8" cy="11" r="1.2" fill="currentColor" stroke="none"/><path d="M4.8 7.8a4.5 4.5 0 016.4 0" stroke-width="1.5"/><path d="M2 5a8 8 0 0112 0" stroke-width="1.5"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="20" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".4"/><path d="M22 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/><rect x="2" y="2" width="15" height="8" rx="2.5" fill="currentColor"/></svg></div></div>
+    <div class="login-wrap">
+      <div class="login-logo">🌸</div>
+      <div class="login-brand">Добро пожаловать!</div>
+      <div class="login-sub">Расскажите немного о себе, чтобы мастера знали как к вам обращаться</div>
+      <div class="login-lbl">Ваше имя</div>
+      <div class="login-field">
+        <input type="text" class="login-phone" id="regName" placeholder="Имя и фамилия"
+          style="background:none;border:none;outline:none;font-size:17px;font-weight:500;font-family:inherit;flex:1;color:var(--text);">
+      </div>
+      <div class="login-lbl" style="margin-top:12px;">Телефон <span style="color:var(--text-2);font-weight:400;">(необязательно)</span></div>
+      <div class="login-field">
+        <input type="tel" inputmode="numeric" class="login-phone" id="regPhone" placeholder="+7 (___) ___-__-__"
+          style="background:none;border:none;outline:none;font-size:17px;font-weight:500;font-family:inherit;flex:1;color:var(--text);">
+      </div>
+      <div id="regError" style="color:var(--red);font-size:13px;padding:4px 0 0;display:none;"></div>
+      <button class="btn-primary" id="regBtn" onclick="registerClient()" style="margin-top:20px;">Создать профиль →</button>
+    </div>
   </div>
 
   <!-- ══ CANCEL ══ -->
@@ -1514,7 +1536,7 @@ body {
 </div><!-- /phone-wrap -->
 
 <script>
-const SCREENS = ['s-home','s-services','s-masters','s-slots','s-confirm','s-history','s-install','s-profile','s-login','s-otp','s-cancel','s-review','s-offer','s-crosssell','s-consent','s-feed','s-admin','s-admin-feed','s-admin-post','s-admin-clients','s-admin-push','s-admin-push-new'];
+const SCREENS = ['s-home','s-services','s-masters','s-slots','s-confirm','s-history','s-install','s-profile','s-login','s-otp','s-register','s-cancel','s-review','s-offer','s-crosssell','s-consent','s-feed','s-admin','s-admin-feed','s-admin-post','s-admin-clients','s-admin-push','s-admin-push-new'];
 let history = ['s-home'];
 let scenarioTimer = null;
 let currentScenarioBtn = null;
@@ -1933,6 +1955,14 @@ runScenario = function(key) {
   });
 };
 
+// ── EMAILJS ──
+const EMAILJS = {
+  serviceId:  'service_m2fr45h',
+  templateId: 'YOUR_TEMPLATE_ID',
+  publicKey:  'YOUR_PUBLIC_KEY'
+};
+emailjs.init(EMAILJS.publicKey);
+
 // ── YCLIENTS API ──
 const YC = {
   token: 'Pe1mZ3x1V99eA6eUWqV5',
@@ -2104,7 +2134,7 @@ function getSession() {
 }
 function saveSession(data) { localStorage.setItem('yc_session', JSON.stringify(data)); }
 function clearSession() {
-  ['yc_session','yc_records','yc_phone','yc_client_name'].forEach(k => localStorage.removeItem(k));
+  ['yc_session','yc_records','yc_phone','yc_client_name','yc_otp','yc_reg_email'].forEach(k => localStorage.removeItem(k));
 }
 function logout() { clearSession(); go('s-login'); }
 
@@ -2115,40 +2145,45 @@ function renderProfileScreen() {
   const avEl = document.getElementById('profAv');
   const homeAv = document.getElementById('homeAv');
   if (!s) return;
-  const initials = getInitials(s.name || s.phone || '?');
-  if (nameEl) nameEl.textContent = s.name || s.phone;
-  if (phoneEl) phoneEl.textContent = s.phone;
+  const initials = getInitials(s.name || s.email || '?');
+  if (nameEl) nameEl.textContent = s.name || s.email;
+  if (phoneEl) phoneEl.textContent = s.email || s.phone;
   if (avEl) avEl.textContent = initials;
   if (homeAv) homeAv.textContent = initials;
 }
 
-// ── OTP VERIFY (login or booking) ──
+// ── OTP VERIFY (email login) ──
 async function verifyOtp() {
-  const phone = localStorage.getItem('yc_phone') || '';
-  const code = ['otp1','otp2','otp3','otp4'].map(id => {
+  const entered = ['otp1','otp2','otp3','otp4'].map(id => {
     const el = document.getElementById(id); return el ? el.value : '';
   }).join('');
-  if (code.length < 4) return;
+  if (entered.length < 4) return;
 
-  if (_authContext === 'login') {
-    const r = await YC.post('/user/auth', { phone, code });
-    if (r.success && r.data) {
-      saveSession({ phone, user_token: r.data.user_token || '', name: r.data.name || '' });
-      _otpClear();
-      renderHomeHero();
-      renderProfileScreen();
-      if (state._bookAfterLogin) {
-        state._bookAfterLogin = false;
-        go('s-services', 'tab');
-      } else {
-        go('s-consent');
-      }
-    } else {
-      _setOtpError(r.meta?.message || 'Неверный код');
-    }
+  const stored = JSON.parse(localStorage.getItem('yc_otp') || 'null');
+  if (!stored) { _setOtpError('Сессия истекла, войдите снова'); return; }
+  if (Date.now() > stored.expiry) { _setOtpError('Код истёк, запросите новый'); return; }
+  if (stored.code !== entered) { _setOtpError('Неверный код'); return; }
+
+  const email = stored.email;
+  localStorage.removeItem('yc_otp');
+  const client = await _findClientByEmail(email);
+  if (client) {
+    saveSession({
+      email,
+      user_token: '',
+      name: client.name || '',
+      phone: client.phone || '',
+      client_id: client.id
+    });
+    _otpClear();
+    renderHomeHero();
+    renderProfileScreen();
+    if (state._bookAfterLogin) { state._bookAfterLogin = false; go('s-services', 'tab'); }
+    else { go('s-consent'); }
   } else {
-    _authContext = 'login';
-    completeBooking();
+    localStorage.setItem('yc_reg_email', email);
+    _otpClear();
+    go('s-register');
   }
 }
 
@@ -2181,27 +2216,18 @@ async function _bookWithSession(session) {
   const m = getMaster();
   const datetime = `${state.dateISO || new Date().toISOString().slice(0,10)} ${state.slot || '10:00'}:00`;
   const body = {
-    phone: session.phone, fullname: session.name || '', email: '',
+    phone: session.phone || '',
+    fullname: session.name || '',
+    email: session.email || '',
     appointments: [{ id: 1, services: [parseInt(svc.id) || 0], staff_id: m ? parseInt(m.id) : 0, datetime }],
     notify_by_sms: 1
   };
-  const headers = {
-    'Authorization': `Bearer ${YC.token}, User ${session.user_token}`,
-    'Accept': 'application/vnd.yclients.v2+json',
-    'Content-Type': 'application/json'
-  };
-  const r = await fetch(`${YC.base}/book_record/${YC.company}`, {
-    method: 'POST', headers, body: JSON.stringify(body)
-  }).then(res => res.json()).catch(() => ({ success: false }));
-
+  const r = await YC.post(`/book_record/${YC.company}`, body);
   if (r.success) {
     _saveBookedRecord(r.data && r.data[0]);
     go('s-confirm');
   } else {
-    _authContext = 'booking';
-    await YC.post(`/book_code/${YC.company}`, { phone: session.phone });
-    localStorage.setItem('yc_phone', session.phone);
-    go('s-otp');
+    alert(r.meta?.message || 'Не удалось создать запись. Попробуйте снова.');
   }
 }
 
@@ -2212,30 +2238,79 @@ function _normalizePhone(raw) {
   return d.slice(-11);
 }
 
-async function sendSmsCode() {
+async function sendEmailCode() {
   _authContext = 'login';
-  const input = document.getElementById('loginPhone');
+  const input = document.getElementById('loginEmail');
   const errEl = document.getElementById('loginError');
   const btn = document.getElementById('loginBtn');
-  if (!input) { go('s-otp'); return; }
-  const phone = _normalizePhone(input.value);
-  if (phone.length < 11) {
-    if (errEl) { errEl.textContent = 'Введите номер телефона'; errEl.style.display = 'block'; }
+  if (!input) return;
+  const email = input.value.trim().toLowerCase();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (errEl) { errEl.textContent = 'Введите корректный email'; errEl.style.display = 'block'; }
     return;
   }
   if (errEl) errEl.style.display = 'none';
   if (btn) { btn.disabled = true; btn.textContent = 'Отправляем…'; }
-  const r = await YC.post(`/book_code/${YC.company}`, { phone });
-  if (btn) { btn.disabled = false; btn.textContent = 'Получить код →'; }
-  if (r.success) {
-    localStorage.setItem('yc_phone', phone);
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  localStorage.setItem('yc_otp', JSON.stringify({ code, email, expiry: Date.now() + 10 * 60 * 1000 }));
+  try {
+    await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
+      to_email: email, code, studio_name: 'БьютиФлайБар'
+    });
     go('s-otp');
-  } else {
-    if (errEl) {
-      errEl.textContent = r.meta?.message || 'Ошибка отправки SMS. Проверьте номер.';
-      errEl.style.display = 'block';
-    }
+  } catch(e) {
+    if (errEl) { errEl.textContent = 'Ошибка отправки. Проверьте email.'; errEl.style.display = 'block'; }
   }
+  if (btn) { btn.disabled = false; btn.textContent = 'Получить код →'; }
+}
+
+async function retryEmail() {
+  const stored = JSON.parse(localStorage.getItem('yc_otp') || 'null');
+  if (!stored) return;
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  localStorage.setItem('yc_otp', JSON.stringify({ code, email: stored.email, expiry: Date.now() + 10 * 60 * 1000 }));
+  try {
+    await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
+      to_email: stored.email, code, studio_name: 'БьютиФлайБар'
+    });
+  } catch {}
+}
+
+async function registerClient() {
+  const nameEl = document.getElementById('regName');
+  const phoneEl = document.getElementById('regPhone');
+  const errEl = document.getElementById('regError');
+  const btn = document.getElementById('regBtn');
+  const name = nameEl ? nameEl.value.trim() : '';
+  if (!name) {
+    if (errEl) { errEl.textContent = 'Введите имя'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (errEl) errEl.style.display = 'none';
+  if (btn) { btn.disabled = true; btn.textContent = 'Создаём…'; }
+  const email = localStorage.getItem('yc_reg_email') || '';
+  const phone = phoneEl ? _normalizePhone(phoneEl.value) : '';
+  const body = { name, email };
+  if (phone.length === 11) body.phone = phone;
+  const r = await YC.post(`/clients/${YC.company}`, body);
+  if (btn) { btn.disabled = false; btn.textContent = 'Создать профиль →'; }
+  const clientId = r.success && r.data ? (r.data.id || r.data.client_id || null) : null;
+  saveSession({ email, user_token: '', name, phone: phone.length === 11 ? phone : '', client_id: clientId });
+  localStorage.removeItem('yc_reg_email');
+  if (nameEl) nameEl.value = '';
+  if (phoneEl) phoneEl.value = '';
+  renderHomeHero();
+  renderProfileScreen();
+  if (state._bookAfterLogin) { state._bookAfterLogin = false; go('s-services', 'tab'); }
+  else { go('s-consent'); }
+}
+
+async function _findClientByEmail(email) {
+  try {
+    const r = await YC.get(`/clients/${YC.company}`, { email });
+    if (r.success && Array.isArray(r.data) && r.data.length) return r.data[0];
+  } catch {}
+  return null;
 }
 
 function otpInput(el, n) {
@@ -2245,10 +2320,6 @@ function otpInput(el, n) {
   }
 }
 
-function retrySms() {
-  const phone = localStorage.getItem('yc_phone') || getSession()?.phone || '';
-  if (phone) YC.post(`/book_code/${YC.company}`, { phone });
-}
 
 function _saveBookedRecord(rec) {
   if (!rec) return;
@@ -2265,31 +2336,6 @@ function _saveBookedRecord(rec) {
   localStorage.setItem('yc_records', JSON.stringify(records));
 }
 
-async function completeBooking() {
-  const phone = localStorage.getItem('yc_phone') || getSession()?.phone || '';
-  const code = ['otp1','otp2','otp3','otp4'].map(id => {
-    const el = document.getElementById(id); return el ? el.value : '';
-  }).join('');
-  if (code.length < 4) return;
-
-  const svc = getService();
-  const m = getMaster();
-  const datetime = `${state.dateISO || new Date().toISOString().slice(0,10)} ${state.slot || '10:00'}:00`;
-  const body = {
-    phone, fullname: getSession()?.name || '', email: '',
-    code,
-    appointments: [{ id: 1, services: [parseInt(svc.id) || 0], staff_id: m ? parseInt(m.id) : 0, datetime }],
-    notify_by_sms: 1
-  };
-  const r = await YC.post(`/book_record/${YC.company}`, body);
-
-  if (r.success) {
-    _saveBookedRecord(r.data && r.data[0]);
-    go('s-confirm');
-  } else {
-    _setOtpError(r.meta?.message || 'Неверный код, попробуйте ещё раз');
-  }
-}
 
 // ── LOCAL RECORDS STORAGE ──
 function _loadStoredRecords() {
@@ -2305,8 +2351,8 @@ function _fmtDatetime(datetime) {
 function renderHistoryScreen() {
   _renderHistoryFromCache();
   const session = getSession();
-  if (session && session.user_token) {
-    _fetchAndMergeServerRecords(session.user_token).then(() => _renderHistoryFromCache());
+  if (session && session.client_id) {
+    _fetchAndMergeServerRecords(session.client_id).then(() => _renderHistoryFromCache());
   }
 }
 
@@ -2408,14 +2454,9 @@ function renderHomeHero() {
 }
 
 // ── SERVER HISTORY ──
-async function _fetchAndMergeServerRecords(userToken) {
+async function _fetchAndMergeServerRecords(clientId) {
   try {
-    const headers = {
-      'Authorization': `Bearer ${YC.token}, User ${userToken}`,
-      'Accept': 'application/vnd.yclients.v2+json'
-    };
-    const r = await fetch(`${YC.base}/user/records?page=1&count=50`, { headers })
-      .then(res => res.json()).catch(() => ({ success: false }));
+    const r = await YC.get(`/records/${YC.company}`, { client_id: clientId, count: 50 });
     if (!r.success || !Array.isArray(r.data)) return;
     const local = _loadStoredRecords();
     const localIds = new Set(local.map(x => String(x.id)));
@@ -2684,9 +2725,9 @@ function onEnterScreen(id) {
   if (id === 's-profile')  renderProfileScreen();
   if (id === 's-otp') {
     ['otp1','otp2','otp3','otp4'].forEach(i => { const el=document.getElementById(i); if(el){el.value='';el.classList.remove('filled');} });
-    const phone = localStorage.getItem('yc_phone') || '';
+    const stored = JSON.parse(localStorage.getItem('yc_otp') || 'null');
     const sub = document.getElementById('otpSub');
-    if (sub && phone) sub.textContent = 'Отправили SMS на +' + phone;
+    if (sub && stored) sub.textContent = 'Отправили код на ' + stored.email;
     setTimeout(() => { const el=document.getElementById('otp1'); if(el) el.focus(); }, 300);
   }
 }
