@@ -806,7 +806,7 @@ body {
           <h2 id="homeGreeting">Привет 👋</h2>
           <p>БьютиФлайБар · Троицк</p>
         </div>
-        <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#C9956C,#E8C4A0);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;letter-spacing:-0.5px;cursor:pointer;box-shadow:0 2px 8px rgba(201,149,108,0.35);" onclick="go('s-profile','tab')">ОИ</div>
+        <div id="homeAv" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#C9956C,#E8C4A0);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;letter-spacing:-0.5px;cursor:pointer;box-shadow:0 2px 8px rgba(201,149,108,0.35);" onclick="go('s-profile','tab')"></div>
       </div>
 
       <div id="homeHero"></div>
@@ -1020,8 +1020,8 @@ body {
     <div class="page-title" style="padding-top:8px;">Профиль</div>
     <div class="scroll">
       <div class="prof-head">
-        <div class="prof-av" style="background:linear-gradient(135deg,#C9956C,#E8C4A0);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;letter-spacing:-1px;box-shadow:0 4px 16px rgba(200,84,127,0.3);">ОИ</div>
-        <div><div class="prof-name">Олеся Иванова</div><div class="prof-phone">+7 (916) 123-45-67</div></div>
+        <div id="profAv" class="prof-av" style="background:linear-gradient(135deg,#C9956C,#E8C4A0);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;letter-spacing:-1px;box-shadow:0 4px 16px rgba(200,84,127,0.3);"></div>
+        <div><div class="prof-name" id="profName"></div><div class="prof-phone" id="profPhone"></div></div>
       </div>
       <div style="padding:0 20px 6px;"><div class="label">Избранный мастер</div></div>
       <div class="settings-group">
@@ -1066,7 +1066,7 @@ body {
         </div>
       </div>
       <div style="padding:0 20px 32px;text-align:center;">
-        <button style="background:none;border:none;color:var(--red);font-size:15px;font-weight:600;cursor:pointer;" onclick="go('s-login')">Выйти из аккаунта</button>
+        <button style="background:none;border:none;color:var(--red);font-size:15px;font-weight:600;cursor:pointer;" onclick="logout()">Выйти из аккаунта</button>
       </div>
     </div>
     <div class="tab-bar">
@@ -1977,7 +1977,7 @@ function updateDots(total, current) {
           document.getElementById(ids[i+1]).focus();
         } else {
           el.blur();
-          setTimeout(() => go('s-consent'), 600);
+          setTimeout(() => verifyOtp(), 600);
         }
       }
     });
@@ -2183,17 +2183,117 @@ async function loadTimes(iso) {
   if (firstTime) { state.slot = firstTime; updateStickyBottom(); }
 }
 
+// ── SESSION ──
+let _authContext = 'login';
+
+function getSession() {
+  try { return JSON.parse(localStorage.getItem('yc_session') || 'null'); } catch { return null; }
+}
+function saveSession(data) { localStorage.setItem('yc_session', JSON.stringify(data)); }
+function clearSession() {
+  ['yc_session','yc_records','yc_phone','yc_client_name'].forEach(k => localStorage.removeItem(k));
+}
+function logout() { clearSession(); go('s-login'); }
+
+function renderProfileScreen() {
+  const s = getSession();
+  const nameEl = document.getElementById('profName');
+  const phoneEl = document.getElementById('profPhone');
+  const avEl = document.getElementById('profAv');
+  const homeAv = document.getElementById('homeAv');
+  if (!s) return;
+  const initials = getInitials(s.name || s.phone || '?');
+  if (nameEl) nameEl.textContent = s.name || s.phone;
+  if (phoneEl) phoneEl.textContent = s.phone;
+  if (avEl) avEl.textContent = initials;
+  if (homeAv) homeAv.textContent = initials;
+}
+
+// ── OTP VERIFY (login or booking) ──
+async function verifyOtp() {
+  const phone = localStorage.getItem('yc_phone') || '';
+  const code = ['otp1','otp2','otp3','otp4'].map(id => {
+    const el = document.getElementById(id); return el ? el.value : '';
+  }).join('');
+  if (code.length < 4) return;
+
+  if (_authContext === 'login') {
+    const r = await YC.post('/user/auth', { phone, code });
+    if (r.success && r.data) {
+      saveSession({ phone, user_token: r.data.user_token || '', name: r.data.name || '' });
+      _otpClear();
+      renderHomeHero();
+      renderProfileScreen();
+      if (state._bookAfterLogin) {
+        state._bookAfterLogin = false;
+        go('s-services', 'tab');
+      } else {
+        go('s-consent');
+      }
+    } else {
+      _setOtpError(r.meta?.message || 'Неверный код');
+    }
+  } else {
+    _authContext = 'login';
+    completeBooking();
+  }
+}
+
+function _otpClear() {
+  ['otp1','otp2','otp3','otp4'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; el.classList.remove('filled','cursor'); }
+  });
+}
+
+function _setOtpError(msg) {
+  const hint = document.querySelector('#s-otp .otp-hint');
+  if (hint) hint.innerHTML = `<span style="color:var(--red)">${msg}</span>`;
+}
+
 // ── BOOKING FLOW ──
 function startBooking() {
-  const phone = localStorage.getItem('yc_phone');
-  if (phone) {
-    _sendCode(phone);
+  const session = getSession();
+  if (session) {
+    _bookWithSession(session);
   } else {
+    state._bookAfterLogin = true;
+    _authContext = 'login';
     go('s-login');
   }
 }
 
+async function _bookWithSession(session) {
+  const svc = getService();
+  const m = getMaster();
+  const datetime = `${state.dateISO || new Date().toISOString().slice(0,10)} ${state.slot || '10:00'}:00`;
+  const body = {
+    phone: session.phone, fullname: session.name || '', email: '',
+    appointments: [{ id: 1, services: [parseInt(svc.id) || 0], staff_id: m ? parseInt(m.id) : 0, datetime }],
+    notify_by_sms: 1
+  };
+  const headers = {
+    'Authorization': `Bearer ${YC.token}, User ${session.user_token}`,
+    'Accept': 'application/vnd.yclients.v2+json',
+    'Content-Type': 'application/json'
+  };
+  const r = await fetch(`${YC.base}/book_record/${YC.company}`, {
+    method: 'POST', headers, body: JSON.stringify(body)
+  }).then(res => res.json()).catch(() => ({ success: false }));
+
+  if (r.success) {
+    _saveBookedRecord(r.data && r.data[0]);
+    go('s-confirm');
+  } else {
+    _authContext = 'booking';
+    const smsR = await YC.post(`/book_code/${YC.company}`, { phone: session.phone });
+    localStorage.setItem('yc_phone', session.phone);
+    go('s-otp');
+  }
+}
+
 async function sendSmsCode() {
+  _authContext = 'login';
   const input = document.getElementById('loginPhone');
   const errEl = document.getElementById('loginError');
   const btn = document.getElementById('loginBtn');
@@ -2218,26 +2318,35 @@ async function sendSmsCode() {
   }
 }
 
-async function _sendCode(phone) {
-  await YC.post(`/book_code/${YC.company}`, { phone });
-  go('s-otp');
-}
-
 function otpInput(el, n) {
   el.classList.toggle('filled', el.value.length > 0);
   if (el.value.length === 1 && n < 4) {
     document.getElementById('otp' + (n + 1)).focus();
   }
-  if (n === 4 && el.value.length === 1) completeBooking();
 }
 
 function retrySms() {
-  const phone = localStorage.getItem('yc_phone') || '';
+  const phone = localStorage.getItem('yc_phone') || getSession()?.phone || '';
   if (phone) YC.post(`/book_code/${YC.company}`, { phone });
 }
 
+function _saveBookedRecord(rec) {
+  if (!rec) return;
+  const svc = getService();
+  const m = getMaster();
+  const datetime = `${state.dateISO || new Date().toISOString().slice(0,10)} ${state.slot || '10:00'}:00`;
+  const records = _loadStoredRecords();
+  records.unshift({
+    id: rec.id, hash: rec.record_hash || '',
+    svcName: svc.name, svcId: svc.id,
+    masterName: m ? m.name : 'Любой мастер', masterId: m ? m.id : 0,
+    datetime, price: svc.priceStr, dur: svc.dur, status: 'upcoming'
+  });
+  localStorage.setItem('yc_records', JSON.stringify(records));
+}
+
 async function completeBooking() {
-  const phone = localStorage.getItem('yc_phone') || '';
+  const phone = localStorage.getItem('yc_phone') || getSession()?.phone || '';
   const code = ['otp1','otp2','otp3','otp4'].map(id => {
     const el = document.getElementById(id); return el ? el.value : '';
   }).join('');
@@ -2247,7 +2356,7 @@ async function completeBooking() {
   const m = getMaster();
   const datetime = `${state.dateISO || new Date().toISOString().slice(0,10)} ${state.slot || '10:00'}:00`;
   const body = {
-    phone, fullname: localStorage.getItem('yc_client_name') || '', email: '',
+    phone, fullname: getSession()?.name || '', email: '',
     code,
     appointments: [{ id: 1, services: [parseInt(svc.id) || 0], staff_id: m ? parseInt(m.id) : 0, datetime }],
     notify_by_sms: 1
@@ -2255,23 +2364,10 @@ async function completeBooking() {
   const r = await YC.post(`/book_record/${YC.company}`, body);
 
   if (r.success) {
-    if (r.data && r.data[0]) {
-      const rec = r.data[0];
-      const records = _loadStoredRecords();
-      records.unshift({
-        id: rec.id,
-        hash: rec.record_hash || '',
-        svcName: svc.name, svcId: svc.id,
-        masterName: m ? m.name : 'Любой мастер', masterId: m ? m.id : 0,
-        datetime, price: svc.priceStr, dur: svc.dur,
-        status: 'upcoming'
-      });
-      localStorage.setItem('yc_records', JSON.stringify(records));
-    }
+    _saveBookedRecord(r.data && r.data[0]);
     go('s-confirm');
   } else {
-    const hint = document.querySelector('#s-otp .otp-hint');
-    if (hint) hint.innerHTML = `<span style="color:var(--red)">${r.meta?.message || 'Неверный код, попробуйте ещё раз'}</span>`;
+    _setOtpError(r.meta?.message || 'Неверный код, попробуйте ещё раз');
   }
 }
 
@@ -2431,6 +2527,7 @@ const state = {
   dateFull: 'Пятница, 24 мая',
   dateISO: '',
   slot: '14:00',
+  _bookAfterLogin: false,
 };
 
 function getService() { return SERVICES_DATA.find(s => s.id === state.serviceId) || SERVICES_DATA[0]; }
@@ -2600,6 +2697,7 @@ function onEnterScreen(id) {
   if (id === 's-confirm')  updateConfirmScreen();
   if (id === 's-history')  renderHistoryScreen();
   if (id === 's-home')     renderHomeHero();
+  if (id === 's-profile')  renderProfileScreen();
   if (id === 's-otp') {
     ['otp1','otp2','otp3','otp4'].forEach(i => { const el=document.getElementById(i); if(el){el.value='';el.classList.remove('filled');} });
     const phone = localStorage.getItem('yc_phone') || '';
@@ -2813,8 +2911,14 @@ function likeFeed(btn) {
 
 // ── INIT ──
 renderServices();
-
-// ── INIT ──
+(function checkSession() {
+  if (!getSession()) {
+    go('s-login');
+  } else {
+    renderHomeHero();
+    renderProfileScreen();
+  }
+})();
 initApp();
 
 // ── SERVICE WORKER ──
