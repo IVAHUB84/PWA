@@ -1,4 +1,4 @@
-const CACHE = 'beautyfly-v4';
+const CACHE = 'resnichki-v1';
 const ASSETS = [
   './prototype.html',
   './manifest.json',

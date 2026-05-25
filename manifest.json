@@ -1,7 +1,7 @@
 {
-  "name": "БьютиФлайБар",
-  "short_name": "БьютиФлай",
-  "description": "Студия эпиляции и перманентного макияжа, Троицк",
+  "name": "Реснички, сестрички и две истерички",
+  "short_name": "Реснички",
+  "description": "Студия красоты в Троицке",
   "start_url": "./prototype.html",
   "scope": "./",
   "display": "standalone",
