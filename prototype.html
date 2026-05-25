@@ -1252,7 +1252,7 @@ body {
   <!-- ══ ADMIN: DASHBOARD ══ -->
   <div class="screen" id="s-admin">
     <div class="status-bar"><span class="time">9:41</span><div class="dynamic-island"></div><div class="icons"><svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".7"/><rect x="4.5" y="5.5" width="3" height="6.5" rx=".7"/><rect x="9" y="3" width="3" height="9" rx=".7"/><rect x="13.5" y="0" width="3" height="12" rx=".7"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="8" cy="11" r="1.2" fill="currentColor" stroke="none"/><path d="M4.8 7.8a4.5 4.5 0 016.4 0" stroke-width="1.5"/><path d="M2 5a8 8 0 0112 0" stroke-width="1.5"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="20" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".4"/><path d="M22 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/><rect x="2" y="2" width="15" height="8" rx="2.5" fill="currentColor"/></svg></div></div>
-    <div class="admin-header"><div class="admin-brand">Studio Admin · Режим студии</div><div class="admin-title">Реснички, сестрички и две истерички</div></div>
+    <div class="admin-header" style="display:flex;align-items:center;justify-content:space-between;"><div><div class="admin-brand">Studio Admin · Режим студии</div><div class="admin-title">Реснички, сестрички и две истерички</div></div><button onclick="_adminResetToken()" style="background:rgba(255,255,255,0.12);border:none;border-radius:8px;color:rgba(255,255,255,0.6);font-size:11px;padding:6px 10px;cursor:pointer;font-family:inherit;">🔑 Токен</button></div>
     <div class="scroll">
       <div class="stat-grid">
         <div class="stat-card"><div class="stat-val" id="adminStatCount">—</div><div class="stat-lbl">Записей сегодня</div><div class="stat-diff up"></div></div>
@@ -1384,7 +1384,7 @@ body {
         <button class="seg-btn active" id="segNow" onclick="pushSchedToggle('now')">Сейчас</button>
         <button class="seg-btn" id="segLater" onclick="pushSchedToggle('later')">Запланировать</button>
       </div>
-      <div id="schedTimeRow" style="display:none;margin:0 20px 16px;background:var(--surface);border-radius:12px;padding:14px 16px;display:none;">
+      <div id="schedTimeRow" style="display:none;margin:0 20px 16px;background:var(--surface);border-radius:12px;padding:14px 16px;">
         <div style="display:flex;align-items:center;justify-content:space-between;">
           <div><div style="font-size:11px;color:var(--text-2);margin-bottom:3px;">Дата</div><div style="font-size:16px;font-weight:700;">26 мая, вт</div></div>
           <div style="width:1px;height:32px;background:var(--border);"></div>
@@ -2109,7 +2109,7 @@ function saveSession(data) { localStorage.setItem('yc_session', JSON.stringify(d
 function clearSession() {
   ['yc_session','yc_records','yc_phone','yc_client_name','yc_otp','yc_reg_email','yc_reg_phone','yc_reg_client_id'].forEach(k => localStorage.removeItem(k));
 }
-function logout() { clearSession(); go('s-login'); }
+function logout() { clearSession(); go('s-login', 'tab'); }
 
 function renderProfileScreen() {
   const s = getSession();
@@ -2476,7 +2476,7 @@ async function retryEmail() {
   const stored = JSON.parse(localStorage.getItem('yc_otp') || 'null');
   if (!stored) return;
   const code = String(Math.floor(1000 + Math.random() * 9000));
-  localStorage.setItem('yc_otp', JSON.stringify({ code, email: stored.email, expiry: Date.now() + 10 * 60 * 1000 }));
+  localStorage.setItem('yc_otp', JSON.stringify({ ...stored, code, expiry: Date.now() + 10 * 60 * 1000 }));
   try {
     await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
       to_email: stored.email, name: 'Клиент', phone: '', topic: 'Код подтверждения', message: code, agreement: 'да'
@@ -2716,9 +2716,13 @@ async function _fetchAndMergeServerRecords(clientId) {
         status: rec.deleted ? 'cancelled' : (new Date(dt.replace(' ', 'T')) > now ? 'upcoming' : 'past')
       };
     });
-    serverRecords.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
-    localStorage.setItem('yc_records', JSON.stringify(serverRecords));
-    return serverRecords;
+    const local = JSON.parse(localStorage.getItem('yc_records') || '[]');
+    const serverIds = new Set(serverRecords.map(r => String(r.id)));
+    const localOnly = local.filter(r => !serverIds.has(String(r.id)));
+    const merged = [...serverRecords, ...localOnly];
+    merged.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+    localStorage.setItem('yc_records', JSON.stringify(merged));
+    return merged;
   } catch {}
 }
 
@@ -3074,12 +3078,16 @@ function rebook(svcId) {
 
 function bookWithMaster(masterId) {
   const m = MASTERS_DATA.find(x => x.id === masterId);
-  if (m && m.cats.length) {
-    const svc = SERVICES_DATA.find(s => s.cat === m.cats[0]);
-    if (svc) state.serviceId = svc.id;
-  }
+  if (!m) return;
   state.masterId = masterId;
-  go('s-slots');
+  state.masterName = m.name;
+  state.masterAvatar = m.avatar_big || m.avatar || '';
+  state.masterGrad = m.grad;
+  if (m.cats && m.cats.length) {
+    const svc = SERVICES_DATA.find(s => s.cat === m.cats[0]);
+    if (svc) { state.serviceId = svc.id; go('s-slots'); return; }
+  }
+  go('s-services');
 }
 
 // ── CONSENT MODAL IN PROFILE ──
@@ -3204,25 +3212,35 @@ function _clearPostImage() {
   if (clr)  clr.style.display = 'none';
 }
 
-function publishPost(draft) {
+async function publishPost(draft) {
   const cat = document.querySelector('#s-admin-post .hscroll .chip.active');
   const ta  = document.querySelector('#s-admin-post .admin-textarea');
   const text = ta ? ta.value.trim() : '';
   if (!text) { alert('Добавьте текст публикации'); return; }
   const catName = cat ? cat.textContent.trim() : 'Другое';
-  const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]');
-  posts.unshift({
-    id: Date.now(),
-    cat: catName,
-    text,
+  const post = {
+    id: Date.now(), cat: catName, text,
     image: _postImageBase64 || null,
     date: new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }),
     draft: !!draft
-  });
+  };
+  const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]');
+  posts.unshift(post);
   localStorage.setItem('yc_feed_posts', JSON.stringify(posts));
   if (ta) ta.value = '';
   _clearPostImage();
   go('s-admin-feed', 'tab');
+  if (!draft) {
+    const published = posts.filter(p => !p.draft);
+    _ghSyncPosts(published);
+  }
+}
+
+async function deletePost(id) {
+  const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => p.id !== id);
+  localStorage.setItem('yc_feed_posts', JSON.stringify(posts));
+  renderAdminFeed();
+  _ghSyncPosts(posts.filter(p => !p.draft));
 }
 
 let _adminAllClients = [];
@@ -3254,11 +3272,6 @@ function renderAdminFeed() {
   }).join('') + '<div style="height:20px;"></div>';
 }
 
-function deletePost(id) {
-  const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => p.id !== id);
-  localStorage.setItem('yc_feed_posts', JSON.stringify(posts));
-  renderAdminFeed();
-}
 
 async function renderAdminClients() {
   const listEl  = document.getElementById('adminClientsList');
@@ -3503,6 +3516,67 @@ function openReview(platform) {
   if (doneEl) doneEl.style.display = 'block';
 }
 
+// ── GITHUB POSTS SYNC ──
+const _GH_API = 'https://api.github.com/repos/IVAHUB84/PWA/contents/docs/posts.json';
+
+function _b64enc(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = ''; for (const b of bytes) bin += String.fromCharCode(b);
+  return btoa(bin);
+}
+function _b64dec(b64) {
+  const bin = atob(b64.replace(/\n/g, ''));
+  const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+async function _ghRead() {
+  try {
+    const r = await fetch(_GH_API + '?_=' + Date.now(), { headers: { 'Accept': 'application/vnd.github.v3+json' } });
+    if (r.status === 404) return { posts: [], sha: null };
+    if (!r.ok) return null;
+    const d = await r.json();
+    return { posts: JSON.parse(_b64dec(d.content)), sha: d.sha };
+  } catch { return null; }
+}
+
+async function _ghWrite(posts, sha, token) {
+  const body = { message: 'Update feed posts', content: _b64enc(JSON.stringify(posts)) };
+  if (sha) body.sha = sha;
+  try {
+    const r = await fetch(_GH_API, {
+      method: 'PUT',
+      headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+      body: JSON.stringify(body)
+    });
+    if (r.status === 401) { localStorage.removeItem('yc_gh_token'); return false; }
+    return r.ok;
+  } catch { return false; }
+}
+
+async function _ghSyncPosts(postsToWrite) {
+  let token = localStorage.getItem('yc_gh_token');
+  if (!token) {
+    token = prompt('Введите GitHub Personal Access Token (нужен для синхронизации постов с клиентами).\n\nПолучить: GitHub → Settings → Developer settings → Personal access tokens → Generate new token → выбрать scope "public_repo"');
+    if (!token) return;
+    localStorage.setItem('yc_gh_token', token.trim());
+    token = token.trim();
+  }
+  const gh = await _ghRead();
+  if (!gh) { alert('Не удалось прочитать данные с GitHub'); return; }
+  const ok = await _ghWrite(postsToWrite, gh.sha, token);
+  if (!ok) { alert('Ошибка записи на GitHub. Токен сброшен — попробуйте снова.'); }
+}
+
+function _adminResetToken() {
+  const cur = localStorage.getItem('yc_gh_token');
+  const msg = cur ? 'Токен задан. Введите новый или оставьте пустым для сброса:' : 'Введите GitHub Personal Access Token:';
+  const t = prompt(msg + '\n\nПолучить: GitHub → Settings → Developer settings → Personal access tokens → Generate new token → scope: public_repo');
+  if (t === null) return;
+  if (t.trim()) { localStorage.setItem('yc_gh_token', t.trim()); alert('Токен сохранён.'); }
+  else { localStorage.removeItem('yc_gh_token'); alert('Токен сброшен.'); }
+}
+
 // ── CLIENT FEED ──
 const _CAT_GRADS = {
   'Брови': 'linear-gradient(135deg,#F4C2A1,#C9956C)',
@@ -3514,10 +3588,28 @@ const _CAT_GRADS = {
 };
 const _CAT_ICONS2 = { 'Брови':'✨','Ногти':'💅','Лицо':'🌿','Волосы':'💆','Тело':'🧖','Акции':'🎁' };
 
-function renderClientFeed() {
+async function renderClientFeed() {
   const el = document.getElementById('feedList');
   if (!el) return;
-  const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => !p.draft);
+
+  const cached = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => !p.draft);
+  if (cached.length) {
+    _paintFeed(el, cached);
+  } else {
+    el.innerHTML = '<div style="padding:60px 20px;text-align:center;color:var(--text-2);font-size:14px;">Загрузка…</div>';
+  }
+
+  const gh = await _ghRead();
+  if (gh && gh.posts.length) {
+    const published = gh.posts.filter(p => !p.draft);
+    localStorage.setItem('yc_feed_posts', JSON.stringify(gh.posts));
+    _paintFeed(el, published);
+  } else if (!cached.length) {
+    el.innerHTML = '<div style="padding:60px 20px;text-align:center;color:var(--text-2);font-size:14px;">Публикаций пока нет.<br>Следите за обновлениями!</div>';
+  }
+}
+
+function _paintFeed(el, posts) {
   if (!posts.length) {
     el.innerHTML = '<div style="padding:60px 20px;text-align:center;color:var(--text-2);font-size:14px;">Публикаций пока нет.<br>Следите за обновлениями!</div>';
     return;
