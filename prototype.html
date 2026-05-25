@@ -2247,14 +2247,13 @@ async function loadTimes(iso) {
     el.innerHTML = '<div style="padding:12px;color:var(--text-2);font-size:13px;">Нет свободных окон на этот день</div>';
     return;
   }
-  let firstFree = '';
+  let firstTime = '';
   el.innerHTML = r.data.map(t => {
     const time = t.time || (t.datetime || '').slice(11, 16);
-    const free = t.seances > 0;
-    if (free && !firstFree) firstFree = time;
-    return `<button class="slot${free ? '' : ' busy'}${time === firstFree ? ' sel' : ''}" ${free ? `onclick="selectSlot(this,'${time}')"` : 'disabled'}>${time}</button>`;
+    if (!firstTime) firstTime = time;
+    return `<button class="slot${time === firstTime ? ' sel' : ''}" onclick="selectSlot(this,'${time}')">${time}</button>`;
   }).join('');
-  if (firstFree) { state.slot = firstFree; updateStickyBottom(); }
+  if (firstTime) { state.slot = firstTime; updateStickyBottom(); }
 }
 
 // ── BOOKING FLOW ──
