@@ -2167,15 +2167,21 @@ async function verifyOtp() {
 
   const email = stored.email;
   localStorage.removeItem('yc_otp');
+
+  // Если уже есть локальная сессия для этого email — не нужна регистрация
+  const existing = getSession();
+  if (existing && existing.email === email) {
+    _otpClear();
+    renderHomeHero();
+    renderProfileScreen();
+    if (state._bookAfterLogin) { state._bookAfterLogin = false; go('s-services', 'tab'); }
+    else { go('s-home', 'tab'); }
+    return;
+  }
+
   const client = await _findClientByEmail(email);
   if (client) {
-    saveSession({
-      email,
-      user_token: '',
-      name: client.name || '',
-      phone: client.phone || '',
-      client_id: client.id
-    });
+    saveSession({ email, user_token: '', name: client.name || '', phone: client.phone || '', client_id: client.id });
     _otpClear();
     renderHomeHero();
     renderProfileScreen();
