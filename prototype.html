@@ -2251,7 +2251,7 @@ async function sendEmailCode() {
   }
   if (errEl) errEl.style.display = 'none';
   if (btn) { btn.disabled = true; btn.textContent = 'Отправляем…'; }
-  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const code = String(Math.floor(1000 + Math.random() * 9000));
   localStorage.setItem('yc_otp', JSON.stringify({ code, email, expiry: Date.now() + 10 * 60 * 1000 }));
   try {
     await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
@@ -2259,7 +2259,9 @@ async function sendEmailCode() {
     });
     go('s-otp');
   } catch(e) {
-    if (errEl) { errEl.textContent = 'Ошибка отправки. Проверьте email.'; errEl.style.display = 'block'; }
+    console.error('EmailJS error:', e);
+    const msg = e?.text || e?.message || JSON.stringify(e) || 'неизвестная ошибка';
+    if (errEl) { errEl.textContent = 'Ошибка: ' + msg; errEl.style.display = 'block'; }
   }
   if (btn) { btn.disabled = false; btn.textContent = 'Получить код →'; }
 }
@@ -2267,7 +2269,7 @@ async function sendEmailCode() {
 async function retryEmail() {
   const stored = JSON.parse(localStorage.getItem('yc_otp') || 'null');
   if (!stored) return;
-  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const code = String(Math.floor(1000 + Math.random() * 9000));
   localStorage.setItem('yc_otp', JSON.stringify({ code, email: stored.email, expiry: Date.now() + 10 * 60 * 1000 }));
   try {
     await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
