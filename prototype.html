@@ -1218,19 +1218,19 @@ body {
         <div class="consent-text"><b>Уведомления о записях</b><br>Напоминания о визитах, перенос и отмена записей</div>
       </div>
       <div class="consent-item" onclick="toggleConsent(this)">
-        <div class="consent-check on">✓</div>
+        <div class="consent-check">✓</div>
         <div class="consent-text"><b>Акции и персональные предложения</b><br>Скидки, новинки и спецпредложения для вас</div>
       </div>
       <div class="consent-item" onclick="toggleConsent(this)">
-        <div class="consent-check on">✓</div>
+        <div class="consent-check">✓</div>
         <div class="consent-text"><b>Публикация фото и видео</b><br>Студия может использовать ваши фото и видео в маркетинговых материалах</div>
       </div>
       <div class="consent-item" onclick="toggleConsent(this)">
-        <div class="consent-check on">✓</div>
+        <div class="consent-check">✓</div>
         <div class="consent-text"><b>Публикация отзывов</b><br>Ваши отзывы могут быть опубликованы на сайте и в соцсетях студии</div>
       </div>
       <div class="consent-item" style="border-bottom:none;" onclick="toggleConsent(this)">
-        <div class="consent-check on">✓</div>
+        <div class="consent-check">✓</div>
         <div class="consent-text">Я ознакомилась с <span class="consent-link">офертой</span> и <span class="consent-link">политикой конфиденциальности</span></div>
       </div>
       <div style="padding:20px 20px 40px;">
@@ -1609,6 +1609,7 @@ function back() {
     fromEl.style.transform  = '';
     fromEl.style.transition = '';
     toEl.style.transition   = '';
+    onEnterScreen(prev);
   }, DUR + 20);
   updateDots();
 }
@@ -1844,7 +1845,7 @@ function runScenario(key) {
   });
   const startScreen = s.startScreen || 's-home';
   document.getElementById(startScreen).classList.add('active');
-  history = [startScreen];
+  navHistory = [startScreen];
 
   const navSteps = s.steps.filter(st => st.screen);
   updateDots(navSteps.length, 0);
@@ -2186,7 +2187,7 @@ async function verifyOtp() {
     renderHomeHero();
     renderProfileScreen();
     if (state._bookAfterLogin) { state._bookAfterLogin = false; go('s-services', 'tab'); }
-    else { go('s-consent'); }
+    else { go('s-home', 'tab'); }
   } else {
     localStorage.setItem('yc_reg_email', email);
     _otpClear();
@@ -2303,6 +2304,10 @@ async function registerClient() {
   if (phone.length === 11) body.phone = phone;
   const r = await YC.post(`/clients/${YC.company}`, body);
   if (btn) { btn.disabled = false; btn.textContent = 'Создать профиль →'; }
+  if (!r.success) {
+    if (errEl) { errEl.textContent = r.meta?.message || 'Ошибка при создании профиля'; errEl.style.display = 'block'; }
+    return;
+  }
   const clientId = r.data?.id || r.data?.client_id || null;
   saveSession({ email, user_token: '', name, phone: phone.length === 11 ? phone : '', client_id: clientId });
   localStorage.removeItem('yc_reg_email');
@@ -2317,7 +2322,9 @@ async function registerClient() {
 async function _findClientByEmail(email) {
   try {
     const r = await YC.get(`/clients/${YC.company}`, { email });
-    if (r.success && Array.isArray(r.data) && r.data.length) return r.data[0];
+    if (r.success && Array.isArray(r.data) && r.data.length) {
+      return r.data.find(c => (c.email || '').toLowerCase() === email.toLowerCase()) || null;
+    }
   } catch {}
   return null;
 }
@@ -2513,12 +2520,15 @@ async function confirmCancel() {
     });
     httpOk = res.ok || res.status === 200 || res.status === 204;
     if (!httpOk) {
-      // YCLIENTS иногда возвращает success:false но реально отменяет — проверяем фактически
-      const check = await fetch(`${YC.base}/record/${YC.company}/${id}`, { headers: YC._h() }).then(r => r.json()).catch(() => null);
-      if (check?.data?.deleted) httpOk = true;
+      const check = await fetch(`${YC.base}/records/${YC.company}/${id}`, { headers: YC._h() }).then(r => r.json()).catch(() => null);
+      if (check?.data?.deleted || check?.data?.status === 'cancelled') httpOk = true;
     }
   } catch(e) {}
   if (btn) { btn.disabled = false; btn.textContent = 'Да, отменить запись'; }
+  if (!httpOk) {
+    alert('Не удалось отменить запись. Позвоните в студию для подтверждения.');
+    return;
+  }
   const records = _loadStoredRecords();
   const idx = records.findIndex(x => String(x.id) === String(id));
   if (idx !== -1) { records[idx].status = 'cancelled'; localStorage.setItem('yc_records', JSON.stringify(records)); }
@@ -2526,7 +2536,6 @@ async function confirmCancel() {
   state._cancelHash = null;
   go('s-home', 'tab');
   renderHomeHero();
-  if (!httpOk) alert('Не удалось отменить запись. Позвоните в студию для подтверждения.');
 }
 
 // ── DATA MODEL ──
