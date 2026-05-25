@@ -1008,7 +1008,7 @@ body {
       <button class="btn-primary" id="loginBtn" onclick="sendCodeByPhone()">Получить код →</button>
       <div class="login-hint">Найдём вас по номеру и отправим код на почту.<br>Вход доступен только для клиентам студии.</div>
       <div class="login-divider" style="margin-top:24px;">для сотрудников студии</div>
-      <button onclick="go('s-admin','tab')" style="width:100%;padding:14px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <button onclick="enterAdmin()" style="width:100%;padding:14px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         Войти как администратор
       </button>
@@ -1082,10 +1082,10 @@ body {
     <div class="status-bar"><span class="time">9:41</span><div class="dynamic-island"></div><div class="icons"><svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".7"/><rect x="4.5" y="5.5" width="3" height="6.5" rx=".7"/><rect x="9" y="3" width="3" height="9" rx=".7"/><rect x="13.5" y="0" width="3" height="12" rx=".7"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="8" cy="11" r="1.2" fill="currentColor" stroke="none"/><path d="M4.8 7.8a4.5 4.5 0 016.4 0" stroke-width="1.5"/><path d="M2 5a8 8 0 0112 0" stroke-width="1.5"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="20" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".4"/><path d="M22 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/><rect x="2" y="2" width="15" height="8" rx="2.5" fill="currentColor"/></svg></div></div>
     <div class="nav-bar"><button class="back-btn" onclick="back()">‹ Назад</button></div>
     <div class="page-title">Оцените визит</div>
-    <div class="page-sub">10 апреля 2026 · Ламинирование бровей</div>
+    <div class="page-sub" id="reviewPageSub">10 апреля 2026 · Ламинирование бровей</div>
     <div class="review-master">
-      <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#F4C2A1,#E8956C);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">👩</div>
-      <div><div style="font-size:15px;font-weight:700;">Мария Соколова</div><div style="font-size:13px;color:var(--text-2);">Мастер бровей · стаж 7 лет</div></div>
+      <div id="reviewMasterAvatar" style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#F4C2A1,#E8956C);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">👩</div>
+      <div><div id="reviewMasterName" style="font-size:15px;font-weight:700;">Мария Соколова</div><div id="reviewMasterRole" style="font-size:13px;color:var(--text-2);">Мастер</div></div>
     </div>
     <div class="stars-row" id="starsRow">
       <span class="star on" onclick="setStar(1)">⭐</span>
@@ -1094,7 +1094,7 @@ body {
       <span class="star on" onclick="setStar(4)">⭐</span>
       <span class="star" onclick="setStar(5)">⭐</span>
     </div>
-    <textarea class="review-textarea" placeholder="Поделитесь впечатлением — это помогает другим клиентам и мастеру…"></textarea>
+    <textarea class="review-textarea" id="reviewTextarea" placeholder="Поделитесь впечатлением — это помогает другим клиентам и мастеру…"></textarea>
     <div style="padding:8px 20px 0;font-size:12px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.5px;">Поделитесь отзывом на картах</div>
     <div style="padding:10px 20px 0;display:flex;flex-direction:column;gap:10px;">
       <button class="review-ext-platform" id="btn2gis" onclick="openReview('2gis')">
@@ -1128,7 +1128,7 @@ body {
       </div>
     </div>
     <div style="padding:16px 20px 40px;">
-      <button class="btn-primary" onclick="go('s-home','tab')" style="width:100%;margin-bottom:10px;">Отправить отзыв</button>
+      <button class="btn-primary" onclick="submitReview()" style="width:100%;margin-bottom:10px;">Отправить отзыв</button>
       <button class="btn-dim" onclick="go('s-home','tab')" style="width:100%;">Пропустить</button>
     </div>
   </div>
@@ -1239,7 +1239,7 @@ body {
         <div class="consent-text">Я ознакомилась с <span class="consent-link">офертой</span> и <span class="consent-link">политикой конфиденциальности</span></div>
       </div>
       <div style="padding:20px 20px 40px;">
-        <button class="btn-primary" onclick="go('s-home','tab')" style="width:100%;">Принять и продолжить</button>
+        <button class="btn-primary" onclick="acceptConsent()" style="width:100%;">Принять и продолжить</button>
         <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--text-2);">Согласия можно изменить в любое время в настройках профиля</div>
       </div>
     </div>
@@ -1334,17 +1334,13 @@ body {
     <div class="admin-header"><div class="admin-brand">Studio Admin · Режим студии</div><div class="admin-title">Реснички, сестрички и две истерички</div></div>
     <div class="scroll">
       <div class="stat-grid">
-        <div class="stat-card"><div class="stat-val">12</div><div class="stat-lbl">Записей сегодня</div><div class="stat-diff up">+3 к вчера</div></div>
-        <div class="stat-card"><div class="stat-val" style="font-size:20px;">38 400 ₽</div><div class="stat-lbl">Выручка сегодня</div><div class="stat-diff up">+12%</div></div>
+        <div class="stat-card"><div class="stat-val" id="adminStatCount">—</div><div class="stat-lbl">Записей сегодня</div><div class="stat-diff up"></div></div>
+        <div class="stat-card"><div class="stat-val" id="adminStatRevenue" style="font-size:20px;">—</div><div class="stat-lbl">Выручка сегодня</div><div class="stat-diff up"></div></div>
         <div class="stat-card"><div class="stat-val">4.8 ★</div><div class="stat-lbl">Средняя оценка</div><div class="stat-diff up">за 30 дней</div></div>
-        <div class="stat-card"><div class="stat-val">1 247</div><div class="stat-lbl">Клиентов</div><div class="stat-diff up">+24 за месяц</div></div>
+        <div class="stat-card"><div class="stat-val">—</div><div class="stat-lbl">Клиентов</div><div class="stat-diff up"></div></div>
       </div>
-      <div class="section-header"><span class="section-title">Записи сегодня</span><span style="font-size:13px;color:var(--text-2);">25 мая</span></div>
-      <div class="booking-row"><div class="booking-time">10:00</div><div class="booking-av" style="background:linear-gradient(135deg,#F4C2A1,#E8956C);">АК</div><div class="booking-info"><div class="booking-name">Анна Кузнецова</div><div class="booking-svc">Ламинирование бровей · Мария С.</div></div><div class="booking-price">3 500 ₽</div></div>
-      <div class="booking-row"><div class="booking-time">11:30</div><div class="booking-av" style="background:linear-gradient(135deg,#A8D8EA,#7EC8E3);color:#2d6a85;">АВ</div><div class="booking-info"><div class="booking-name">Анна Волкова</div><div class="booking-svc">Маникюр с покрытием · Ольга К.</div></div><div class="booking-price">2 800 ₽</div></div>
-      <div class="booking-row"><div class="booking-time">13:00</div><div class="booking-av" style="background:linear-gradient(135deg,#C8E6C9,#81C784);color:#2d6a3a;">СМ</div><div class="booking-info"><div class="booking-name">Светлана Миронова</div><div class="booking-svc">Глубокое очищение лица · Елена Р.</div></div><div class="booking-price">4 200 ₽</div></div>
-      <div class="booking-row"><div class="booking-time">15:30</div><div class="booking-av" style="background:linear-gradient(135deg,#F8BBD0,#F48FB1);color:#8a2d5a;">ТЛ</div><div class="booking-info"><div class="booking-name">Тамара Лебедева</div><div class="booking-svc">Окрашивание волос · Дарья М.</div></div><div class="booking-price">от 6 000 ₽</div></div>
-      <div class="booking-row" style="border-bottom:none;"><div class="booking-time">17:00</div><div class="booking-av" style="background:linear-gradient(135deg,#F4C2A1,#E8956C);">ЕС</div><div class="booking-info"><div class="booking-name">Екатерина Смирнова</div><div class="booking-svc">Оформление бровей · Мария С.</div></div><div class="booking-price">2 000 ₽</div></div>
+      <div class="section-header"><span class="section-title">Записи сегодня</span><span style="font-size:13px;color:var(--text-2);" id="adminTodayDate"></span></div>
+      <div id="adminBookingList"></div>
       <div style="height:20px;"></div>
     </div>
     <div class="tab-bar">
@@ -1831,6 +1827,109 @@ function setStar(n) {
   document.querySelectorAll('#starsRow .star').forEach((s, i) => s.classList.toggle('on', i < n));
 }
 
+function renderReviewScreen() {
+  const sub = document.getElementById('reviewPageSub');
+  const nameEl = document.getElementById('reviewMasterName');
+  const roleEl = document.getElementById('reviewMasterRole');
+  const avatarEl = document.getElementById('reviewMasterAvatar');
+  const ta = document.getElementById('reviewTextarea');
+  if (sub) sub.textContent = (state._reviewRecordDate || '') + (state._reviewSvcName ? ' · ' + state._reviewSvcName : '');
+  if (nameEl) nameEl.textContent = state._reviewMasterName || 'Мастер';
+  if (roleEl) {
+    const m = MASTERS_DATA.find(x => x.id === state._reviewMasterId);
+    roleEl.textContent = m ? m.role : 'Мастер';
+  }
+  if (avatarEl) {
+    const m = MASTERS_DATA.find(x => x.id === state._reviewMasterId);
+    if (m && _hasRealAvatar(m)) {
+      avatarEl.innerHTML = `<img src="${m.avatar_big||m.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.textContent='👩'">`;
+    } else {
+      avatarEl.textContent = '👩';
+    }
+  }
+  if (ta) ta.value = '';
+  setStar(4);
+}
+
+function openRateVisit(recordId, masterId, masterName, svcName, datetime) {
+  state._reviewMasterId = masterId;
+  state._reviewMasterName = masterName;
+  state._reviewSvcName = svcName;
+  const d = new Date(datetime.replace(' ', 'T'));
+  state._reviewRecordDate = isNaN(d) ? datetime : d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+  go('s-review');
+}
+
+function submitReview() {
+  const stars = document.querySelectorAll('#starsRow .star.on').length;
+  const text = (document.getElementById('reviewTextarea')?.value || '').trim();
+  const reviews = JSON.parse(localStorage.getItem('yc_reviews') || '[]');
+  reviews.push({
+    masterId: state._reviewMasterId,
+    masterName: state._reviewMasterName,
+    svcName: state._reviewSvcName,
+    date: state._reviewRecordDate,
+    stars,
+    text,
+    saved: new Date().toISOString()
+  });
+  localStorage.setItem('yc_reviews', JSON.stringify(reviews));
+  go('s-home', 'tab');
+}
+
+function acceptConsent() {
+  if ('Notification' in window) {
+    Notification.requestPermission().catch(() => {});
+  }
+  go('s-home', 'tab');
+}
+
+function enterAdmin() {
+  const pin = prompt('PIN-код администратора:');
+  if (pin === null) return;
+  if (pin !== '1111') { alert('Неверный PIN-код'); return; }
+  go('s-admin', 'tab');
+  renderAdminDashboard();
+}
+
+async function renderAdminDashboard() {
+  const bookingList = document.getElementById('adminBookingList');
+  const statCount   = document.getElementById('adminStatCount');
+  const statRevenue = document.getElementById('adminStatRevenue');
+  const dateEl      = document.getElementById('adminTodayDate');
+  if (dateEl) dateEl.textContent = new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+  if (bookingList) bookingList.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-2);">Загрузка…</div>';
+  const today = new Date().toISOString().slice(0, 10);
+  const r = await YC.get(`/records/${YC.company}`, { start_date: today, end_date: today, count: 50 });
+  if (!r.success || !r.data) {
+    if (bookingList) bookingList.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-2);">Нет данных</div>';
+    return;
+  }
+  const recs = r.data.filter(x => !x.deleted);
+  if (statCount) statCount.textContent = recs.length;
+  const rev = recs.reduce((s, x) => s + ((x.services && x.services[0] && x.services[0].cost) || 0), 0);
+  if (statRevenue) statRevenue.textContent = rev ? rev.toLocaleString('ru-RU') + ' ₽' : '—';
+  const _GRADS2 = ['linear-gradient(135deg,#F4C2A1,#E8956C)','linear-gradient(135deg,#A8D8EA,#7EC8E3)','linear-gradient(135deg,#C8E6C9,#81C784)','linear-gradient(135deg,#F8BBD0,#F48FB1)'];
+  if (bookingList) {
+    if (!recs.length) {
+      bookingList.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-2);">Записей на сегодня нет</div>';
+      return;
+    }
+    bookingList.innerHTML = recs.map((rec, i) => {
+      const svc = rec.services && rec.services[0];
+      const dt = (rec.date || '').slice(11, 16);
+      const client = rec.client || {};
+      const staff = rec.staff || {};
+      const name = client.name || 'Клиент';
+      const initials = name.trim().split(/\s+/).map(w => w[0] || '').join('').slice(0,2).toUpperCase();
+      const price = svc && svc.cost ? svc.cost.toLocaleString('ru-RU') + ' ₽' : '—';
+      const grad = _GRADS2[i % _GRADS2.length];
+      const borderStyle = i === recs.length - 1 ? 'border-bottom:none;' : '';
+      return `<div class="booking-row" style="${borderStyle}"><div class="booking-time">${dt}</div><div class="booking-av" style="background:${grad};">${initials}</div><div class="booking-info"><div class="booking-name">${esc(name)}</div><div class="booking-svc">${esc(svc ? svc.title : '—')} · ${esc(staff.name || '—')}</div></div><div class="booking-price">${price}</div></div>`;
+    }).join('');
+  }
+}
+
 function runScenario(key) {
   stopScenario();
   const s = scenarios[key];
@@ -2037,12 +2136,13 @@ async function initApp() {
       _updateCatChips();
     }
     if (staffRes.success && staffRes.data && staffRes.data.length) {
+      const storedFavs = new Set(JSON.parse(localStorage.getItem('yc_favs') || '[]'));
       MASTERS_DATA = staffRes.data.map((m, i) => ({
         id: String(m.id), name: m.name, short: _makeShort(m.name),
         role: m.specialization || 'Мастер', exp: '',
         avatar: m.avatar_big || m.avatar || '',
         emoji: '👩', grad: _GRADS[i % _GRADS.length],
-        cats: [], fav: i === 0, avail: true, availText: '● Есть окна сегодня'
+        cats: [], fav: storedFavs.has(String(m.id)), avail: true, availText: '● Есть окна сегодня'
       }));
     }
     const cur = document.querySelector('.screen.active');
@@ -2603,7 +2703,7 @@ function _renderHistoryFromCache() {
         <div class="hist-visit"${i === past.length-1 ? ' style="margin-bottom:24px;"' : ''}>
           <div class="hist-emoji" style="background:var(--accent-light);">✨</div>
           <div style="flex:1;"><div style="font-size:14px;font-weight:700;margin-bottom:2px;">${esc(r.svcName)}</div><div style="font-size:12px;color:var(--text-2);">${esc(r.masterName)} · ${_fmtDatetime(r.datetime)}</div></div>
-          <div style="text-align:right;"><div style="font-size:14px;font-weight:700;margin-bottom:2px;">${r.price}</div><button class="btn-ghost" style="font-size:12px;" onclick="rebook('${r.svcId}')">Повторить</button></div>
+          <div style="text-align:right;"><div style="font-size:14px;font-weight:700;margin-bottom:2px;">${r.price}</div><button class="btn-ghost" style="font-size:12px;display:block;margin-bottom:4px;" onclick="rebook('${r.svcId}')">Повторить</button><button class="btn-ghost" style="font-size:12px;color:var(--accent);" onclick="openRateVisit('${r.id}','${r.masterId}','${esc(r.masterName)}','${esc(r.svcName)}','${r.datetime}')">Оценить</button></div>
         </div>`).join('');
     }
   }
@@ -2771,6 +2871,10 @@ const state = {
   _cancelId: null,
   _cancelHash: null,
   _rescheduleId: null,
+  _reviewMasterId: null,
+  _reviewMasterName: '',
+  _reviewSvcName: '',
+  _reviewRecordDate: '',
 };
 
 function getService() { return SERVICES_DATA.find(s => s.id === state.serviceId) || SERVICES_DATA[0]; }
@@ -2845,32 +2949,61 @@ function selectService(id) {
 }
 
 // ── RENDER MASTERS ──
-function renderMasters() {
+function _avgRating(masterId) {
+  const reviews = JSON.parse(localStorage.getItem('yc_reviews') || '[]');
+  const rel = reviews.filter(r => r.masterId === masterId && r.stars > 0);
+  if (!rel.length) return '';
+  const avg = rel.reduce((s, r) => s + r.stars, 0) / rel.length;
+  return ` · ⭐ ${avg.toFixed(1)}`;
+}
+
+function _masterCardHtml(m, i, total) {
+  const last     = i === total - 1;
+  const favBadge = m.fav ? '<div class="fav-badge">❤️</div>' : '';
+  const favChip  = m.fav ? ' <span class="fav-chip">Избранная</span>' : '';
+  const availCls = m.avail ? 'avail-yes' : 'avail-no';
+  const styles   = [...(m.avail ? [] : ['opacity:0.55']), ...(last ? ['margin-bottom:24px'] : [])];
+  const styleAttr = styles.length ? ` style="${styles.join(';')}"` : '';
+  const click    = m.avail ? ` onclick="selectMaster('${m.id}')"` : '';
+  const rating   = _avgRating(m.id);
+  return `<div class="master-card${m.fav ? ' fav' : ''}"${styleAttr}${click}>
+    <div class="master-av" style="background:${m.grad};">${_hasRealAvatar(m) ? `<img src="${m.avatar_big||m.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.style.display='none'">` : `<div class="av-initials">${getInitials(m.name)}</div>`}${favBadge}</div>
+    <div class="master-info">
+      <div class="master-name">${m.name}${favChip}</div>
+      <div class="master-role">${m.role}${m.exp ? ' · стаж ' + m.exp : ''}${rating}</div>
+      <div class="master-avail ${availCls}">${m.availText}</div>
+    </div>
+    <button onclick="event.stopPropagation();toggleFav('${m.id}')" style="background:none;border:none;cursor:pointer;font-size:20px;padding:4px 6px;flex-shrink:0;" title="В избранное">${m.fav ? '❤️' : '🤍'}</button>
+    <div class="chevron">›</div>
+  </div>`;
+}
+
+async function renderMasters() {
   const svc = getService();
   const sub = document.getElementById('mastersSub');
   if (sub) sub.textContent = svc.name + ' · ' + svc.dur + ' мин';
   const list = document.getElementById('mastersList');
   if (!list) return;
-  let masters = MASTERS_DATA.filter(m => m.cats.includes(svc.cat));
-  if (masters.length === 0) masters = MASTERS_DATA;
-  list.innerHTML = masters.map((m, i) => {
-    const last   = i === masters.length - 1;
-    const favBadge = m.fav ? '<div class="fav-badge">❤️</div>' : '';
-    const favChip  = m.fav ? ' <span class="fav-chip">Избранная</span>' : '';
-    const availCls  = m.avail ? 'avail-yes' : 'avail-no';
-    const styles    = [...(m.avail ? [] : ['opacity:0.55']), ...(last ? ['margin-bottom:24px'] : [])];
-    const styleAttr = styles.length ? ` style="${styles.join(';')}"` : '';
-    const click     = m.avail ? ` onclick="selectMaster('${m.id}')"` : '';
-    return `<div class="master-card${m.fav ? ' fav' : ''}"${styleAttr}${click}>
-      <div class="master-av" style="background:${m.grad};">${_hasRealAvatar(m) ? `<img src="${m.avatar_big||m.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.style.display='none'">` : `<div class="av-initials">${getInitials(m.name)}</div>`}${favBadge}</div>
-      <div class="master-info">
-        <div class="master-name">${m.name}${favChip}</div>
-        <div class="master-role">${m.role} · стаж ${m.exp}</div>
-        <div class="master-avail ${availCls}">${m.availText}</div>
-      </div>
-      <div class="chevron">›</div>
-    </div>`;
-  }).join('');
+  list.innerHTML = '<div style="padding:32px 20px;text-align:center;color:var(--text-2);font-size:14px;">Загрузка мастеров…</div>';
+  let masters = [];
+  try {
+    const r = await YC.get(`/book_staff/${YC.company}`, { service_id: svc.id });
+    if (r.success && r.data && r.data.length) {
+      const ids = new Set(r.data.map(s => String(s.id)));
+      masters = MASTERS_DATA.filter(m => ids.has(m.id));
+    }
+  } catch {}
+  if (!masters.length) masters = MASTERS_DATA;
+  list.innerHTML = masters.map((m, i) => _masterCardHtml(m, i, masters.length)).join('');
+}
+
+function toggleFav(masterId) {
+  const m = MASTERS_DATA.find(x => x.id === masterId);
+  if (!m) return;
+  m.fav = !m.fav;
+  const favs = MASTERS_DATA.filter(x => x.fav).map(x => x.id);
+  localStorage.setItem('yc_favs', JSON.stringify(favs));
+  renderMasters();
 }
 
 function selectMaster(id) {
@@ -2950,6 +3083,8 @@ function onEnterScreen(id) {
     }
   }
   if (id === 's-profile')  renderProfileScreen();
+  if (id === 's-review')   renderReviewScreen();
+  if (id === 's-admin')    renderAdminDashboard();
   if (id === 's-register') {
     const phone = localStorage.getItem('yc_reg_phone') || '';
     const el = document.getElementById('regPhone');
