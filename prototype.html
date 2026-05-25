@@ -1562,6 +1562,7 @@ function go(id, mode) {
   if (!toEl) return;
 
   if (mode === 'tab') {
+    if (id !== 's-slots') state._rescheduleId = null;
     // Instant snap — no slide animation for tab switches
     setTx(fromEl, 100, false);
     fromEl.classList.remove('active');
@@ -1986,10 +1987,10 @@ const YC = {
       return r.json();
     } catch(e) { return { success: false }; }
   },
-  async post(path, body) {
+  async post(path, body, method = 'POST') {
     try {
       const r = await fetch(this.base + path, {
-        method: 'POST', headers: this._h(), body: JSON.stringify(body)
+        method, headers: this._h(), body: JSON.stringify(body)
       });
       return r.json();
     } catch(e) { return { success: false }; }
@@ -2210,12 +2211,59 @@ function _setOtpError(msg) {
 // ── BOOKING FLOW ──
 function startBooking() {
   const session = getSession();
-  if (session) {
-    _bookWithSession(session);
-  } else {
+  if (!session) {
     state._bookAfterLogin = true;
     _authContext = 'login';
     go('s-login');
+    return;
+  }
+  if (state._rescheduleId) {
+    _rescheduleWithSession(session);
+  } else {
+    _bookWithSession(session);
+  }
+}
+
+function rescheduleRecord(id) {
+  const records = _loadStoredRecords();
+  const rec = records.find(r => String(r.id) === String(id));
+  if (!rec) return;
+  state._rescheduleId = id;
+  if (rec.svcId) {
+    const svc = SERVICES_DATA.find(s => s.id === rec.svcId || String(s.id) === String(rec.svcId));
+    if (svc) state.serviceId = svc.id;
+  }
+  if (rec.masterId) {
+    const m = MASTERS_DATA.find(x => x.id === rec.masterId || String(x.id) === String(rec.masterId));
+    state.masterId = m ? m.id : null;
+  }
+  go('s-slots');
+}
+
+async function _rescheduleWithSession(session) {
+  const id = state._rescheduleId;
+  const m = getMaster();
+  const datetime = `${state.dateISO || new Date().toISOString().slice(0,10)} ${state.slot || '10:00'}:00`;
+  const svc = getService();
+  const body = {
+    staff_id: m ? parseInt(m.id) : 0,
+    services: [{ id: parseInt(svc.id) || 0 }],
+    date: datetime
+  };
+  const r = await YC.post(`/records/${YC.company}/${id}`, body, 'PUT');
+  if (r.success) {
+    const records = _loadStoredRecords();
+    const idx = records.findIndex(x => String(x.id) === String(id));
+    if (idx !== -1) { records[idx].datetime = datetime; localStorage.setItem('yc_records', JSON.stringify(records)); }
+    state._rescheduleId = null;
+    renderHomeHero();
+    go('s-confirm');
+    const title = document.querySelector('#s-confirm .confirm-title');
+    const sub = document.querySelector('#s-confirm .confirm-sub');
+    if (title) title.textContent = 'Запись перенесена!';
+    if (sub) sub.textContent = 'Время успешно изменено';
+  } else {
+    alert(r.meta?.message || 'Не удалось перенести запись. Попробуйте снова.');
   }
 }
 
@@ -2391,6 +2439,7 @@ function _renderHistoryFromCache() {
           </div>
           <div style="font-size:16px;font-weight:800;margin-bottom:12px;">${esc(r.svcName)}</div>
           <div style="display:flex;gap:8px;">
+            <button class="hero-btn" style="font-size:13px;" onclick="rescheduleRecord('${r.id}')">Перенести</button>
             <button class="hero-btn" style="font-size:13px;" onclick="cancelRecord('${r.id}','${r.hash}')">Отменить</button>
           </div>
         </div>`).join('');
@@ -2457,6 +2506,7 @@ function renderHomeHero() {
     <div class="hero-service">${esc(next.svcName)}</div>
     <div class="hero-dt">${_fmtDatetime(next.datetime)} · ${next.dur} мин</div>
     <div class="hero-actions">
+      <button class="hero-btn" onclick="event.stopPropagation();rescheduleRecord('${next.id}')">Перенести</button>
       <button class="hero-btn" onclick="event.stopPropagation();cancelRecord('${next.id}','${next.hash}')">Отменить</button>
     </div>
   </div>`;
@@ -2573,6 +2623,7 @@ const state = {
   _bookAfterLogin: false,
   _cancelId: null,
   _cancelHash: null,
+  _rescheduleId: null,
 };
 
 function getService() { return SERVICES_DATA.find(s => s.id === state.serviceId) || SERVICES_DATA[0]; }
@@ -2708,6 +2759,8 @@ function updateStickyBottom() {
   const svc = getService();
   const el = document.getElementById('stickyInfo');
   if (el) el.innerHTML = `<b>${state.dateFull} · ${state.slot}</b> · ${svc.name}`;
+  const btn = document.querySelector('#s-slots .sticky-bottom .btn-primary');
+  if (btn) btn.textContent = state._rescheduleId ? 'Перенести запись' : 'Подтвердить запись';
 }
 
 // ── CONFIRM ──
