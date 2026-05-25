@@ -1,4 +1,4 @@
-const CACHE = 'beautyfly-v1';
+const CACHE = 'beautyfly-v2';
 const ASSETS = [
   './manifest.json',
   './icon-180.png',

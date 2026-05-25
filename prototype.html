@@ -970,37 +970,20 @@ body {
     <div class="scroll">
       <div class="date-picker">
         <div class="date-picker-lbl">Май 2026</div>
-        <div class="dates-row">
-          <div class="date-item" onclick="selectDate(this)"><div class="date-day">пн</div><div class="date-num">20</div></div>
-          <div class="date-item" onclick="selectDate(this)"><div class="date-day">вт</div><div class="date-num">21</div></div>
-          <div class="date-item" onclick="selectDate(this)"><div class="date-day">ср</div><div class="date-num">22</div></div>
-          <div class="date-item" onclick="selectDate(this)"><div class="date-day">чт</div><div class="date-num">23</div></div>
-          <div class="date-item sel" onclick="selectDate(this)"><div class="date-day">пт</div><div class="date-num">24</div></div>
-          <div class="date-item" onclick="selectDate(this)"><div class="date-day">сб</div><div class="date-num">25</div></div>
-          <div class="date-item" onclick="selectDate(this)"><div class="date-day">вс</div><div class="date-num">26</div></div>
+        <div class="dates-row" id="datesRow">
+          <div class="date-item sel" onclick="selectDate(this,'')"><div class="date-day">пт</div><div class="date-num">24</div></div>
         </div>
       </div>
       <div class="slots-section">
-        <div class="slots-lbl" id="slotsDateLbl">Доступное время — пятница, 24 мая</div>
-        <div class="slots-grid">
-          <button class="slot busy">09:00</button>
-          <button class="slot busy">10:00</button>
-          <button class="slot" onclick="selectSlot(this)">11:00</button>
-          <button class="slot" onclick="selectSlot(this)">12:00</button>
-          <button class="slot busy">13:00</button>
-          <button class="slot sel" onclick="selectSlot(this)">14:00</button>
-          <button class="slot" onclick="selectSlot(this)">15:00</button>
-          <button class="slot" onclick="selectSlot(this)">16:00</button>
-          <button class="slot busy">17:00</button>
-          <button class="slot" onclick="selectSlot(this)">18:00</button>
-          <button class="slot" onclick="selectSlot(this)">19:00</button>
-          <button class="slot busy">20:00</button>
+        <div class="slots-lbl" id="slotsDateLbl">Доступное время</div>
+        <div class="slots-grid" id="slotsGrid">
+          <div style="padding:12px;color:var(--text-2);font-size:13px;">Выберите дату</div>
         </div>
       </div>
     </div>
     <div class="sticky-bottom">
       <div class="sticky-info" id="stickyInfo"><b>Пятница, 24 мая · 14:00</b> · Ламинирование бровей</div>
-      <button class="btn-primary" onclick="go('s-confirm')">Подтвердить запись</button>
+      <button class="btn-primary" onclick="startBooking()">Подтвердить запись</button>
     </div>
     <div class="tab-bar">
       <div class="tab" onclick="go('s-home','tab')"><div class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div><div class="tab-label">Главная</div></div>
@@ -1178,11 +1161,12 @@ body {
       <div class="login-lbl">Номер телефона</div>
       <div class="login-field">
         <span style="font-size:20px;">🇷🇺</span>
-        <input type="tel" inputmode="numeric" class="login-phone"
-          placeholder="+7 (___) ___-__-__" value="+7 (916) 123-45-67"
+        <input type="tel" inputmode="numeric" class="login-phone" id="loginPhone"
+          placeholder="+7 (___) ___-__-__" value=""
           style="background:none;border:none;outline:none;font-size:17px;font-weight:500;font-family:inherit;flex:1;color:var(--text);">
       </div>
-      <button class="btn-primary" onclick="go('s-otp')">Получить код →</button>
+      <div id="loginError" style="color:var(--red);font-size:13px;padding:0 0 8px;display:none;"></div>
+      <button class="btn-primary" id="loginBtn" onclick="sendSmsCode()">Получить код →</button>
       <div class="login-hint">Отправим SMS с кодом подтверждения.<br>Вход доступен только для клиентов студии.</div>
       <div class="login-divider" style="margin-top:24px;">для сотрудников студии</div>
       <button onclick="go('s-admin','tab')" style="width:100%;padding:14px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;">
@@ -1197,15 +1181,14 @@ body {
     <div class="status-bar"><span class="time">9:41</span><div class="dynamic-island"></div><div class="icons"><svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".7"/><rect x="4.5" y="5.5" width="3" height="6.5" rx=".7"/><rect x="9" y="3" width="3" height="9" rx=".7"/><rect x="13.5" y="0" width="3" height="12" rx=".7"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="8" cy="11" r="1.2" fill="currentColor" stroke="none"/><path d="M4.8 7.8a4.5 4.5 0 016.4 0" stroke-width="1.5"/><path d="M2 5a8 8 0 0112 0" stroke-width="1.5"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="20" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".4"/><path d="M22 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/><rect x="2" y="2" width="15" height="8" rx="2.5" fill="currentColor"/></svg></div></div>
     <div class="nav-bar"><button class="back-btn" onclick="back()">‹ Назад</button></div>
     <div class="page-title">Код из SMS</div>
-    <div class="page-sub">Отправили на +7 (916) *** — ** — 67</div>
+    <div class="page-sub" id="otpSub">Отправили SMS с кодом</div>
     <div class="otp-row">
-      <input class="otp-box filled" type="text" inputmode="numeric" maxlength="1" value="4" id="otp1">
-      <input class="otp-box filled" type="text" inputmode="numeric" maxlength="1" value="2" id="otp2">
-      <input class="otp-box filled" type="text" inputmode="numeric" maxlength="1" value="7" id="otp3">
-      <input class="otp-box cursor" type="text" inputmode="numeric" maxlength="1" id="otp4" placeholder="·">
+      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" id="otp1" oninput="otpInput(this,1)">
+      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" id="otp2" oninput="otpInput(this,2)">
+      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" id="otp3" oninput="otpInput(this,3)">
+      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" id="otp4" oninput="otpInput(this,4)" placeholder="·">
     </div>
-    <div class="otp-hint">Не пришёл код? <button class="btn-ghost" style="font-size:14px;">Отправить снова</button></div>
-    <div style="padding:24px 20px 0;text-align:center;font-size:12px;color:var(--text-2);">Запросить снова через 2:47</div>
+    <div class="otp-hint">Не пришёл код? <button class="btn-ghost" style="font-size:14px;" onclick="retrySms()">Отправить снова</button></div>
   </div>
 
   <!-- ══ CANCEL ══ -->
@@ -1770,22 +1753,26 @@ function back() {
 }
 
 // ── SLOT / DATE SELECTION ──
-function selectSlot(el) {
+function selectSlot(el, time) {
   document.querySelectorAll('#s-slots .slot').forEach(s => s.classList.remove('sel'));
   el.classList.add('sel');
-  state.slot = el.textContent.trim();
+  state.slot = time || el.textContent.trim();
   updateStickyBottom();
 }
-function selectDate(el) {
+function selectDate(el, iso) {
   document.querySelectorAll('#s-slots .date-item').forEach(d => d.classList.remove('sel'));
   el.classList.add('sel');
-  const day = el.querySelector('.date-day').textContent;
-  const num = el.querySelector('.date-num').textContent;
-  const names = {'пн':'Понедельник','вт':'Вторник','ср':'Среда','чт':'Четверг','пт':'Пятница','сб':'Суббота','вс':'Воскресенье'};
-  state.dateFull = (names[day] || day) + ', ' + num + ' мая';
-  const lbl = document.getElementById('slotsDateLbl');
-  if (lbl) lbl.textContent = 'Доступное время — ' + state.dateFull.toLowerCase();
-  updateStickyBottom();
+  if (iso) {
+    loadTimes(iso);
+  } else {
+    const day = el.querySelector('.date-day').textContent;
+    const num = el.querySelector('.date-num').textContent;
+    const names = {'пн':'Понедельник','вт':'Вторник','ср':'Среда','чт':'Четверг','пт':'Пятница','сб':'Суббота','вс':'Воскресенье'};
+    state.dateFull = (names[day] || day) + ', ' + num + ' мая';
+    const lbl = document.getElementById('slotsDateLbl');
+    if (lbl) lbl.textContent = 'Доступное время — ' + state.dateFull.toLowerCase();
+    updateStickyBottom();
+  }
 }
 
 // ── SCENARIOS ──
@@ -2107,8 +2094,246 @@ runScenario = function(key) {
   });
 };
 
+// ── YCLIENTS API ──
+const YC = {
+  token: '5c9a233fef43889ebf3d27616378366c',
+  company: 1940850,
+  base: 'https://api.yclients.com/api/v1',
+  _h() {
+    return {
+      'Authorization': `Bearer ${this.token}`,
+      'Accept': 'application/vnd.yclients.v2+json',
+      'Content-Type': 'application/json'
+    };
+  },
+  async get(path, params = {}) {
+    try {
+      const url = new URL(this.base + path);
+      Object.entries(params).forEach(([k,v]) => url.searchParams.append(k, v));
+      const r = await fetch(url.toString(), { headers: this._h() });
+      return r.json();
+    } catch(e) { return { success: false }; }
+  },
+  async post(path, body) {
+    try {
+      const r = await fetch(this.base + path, {
+        method: 'POST', headers: this._h(), body: JSON.stringify(body)
+      });
+      return r.json();
+    } catch(e) { return { success: false }; }
+  }
+};
+
+function _fmtPrice(min, max) {
+  if (!min) return 'По запросу';
+  const f = n => Math.round(n).toLocaleString('ru-RU') + ' ₽';
+  return (min === max || !max) ? f(min) : 'от ' + f(min);
+}
+function _makeShort(name) {
+  const p = name.trim().split(/\s+/);
+  return p.length >= 2 ? p[0] + ' ' + p[1][0] + '.' : p[0];
+}
+const _GRADS = [
+  'linear-gradient(135deg,#F4B8CF,#E8729A)',
+  'linear-gradient(135deg,#B8EFE0,#6DC9AF)',
+  'linear-gradient(135deg,#EDACC3,#C8547F)',
+  'linear-gradient(135deg,#C5F0E4,#72C8B0)',
+];
+
+async function initApp() {
+  try {
+    const [catsRes, svcRes, staffRes] = await Promise.all([
+      YC.get(`/service_categories/${YC.company}`),
+      YC.get(`/services/${YC.company}`),
+      YC.get(`/book_staff/${YC.company}`)
+    ]);
+    const catMap = {};
+    if (catsRes.success && catsRes.data) catsRes.data.forEach(c => catMap[c.id] = c.title);
+    if (svcRes.success && svcRes.data && svcRes.data.length) {
+      SERVICES_DATA = svcRes.data.map(s => ({
+        id: String(s.id), name: s.title,
+        cat: catMap[s.category_id] || 'Другое',
+        dur: s.duration || 60,
+        priceStr: _fmtPrice(s.price_min, s.price_max)
+      }));
+      _updateCatChips();
+    }
+    if (staffRes.success && staffRes.data && staffRes.data.length) {
+      MASTERS_DATA = staffRes.data.map((m, i) => ({
+        id: String(m.id), name: m.name, short: _makeShort(m.name),
+        role: m.specialization || 'Мастер', exp: '',
+        avatar: m.avatar_big || m.avatar || '',
+        emoji: '👩', grad: _GRADS[i % _GRADS.length],
+        cats: [], fav: i === 0, avail: true, availText: '● Есть окна сегодня'
+      }));
+    }
+    const cur = document.querySelector('.screen.active');
+    if (cur && cur.id === 's-services') renderServices();
+  } catch(e) { console.warn('API init:', e); }
+}
+
+function _updateCatChips() {
+  const cats = [...new Set(SERVICES_DATA.map(s => s.cat))].filter(Boolean);
+  const el = document.getElementById('catChips');
+  if (!el) return;
+  el.innerHTML = `<span class="chip active" onclick="filterCategory('Все')">Все</span>`
+    + cats.map(c => `<span class="chip" onclick="filterCategory('${c}')">${c}</span>`).join('');
+}
+
+// ── SLOTS: REAL DATES & TIMES ──
+async function loadDates() {
+  const svc = getService();
+  const m = getMaster();
+  const el = document.getElementById('datesRow');
+  if (!el) return;
+  el.innerHTML = '<div style="padding:12px;color:var(--text-2);font-size:13px;">Загрузка…</div>';
+  const params = { service_ids: svc.id };
+  if (m) params.staff_id = m.id;
+  const r = await YC.get(`/book_dates/${YC.company}`, params);
+  const dates = r.success && r.data && r.data.booking_dates ? r.data.booking_dates : null;
+  if (dates && dates.length) {
+    _renderDates(el, dates);
+  } else {
+    _renderDatesFallback(el);
+  }
+}
+
+function _renderDates(container, availDates) {
+  const set = new Set(availDates);
+  const today = new Date();
+  const RU_DAYS = ['вс','пн','вт','ср','чт','пт','сб'];
+  let html = '';
+  for (let i = 0; i < 21; i++) {
+    const d = new Date(today); d.setDate(today.getDate() + i);
+    const iso = d.toISOString().slice(0, 10);
+    if (!set.has(iso)) continue;
+    const day = RU_DAYS[d.getDay()];
+    const num = d.getDate();
+    html += `<div class="date-item" onclick="selectDate(this,'${iso}')"><div class="date-day">${day}</div><div class="date-num">${num}</div></div>`;
+  }
+  container.innerHTML = html || '<div style="padding:12px;color:var(--text-2);font-size:13px;">Нет доступных дат</div>';
+  const first = container.querySelector('.date-item');
+  if (first) { first.classList.add('sel'); first.click(); }
+}
+
+function _renderDatesFallback(container) {
+  const RU_DAYS = ['вс','пн','вт','ср','чт','пт','сб'];
+  const today = new Date(); let html = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today); d.setDate(today.getDate() + i);
+    const iso = d.toISOString().slice(0, 10);
+    html += `<div class="date-item${i===0?' sel':''}" onclick="selectDate(this,'${iso}')"><div class="date-day">${RU_DAYS[d.getDay()]}</div><div class="date-num">${d.getDate()}</div></div>`;
+  }
+  container.innerHTML = html;
+  loadTimes(new Date().toISOString().slice(0, 10));
+}
+
+async function loadTimes(iso) {
+  const svc = getService();
+  const m = getMaster();
+  const el = document.getElementById('slotsGrid');
+  const lbl = document.getElementById('slotsDateLbl');
+  if (!el) return;
+  state.dateISO = iso;
+  const d = new Date(iso + 'T00:00:00');
+  const dateStr = d.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
+  if (lbl) lbl.textContent = 'Доступное время — ' + dateStr;
+  el.innerHTML = '<div style="padding:12px;color:var(--text-2);font-size:13px;">Загрузка…</div>';
+  const staffId = m ? m.id : 0;
+  const params = {}; if (svc) params['service_ids'] = svc.id;
+  const r = await YC.get(`/book_times/${YC.company}/${staffId}/${iso}`, params);
+  if (!r.success || !r.data || !r.data.length) {
+    el.innerHTML = '<div style="padding:12px;color:var(--text-2);font-size:13px;">Нет свободных окон на этот день</div>';
+    return;
+  }
+  let firstFree = '';
+  el.innerHTML = r.data.map(t => {
+    const time = t.time || (t.datetime || '').slice(11, 16);
+    const free = t.seances > 0;
+    if (free && !firstFree) firstFree = time;
+    return `<button class="slot${free ? '' : ' busy'}${time === firstFree ? ' sel' : ''}" ${free ? `onclick="selectSlot(this,'${time}')"` : 'disabled'}>${time}</button>`;
+  }).join('');
+  if (firstFree) { state.slot = firstFree; updateStickyBottom(); }
+}
+
+// ── BOOKING FLOW ──
+function startBooking() {
+  const phone = localStorage.getItem('yc_phone');
+  if (phone) {
+    _sendCode(phone);
+  } else {
+    go('s-login');
+  }
+}
+
+async function sendSmsCode() {
+  const input = document.getElementById('loginPhone');
+  const errEl = document.getElementById('loginError');
+  const btn = document.getElementById('loginBtn');
+  if (!input) { go('s-otp'); return; }
+  const phone = input.value.replace(/\D/g, '');
+  if (phone.length < 10) {
+    if (errEl) { errEl.textContent = 'Введите номер телефона'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (errEl) errEl.style.display = 'none';
+  if (btn) { btn.disabled = true; btn.textContent = 'Отправляем…'; }
+  const r = await YC.post(`/book_code/${YC.company}`, { phone: phone.slice(-11) });
+  if (btn) { btn.disabled = false; btn.textContent = 'Получить код →'; }
+  if (r.success) {
+    localStorage.setItem('yc_phone', phone.slice(-11));
+    go('s-otp');
+  } else {
+    if (errEl) {
+      errEl.textContent = r.meta?.message || 'Ошибка отправки SMS. Проверьте номер.';
+      errEl.style.display = 'block';
+    }
+  }
+}
+
+async function _sendCode(phone) {
+  await YC.post(`/book_code/${YC.company}`, { phone });
+  go('s-otp');
+}
+
+function otpInput(el, n) {
+  el.classList.toggle('filled', el.value.length > 0);
+  if (el.value.length === 1 && n < 4) {
+    document.getElementById('otp' + (n + 1)).focus();
+  }
+  if (n === 4 && el.value.length === 1) completeBooking();
+}
+
+function retrySms() {
+  const phone = localStorage.getItem('yc_phone') || '';
+  if (phone) YC.post(`/book_code/${YC.company}`, { phone });
+}
+
+async function completeBooking() {
+  const phone = localStorage.getItem('yc_phone') || '';
+  const code = ['otp1','otp2','otp3','otp4'].map(id => {
+    const el = document.getElementById(id); return el ? el.value : '';
+  }).join('');
+  if (code.length < 4) return;
+  const svc = getService();
+  const m = getMaster();
+  const datetime = `${state.dateISO || new Date().toISOString().slice(0,10)} ${state.slot || '10:00'}:00`;
+  const body = {
+    phone, fullname: '', email: '', code,
+    appointments: [{ id: 1, services: [parseInt(svc.id) || 0], staff_id: m ? parseInt(m.id) : 0, datetime }],
+    notify_by_sms: 1
+  };
+  const r = await YC.post(`/book_record/${YC.company}`, body);
+  if (r.success) {
+    go('s-confirm');
+  } else {
+    const hint = document.querySelector('#s-otp .otp-hint');
+    if (hint) hint.innerHTML = `<span style="color:var(--red)">${r.meta?.message || 'Неверный код, попробуйте ещё раз'}</span>`;
+  }
+}
+
 // ── DATA MODEL ──
-const SERVICES_DATA = [
+let SERVICES_DATA = [
   { id:'svc1',  name:'Перманентный макияж бровей', cat:'Брови',    dur:120, priceStr:'от 8 000 ₽' },
   { id:'svc2',  name:'Перманентный макияж губ',    cat:'Губы',     dur:150, priceStr:'от 10 000 ₽' },
   { id:'svc3',  name:'Перманентный макияж век',    cat:'Глаза',    dur:120, priceStr:'от 7 000 ₽' },
@@ -2124,7 +2349,7 @@ const SERVICES_DATA = [
   { id:'svc13', name:'Ламинирование бровей',       cat:'Брови',    dur:60,  priceStr:'3 500 ₽' },
 ];
 
-const MASTERS_DATA = [
+let MASTERS_DATA = [
   { id:'m1', name:'Мария Соколова',  short:'Мария С.',  role:'Мастер ПМ и бровей', exp:'7 лет',  emoji:'👩', grad:'linear-gradient(135deg,#F4B8CF,#E8729A)', cats:['Брови','Губы','Глаза'], fav:true,  avail:true,  availText:'● Есть окна сегодня' },
   { id:'m2', name:'Ольга Климова',   short:'Ольга К.',  role:'Мастер эпиляции',    exp:'5 лет',  emoji:'👩', grad:'linear-gradient(135deg,#B8EFE0,#6DC9AF)', cats:['Эпиляция'],             fav:false, avail:false, availText:'Ближайшее окно — 27 мая' },
   { id:'m3', name:'Елена Романова',  short:'Елена Р.',  role:'Мастер ресниц',      exp:'4 года', emoji:'👩', grad:'linear-gradient(135deg,#EDACC3,#C8547F)', cats:['Глаза'],                fav:false, avail:true,  availText:'● Есть окна сегодня' },
@@ -2137,6 +2362,7 @@ const state = {
   serviceId: 'svc1',
   masterId: 'm1',
   dateFull: 'Пятница, 24 мая',
+  dateISO: '',
   slot: '14:00',
 };
 
@@ -2290,8 +2516,15 @@ function updateConfirmScreen() {
 function onEnterScreen(id) {
   if (id === 's-services') renderServices();
   if (id === 's-masters')  renderMasters();
-  if (id === 's-slots')    updateSlotsScreen();
+  if (id === 's-slots')  { updateSlotsScreen(); loadDates(); }
   if (id === 's-confirm')  updateConfirmScreen();
+  if (id === 's-otp') {
+    ['otp1','otp2','otp3','otp4'].forEach(i => { const el=document.getElementById(i); if(el){el.value='';el.classList.remove('filled');} });
+    const phone = localStorage.getItem('yc_phone') || '';
+    const sub = document.getElementById('otpSub');
+    if (sub && phone) sub.textContent = 'Отправили SMS на +' + phone;
+    setTimeout(() => { const el=document.getElementById('otp1'); if(el) el.focus(); }, 300);
+  }
 }
 
 // ── QUICK BOOK FROM HOME ──
@@ -2498,6 +2731,9 @@ function likeFeed(btn) {
 
 // ── INIT ──
 renderServices();
+
+// ── INIT ──
+initApp();
 
 // ── SERVICE WORKER ──
 if ('serviceWorker' in navigator) {
