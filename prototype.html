@@ -2096,12 +2096,13 @@ runScenario = function(key) {
 
 // ── YCLIENTS API ──
 const YC = {
-  token: '5c9a233fef43889ebf3d27616378366c',
+  token: 'Pe1mZ3x1V99eA6eUWqV5',
+  userToken: '5c9a233fef43889ebf3d27616378366c',
   company: 1940850,
   base: 'https://api.yclients.com/api/v1',
   _h() {
     return {
-      'Authorization': `Bearer ${this.token}`,
+      'Authorization': `Bearer ${this.token}, User ${this.userToken}`,
       'Accept': 'application/vnd.yclients.v2+json',
       'Content-Type': 'application/json'
     };
