@@ -38,11 +38,10 @@ body {
   background: #1a1a1a;
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  padding: 32px 20px 48px;
+  justify-content: center;
+  padding: 32px 20px;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-  gap: 28px;
 }
 
 /* ── SCENARIO BAR ── */
@@ -692,93 +691,6 @@ body {
 </head>
 <body>
 
-<!-- SCENARIO BAR -->
-<div class="scenario-bar">
-  <div class="scenario-group">
-    <div class="scenario-group-lbl">Запись</div>
-    <div class="scenario-group-btns">
-      <button class="scenario-btn" onclick="runScenario('booking')">▶ Записаться</button>
-      <button class="scenario-btn" onclick="runScenario('rebook')">▶ Повторить</button>
-      <button class="scenario-btn" onclick="runScenario('reschedule')">▶ Перенести</button>
-      <button class="scenario-btn" onclick="runScenario('cancel')">▶ Отменить</button>
-      <button class="scenario-btn" onclick="runScenario('crosssell')">▶ Кросс-продажа</button>
-    </div>
-  </div>
-  <div class="scenario-group">
-    <div class="scenario-group-lbl">Маркетинг</div>
-    <div class="scenario-group-btns">
-      <button class="scenario-btn" onclick="runScenario('push')">▶ Пуш-напоминание</button>
-      <button class="scenario-btn" onclick="runScenario('offer')">▶ Спецпредложение</button>
-    </div>
-  </div>
-  <div class="scenario-group">
-    <div class="scenario-group-lbl">Профиль</div>
-    <div class="scenario-group-btns">
-      <button class="scenario-btn" onclick="runScenario('history')">▶ История</button>
-      <button class="scenario-btn" onclick="runScenario('review')">▶ Отзыв</button>
-      <button class="scenario-btn" onclick="runScenario('postreview')">▶ После визита</button>
-      <button class="scenario-btn" onclick="runScenario('install')">▶ Установить</button>
-      <button class="scenario-btn" onclick="runScenario('auth')">▶ Авторизация</button>
-      <button class="scenario-btn" onclick="runScenario('consent')">▶ Согласия</button>
-      <button class="scenario-btn" onclick="runScenario('feed')">▶ Лента</button>
-    </div>
-  </div>
-  <div class="scenario-group">
-    <div class="scenario-group-lbl">Студия (Admin)</div>
-    <div class="scenario-group-btns">
-      <button class="scenario-btn" onclick="runScenario('admin')">▶ Дашборд</button>
-      <button class="scenario-btn" onclick="runScenario('admin-feed')">▶ CMS Лента</button>
-      <button class="scenario-btn" onclick="runScenario('admin-post')">▶ Новый пост</button>
-      <button class="scenario-btn" onclick="runScenario('admin-clients')">▶ Клиенты</button>
-      <button class="scenario-btn" onclick="runScenario('admin-push')">▶ Рассылка</button>
-    </div>
-  </div>
-</div>
-<div class="scenario-hint">или нажимай на элементы экрана сам</div>
-
-<!-- Mobile FAB + scenario bottom sheet -->
-<button class="fab" onclick="openSheet()">▶</button>
-<div class="sheet-overlay" id="sheetOverlay" onclick="closeSheet()">
-  <div class="sheet" id="sheet" onclick="event.stopPropagation()">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">Сценарии</div>
-    <div class="sheet-group">
-      <div class="sheet-group-lbl">Запись</div>
-      <button class="sheet-btn" onclick="sheetRun('booking')">Записаться</button>
-      <button class="sheet-btn" onclick="sheetRun('rebook')">Повторить</button>
-      <button class="sheet-btn" onclick="sheetRun('reschedule')">Перенести</button>
-      <button class="sheet-btn" onclick="sheetRun('cancel')">Отменить</button>
-      <button class="sheet-btn" onclick="sheetRun('crosssell')">Кросс-продажа</button>
-    </div>
-    <div class="sheet-group">
-      <div class="sheet-group-lbl">Маркетинг</div>
-      <button class="sheet-btn" onclick="sheetRun('push')">Пуш-напоминание</button>
-      <button class="sheet-btn" onclick="sheetRun('offer')">Спецпредложение</button>
-    </div>
-    <div class="sheet-group">
-      <div class="sheet-group-lbl">Профиль</div>
-      <button class="sheet-btn" onclick="sheetRun('history')">История</button>
-      <button class="sheet-btn" onclick="sheetRun('review')">Отзыв</button>
-      <button class="sheet-btn" onclick="sheetRun('postreview')">После визита</button>
-      <button class="sheet-btn" onclick="sheetRun('install')">Установить</button>
-      <button class="sheet-btn" onclick="sheetRun('auth')">Авторизация</button>
-      <button class="sheet-btn" onclick="sheetRun('consent')">Согласия</button>
-      <button class="sheet-btn" onclick="sheetRun('feed')">Лента</button>
-    </div>
-    <div class="sheet-group">
-      <div class="sheet-group-lbl">Студия (Admin)</div>
-      <button class="sheet-btn" onclick="sheetRun('admin')">Дашборд</button>
-      <button class="sheet-btn" onclick="sheetRun('admin-feed')">CMS Лента</button>
-      <button class="sheet-btn" onclick="sheetRun('admin-post')">Новый пост</button>
-      <button class="sheet-btn" onclick="sheetRun('admin-clients')">Клиенты</button>
-      <button class="sheet-btn" onclick="sheetRun('admin-push')">Рассылка</button>
-    </div>
-  </div>
-</div>
-
-<!-- STEP INDICATOR -->
-<div class="step-indicator" id="stepIndicator"></div>
-
 <!-- PHONE -->
 <div class="phone-wrap">
 <div class="phone" id="phone">
@@ -1401,7 +1313,7 @@ body {
         <div class="stat-card"><div class="stat-val">1 247</div><div class="stat-lbl">Клиентов</div><div class="stat-diff up">+24 за месяц</div></div>
       </div>
       <div class="section-header"><span class="section-title">Записи сегодня</span><span style="font-size:13px;color:var(--text-2);">25 мая</span></div>
-      <div class="booking-row"><div class="booking-time">10:00</div><div class="booking-av" style="background:linear-gradient(135deg,#F4C2A1,#E8956C);">ОИ</div><div class="booking-info"><div class="booking-name">Олеся Иванова</div><div class="booking-svc">Ламинирование бровей · Мария С.</div></div><div class="booking-price">3 500 ₽</div></div>
+      <div class="booking-row"><div class="booking-time">10:00</div><div class="booking-av" style="background:linear-gradient(135deg,#F4C2A1,#E8956C);">АК</div><div class="booking-info"><div class="booking-name">Анна Кузнецова</div><div class="booking-svc">Ламинирование бровей · Мария С.</div></div><div class="booking-price">3 500 ₽</div></div>
       <div class="booking-row"><div class="booking-time">11:30</div><div class="booking-av" style="background:linear-gradient(135deg,#A8D8EA,#7EC8E3);color:#2d6a85;">АВ</div><div class="booking-info"><div class="booking-name">Анна Волкова</div><div class="booking-svc">Маникюр с покрытием · Ольга К.</div></div><div class="booking-price">2 800 ₽</div></div>
       <div class="booking-row"><div class="booking-time">13:00</div><div class="booking-av" style="background:linear-gradient(135deg,#C8E6C9,#81C784);color:#2d6a3a;">СМ</div><div class="booking-info"><div class="booking-name">Светлана Миронова</div><div class="booking-svc">Глубокое очищение лица · Елена Р.</div></div><div class="booking-price">4 200 ₽</div></div>
       <div class="booking-row"><div class="booking-time">15:30</div><div class="booking-av" style="background:linear-gradient(135deg,#F8BBD0,#F48FB1);color:#8a2d5a;">ТЛ</div><div class="booking-info"><div class="booking-name">Тамара Лебедева</div><div class="booking-svc">Окрашивание волос · Дарья М.</div></div><div class="booking-price">от 6 000 ₽</div></div>
@@ -1474,7 +1386,7 @@ body {
     <div style="padding:10px 20px 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-2);">Согласия: 🔔 уведомл. &nbsp; 🎁 акции &nbsp; 📸 фото &nbsp; 💬 отзывы</div>
     <div style="margin:0 20px 12px;background:var(--surface);border-radius:10px;height:38px;display:flex;align-items:center;padding:0 12px;gap:8px;"><span style="color:var(--text-2);font-size:14px;">🔍</span><input style="background:none;border:none;outline:none;font-size:14px;color:var(--text);flex:1;font-family:inherit;" placeholder="Имя или телефон…"></div>
     <div class="scroll" style="padding-bottom:20px;">
-      <div class="client-row"><div class="client-av" style="background:linear-gradient(135deg,#F4C2A1,#E8956C);">ОИ</div><div class="client-info"><div class="client-name">Олеся Иванова</div><div class="client-phone">+7 912 345-67-89</div><div class="consent-dots"><div class="consent-dot on"></div><div class="consent-dot on"></div><div class="consent-dot on"></div><div class="consent-dot on"></div></div></div><div style="font-size:12px;color:var(--text-2);white-space:nowrap;">12 визитов</div></div>
+      <div class="client-row"><div class="client-av" style="background:linear-gradient(135deg,#F4C2A1,#E8956C);">АК</div><div class="client-info"><div class="client-name">Анна Кузнецова</div><div class="client-phone">+7 912 345-67-89</div><div class="consent-dots"><div class="consent-dot on"></div><div class="consent-dot on"></div><div class="consent-dot on"></div><div class="consent-dot on"></div></div></div><div style="font-size:12px;color:var(--text-2);white-space:nowrap;">12 визитов</div></div>
       <div class="client-row"><div class="client-av" style="background:linear-gradient(135deg,#A8D8EA,#7EC8E3);color:#2d6a85;">АВ</div><div class="client-info"><div class="client-name">Анна Волкова</div><div class="client-phone">+7 903 210-44-18</div><div class="consent-dots"><div class="consent-dot on"></div><div class="consent-dot on"></div><div class="consent-dot off"></div><div class="consent-dot on"></div></div></div><div style="font-size:12px;color:var(--text-2);white-space:nowrap;">8 визитов</div></div>
       <div class="client-row"><div class="client-av" style="background:linear-gradient(135deg,#C8E6C9,#81C784);color:#2d6a3a;">СМ</div><div class="client-info"><div class="client-name">Светлана Миронова</div><div class="client-phone">+7 916 677-33-11</div><div class="consent-dots"><div class="consent-dot on"></div><div class="consent-dot off"></div><div class="consent-dot off"></div><div class="consent-dot off"></div></div></div><div style="font-size:12px;color:var(--text-2);white-space:nowrap;">5 визитов</div></div>
       <div class="client-row"><div class="client-av" style="background:linear-gradient(135deg,#F8BBD0,#F48FB1);color:#8a2d5a;">ТЛ</div><div class="client-info"><div class="client-name">Тамара Лебедева</div><div class="client-phone">+7 965 444-22-00</div><div class="consent-dots"><div class="consent-dot on"></div><div class="consent-dot on"></div><div class="consent-dot on"></div><div class="consent-dot off"></div></div></div><div style="font-size:12px;color:var(--text-2);white-space:nowrap;">3 визита</div></div>
