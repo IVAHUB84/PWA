@@ -2193,18 +2193,29 @@ function renderProfileScreen() {
     if (favNameEl) favNameEl.textContent = fav.name;
     if (favRoleEl) favRoleEl.textContent = fav.role;
     if (favAvEl) {
+      favAvEl.textContent = '';
+      favAvEl.style.backgroundImage = '';
       if (_hasRealAvatar(fav)) {
-        favAvEl.innerHTML = `<img src="${fav.avatar_big||fav.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.outerHTML='<span style=\\"font-size:18px;\\">👩</span>'">`;
+        favAvEl.style.backgroundImage = `url('${fav.avatar_big || fav.avatar}')`;
+        favAvEl.style.backgroundSize = 'cover';
+        favAvEl.style.backgroundPosition = 'center';
       } else {
         favAvEl.textContent = getInitials(fav.name);
         favAvEl.style.fontSize = '14px';
         favAvEl.style.fontWeight = '800';
+        favAvEl.style.color = '#fff';
       }
     }
   } else {
     if (favNameEl) favNameEl.textContent = 'Не выбран';
     if (favRoleEl) favRoleEl.textContent = 'Выберите на экране мастеров';
-    if (favAvEl) { favAvEl.textContent = '👩'; favAvEl.style.fontSize = '18px'; }
+    if (favAvEl) {
+      favAvEl.textContent = '';
+      favAvEl.style.backgroundImage = '';
+      favAvEl.style.fontSize = '18px';
+      const initials = getInitials('');
+      favAvEl.textContent = initials || '?';
+    }
   }
 
   const recentEl = document.getElementById('profRecentVisits');
@@ -2954,12 +2965,25 @@ async function renderMasters() {
   list.innerHTML = '<div style="padding:32px 20px;text-align:center;color:var(--text-2);font-size:14px;">Загрузка мастеров…</div>';
   let masters = [];
   try {
-    const r = await YC.get(`/book_staff/${YC.company}`, { service_id: svc.id });
+    const r = await YC.get(`/book_staff/${YC.company}`, { service_ids: svc.id });
+    console.log('[renderMasters] svc.id=', svc.id, 'API returned', r.data?.length, 'staff, MASTERS_DATA has', MASTERS_DATA.length);
     if (r.success && r.data && r.data.length) {
       const ids = new Set(r.data.map(s => String(s.id)));
-      masters = MASTERS_DATA.filter(m => ids.has(m.id));
+      const filtered = MASTERS_DATA.filter(m => ids.has(m.id));
+      if (filtered.length) {
+        masters = filtered;
+      } else {
+        masters = r.data.map((m, i) => ({
+          id: String(m.id), name: m.name, short: _makeShort(m.name),
+          role: m.specialization || 'Мастер', exp: '',
+          avatar: m.avatar_big || m.avatar || '',
+          grad: _GRADS[i % _GRADS.length],
+          fav: JSON.parse(localStorage.getItem('yc_favs') || '[]').includes(String(m.id)),
+          avail: true, availText: '● Есть окна сегодня'
+        }));
+      }
     }
-  } catch {}
+  } catch(e) { console.warn('[renderMasters]', e); }
   if (!masters.length) masters = MASTERS_DATA;
   list.innerHTML = masters.map((m, i) => _masterCardHtml(m, i, masters.length)).join('');
 }
