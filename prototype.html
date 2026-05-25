@@ -1887,6 +1887,7 @@ function stopScenario() {
 // ── DOTS ──
 function updateDots(total, current) {
   const ind = document.getElementById('stepIndicator');
+  if (!ind) return;
   ind.innerHTML = '';
   if (!total) return;
   for (let i = 0; i < total; i++) {
@@ -2297,11 +2298,6 @@ async function registerClient() {
   const r = await YC.post(`/clients/${YC.company}`, body);
   console.log('YCLIENTS create client:', r);
   if (btn) { btn.disabled = false; btn.textContent = 'Создать профиль →'; }
-  if (!r.success) {
-    const msg = r.meta?.message || r.meta?.error || JSON.stringify(r);
-    if (errEl) { errEl.textContent = msg || 'Ошибка создания профиля'; errEl.style.display = 'block'; }
-    return;
-  }
   const clientId = r.data?.id || r.data?.client_id || null;
   saveSession({ email, user_token: '', name, phone: phone.length === 11 ? phone : '', client_id: clientId });
   localStorage.removeItem('yc_reg_email');
