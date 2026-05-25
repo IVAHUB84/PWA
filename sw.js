@@ -1,5 +1,6 @@
-const CACHE = 'beautyfly-v2';
+const CACHE = 'beautyfly-v3';
 const ASSETS = [
+  './prototype.html',
   './manifest.json',
   './icon-180.png',
   './icon-192.png',
@@ -30,6 +31,5 @@ self.addEventListener('fetch', e => {
   e.respondWith(
     caches.match(e.request)
       .then(r => r || fetch(e.request))
-      .catch(() => caches.match('./prototype.html'))
   );
 });

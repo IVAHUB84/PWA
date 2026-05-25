@@ -1022,10 +1022,10 @@ body {
     <div class="page-title">Код из письма</div>
     <div class="page-sub" id="otpSub">Отправили код на почту</div>
     <div class="otp-row">
-      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" id="otp1" oninput="otpInput(this,1)">
-      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" id="otp2" oninput="otpInput(this,2)">
-      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" id="otp3" oninput="otpInput(this,3)">
-      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" id="otp4" oninput="otpInput(this,4)" placeholder="·">
+      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" id="otp1">
+      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" id="otp2">
+      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" id="otp3">
+      <input class="otp-box" type="text" inputmode="numeric" maxlength="1" id="otp4" placeholder="·">
     </div>
     <div class="otp-hint">Не пришёл код? <button class="btn-ghost" style="font-size:14px;" onclick="retryEmail()">Отправить снова</button></div>
   </div>
@@ -1537,7 +1537,7 @@ body {
 
 <script>
 const SCREENS = ['s-home','s-services','s-masters','s-slots','s-confirm','s-history','s-install','s-profile','s-login','s-otp','s-register','s-cancel','s-review','s-offer','s-crosssell','s-consent','s-feed','s-admin','s-admin-feed','s-admin-post','s-admin-clients','s-admin-push','s-admin-push-new'];
-let history = ['s-home'];
+let navHistory = ['s-home'];
 let scenarioTimer = null;
 let currentScenarioBtn = null;
 
@@ -1555,7 +1555,7 @@ function setTx(el, x, animated) {
 }
 
 function go(id, mode) {
-  const current = history[history.length - 1];
+  const current = navHistory[navHistory.length - 1];
   if (current === id) return;
   const fromEl = document.getElementById(current);
   const toEl   = document.getElementById(id);
@@ -1569,7 +1569,7 @@ function go(id, mode) {
     toEl.classList.add('active');
     void toEl.offsetWidth; // flush, re-enable future transitions
     toEl.style.transition = '';
-    history = [id];
+    navHistory = [id];
   } else {
     // Slide forward: toEl from right → centre, fromEl centre → left
     setTx(toEl, 100, false);          // snap toEl off-screen right
@@ -1584,16 +1584,16 @@ function go(id, mode) {
       fromEl.style.transition = '';
       toEl.style.transition   = '';
     }, DUR + 20);
-    history.push(id);
+    navHistory.push(id);
   }
   onEnterScreen(id);
   updateDots();
 }
 
 function back() {
-  if (history.length < 2) return;
-  const current = history.pop();
-  const prev    = history[history.length - 1];
+  if (navHistory.length < 2) return;
+  const current = navHistory.pop();
+  const prev    = navHistory[navHistory.length - 1];
   const fromEl  = document.getElementById(current);
   const toEl    = document.getElementById(prev);
 
@@ -2280,7 +2280,7 @@ async function retryEmail() {
   localStorage.setItem('yc_otp', JSON.stringify({ code, email: stored.email, expiry: Date.now() + 10 * 60 * 1000 }));
   try {
     await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
-      to_email: stored.email, name: 'Клиент', phone: '', topic: 'Код подтверждения', message: stored.code, agreement: 'да'
+      to_email: stored.email, name: 'Клиент', phone: '', topic: 'Код подтверждения', message: code, agreement: 'да'
     });
   } catch {}
 }
@@ -2302,7 +2302,6 @@ async function registerClient() {
   const body = { name, email };
   if (phone.length === 11) body.phone = phone;
   const r = await YC.post(`/clients/${YC.company}`, body);
-  console.log('YCLIENTS create client:', r);
   if (btn) { btn.disabled = false; btn.textContent = 'Создать профиль →'; }
   const clientId = r.data?.id || r.data?.client_id || null;
   saveSession({ email, user_token: '', name, phone: phone.length === 11 ? phone : '', client_id: clientId });
@@ -2321,13 +2320,6 @@ async function _findClientByEmail(email) {
     if (r.success && Array.isArray(r.data) && r.data.length) return r.data[0];
   } catch {}
   return null;
-}
-
-function otpInput(el, n) {
-  el.classList.toggle('filled', el.value.length > 0);
-  if (el.value.length === 1 && n < 4) {
-    document.getElementById('otp' + (n + 1)).focus();
-  }
 }
 
 
@@ -2387,10 +2379,10 @@ function _renderHistoryFromCache() {
         <div class="hist-upcoming">
           <div class="hist-row">
             <div class="hist-av" style="background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--accent);">${getInitials(r.masterName)}</div>
-            <div style="flex:1;"><div style="font-size:14px;font-weight:700;">${r.masterName}</div></div>
+            <div style="flex:1;"><div style="font-size:14px;font-weight:700;">${esc(r.masterName)}</div></div>
             <div style="text-align:right;font-size:13px;font-weight:700;color:var(--accent);">${_fmtDatetime(r.datetime)}</div>
           </div>
-          <div style="font-size:16px;font-weight:800;margin-bottom:12px;">${r.svcName}</div>
+          <div style="font-size:16px;font-weight:800;margin-bottom:12px;">${esc(r.svcName)}</div>
           <div style="display:flex;gap:8px;">
             <button class="hero-btn" style="font-size:13px;" onclick="cancelRecord('${r.id}','${r.hash}')">Отменить</button>
           </div>
@@ -2409,7 +2401,7 @@ function _renderHistoryFromCache() {
       paEl.innerHTML = past.map((r, i) => `
         <div class="hist-visit"${i === past.length-1 ? ' style="margin-bottom:24px;"' : ''}>
           <div class="hist-emoji" style="background:var(--accent-light);">✨</div>
-          <div style="flex:1;"><div style="font-size:14px;font-weight:700;margin-bottom:2px;">${r.svcName}</div><div style="font-size:12px;color:var(--text-2);">${r.masterName} · ${_fmtDatetime(r.datetime)}</div></div>
+          <div style="flex:1;"><div style="font-size:14px;font-weight:700;margin-bottom:2px;">${esc(r.svcName)}</div><div style="font-size:12px;color:var(--text-2);">${esc(r.masterName)} · ${_fmtDatetime(r.datetime)}</div></div>
           <div style="text-align:right;"><div style="font-size:14px;font-weight:700;margin-bottom:2px;">${r.price}</div><button class="btn-ghost" style="font-size:12px;" onclick="rebook('${r.svcId}')">Повторить</button></div>
         </div>`).join('');
     }
@@ -2431,8 +2423,8 @@ function renderHomeHero() {
     ml.innerHTML = MASTERS_DATA.slice(0, 4).map(m => `
       <div class="master-card-sm" onclick="bookWithMaster('${m.id}')">
         <div class="master-av-sm" style="background:${m.grad};overflow:hidden;">${_hasRealAvatar(m)?`<img src="${m.avatar_big||m.avatar}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">`:`<div class="av-initials">${getInitials(m.name)}</div>`}</div>
-        <div class="master-name-sm">${m.short || m.name}</div>
-        <div class="master-role-sm">${m.role}</div>
+        <div class="master-name-sm">${esc(m.short || m.name)}</div>
+        <div class="master-role-sm">${esc(m.role)}</div>
       </div>`).join('');
   }
 
@@ -2453,9 +2445,9 @@ function renderHomeHero() {
     <div class="hero-label">Ближайший визит</div>
     <div class="hero-master">
       <div class="hero-avatar" style="background:var(--accent-light);"><div class="av-initials" style="font-size:18px;color:var(--accent);">${getInitials(next.masterName)}</div></div>
-      <div><div style="font-size:15px;font-weight:700;">${next.masterName}</div></div>
+      <div><div style="font-size:15px;font-weight:700;">${esc(next.masterName)}</div></div>
     </div>
-    <div class="hero-service">${next.svcName}</div>
+    <div class="hero-service">${esc(next.svcName)}</div>
     <div class="hero-dt">${_fmtDatetime(next.datetime)} · ${next.dur} мин</div>
     <div class="hero-actions">
       <button class="hero-btn" onclick="event.stopPropagation();cancelRecord('${next.id}','${next.hash}')">Отменить</button>
@@ -2481,7 +2473,7 @@ async function _fetchAndMergeServerRecords(clientId) {
         svcName: svc ? svc.title : 'Услуга', svcId: svc ? String(svc.id) : '',
         masterName: staff.name || 'Мастер', masterId: staff.id ? String(staff.id) : '',
         datetime: dt, price: '', dur: svc ? (svc.duration || 60) : 60,
-        status: rec.deleted ? 'cancelled' : 'upcoming'
+        status: rec.deleted ? 'cancelled' : (new Date(dt.replace(' ', 'T')) > new Date() ? 'upcoming' : 'past')
       });
       changed = true;
     }
@@ -2520,8 +2512,7 @@ async function confirmCancel() {
       method: 'DELETE', headers: YC._h()
     });
     r = await res.json();
-    console.log('cancel response:', r);
-  } catch(e) { console.error('cancel error:', e); }
+  } catch(e) {}
   if (btn) { btn.disabled = false; btn.textContent = 'Да, отменить запись'; }
   const records = _loadStoredRecords();
   const idx = records.findIndex(x => String(x.id) === String(id));
@@ -2572,7 +2563,8 @@ const state = {
 
 function getService() { return SERVICES_DATA.find(s => s.id === state.serviceId) || SERVICES_DATA[0]; }
 function getMaster()  { return state.masterId ? MASTERS_DATA.find(m => m.id === state.masterId) : null; }
-function getInitials(name) { return name.split(' ').map(w => w[0]).join('').slice(0, 2); }
+function getInitials(name) { if (!name) return '?'; return name.trim().split(/\s+/).map(w => w[0] || '').join('').slice(0, 2).toUpperCase() || '?'; }
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 const _NO_AVATAR = ['no-master-sm.png', 'no-master.png'];
 function _hasRealAvatar(m) {
