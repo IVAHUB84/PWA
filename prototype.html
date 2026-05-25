@@ -2506,12 +2506,17 @@ async function confirmCancel() {
   if (!id) return;
   const btn = document.querySelector('#s-cancel .btn-danger');
   if (btn) { btn.disabled = true; btn.textContent = 'Отменяем…'; }
-  let r = { success: false };
+  let httpOk = false;
   try {
     const res = await fetch(`${YC.base}/records/${YC.company}/${id}`, {
       method: 'DELETE', headers: YC._h()
     });
-    r = await res.json();
+    httpOk = res.ok || res.status === 200 || res.status === 204;
+    if (!httpOk) {
+      // YCLIENTS иногда возвращает success:false но реально отменяет — проверяем фактически
+      const check = await fetch(`${YC.base}/record/${YC.company}/${id}`, { headers: YC._h() }).then(r => r.json()).catch(() => null);
+      if (check?.data?.deleted) httpOk = true;
+    }
   } catch(e) {}
   if (btn) { btn.disabled = false; btn.textContent = 'Да, отменить запись'; }
   const records = _loadStoredRecords();
@@ -2521,7 +2526,7 @@ async function confirmCancel() {
   state._cancelHash = null;
   go('s-home', 'tab');
   renderHomeHero();
-  if (!r.success) alert(r.meta?.message || 'Не удалось отменить через API. Запись отменена локально — позвоните в студию для подтверждения.');
+  if (!httpOk) alert('Не удалось отменить запись. Позвоните в студию для подтверждения.');
 }
 
 // ── DATA MODEL ──
