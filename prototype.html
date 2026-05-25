@@ -1291,10 +1291,15 @@ body {
     <div class="status-bar"><span class="time">9:41</span><div class="dynamic-island"></div><div class="icons"><svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".7"/><rect x="4.5" y="5.5" width="3" height="6.5" rx=".7"/><rect x="9" y="3" width="3" height="9" rx=".7"/><rect x="13.5" y="0" width="3" height="12" rx=".7"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="8" cy="11" r="1.2" fill="currentColor" stroke="none"/><path d="M4.8 7.8a4.5 4.5 0 016.4 0" stroke-width="1.5"/><path d="M2 5a8 8 0 0112 0" stroke-width="1.5"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="20" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".4"/><path d="M22 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/><rect x="2" y="2" width="15" height="8" rx="2.5" fill="currentColor"/></svg></div></div>
     <div class="nav-bar"><button class="back-btn" onclick="back()">‹ Отмена</button><div style="font-size:17px;font-weight:700;">Новый пост</div><div style="width:60px;"></div></div>
     <div class="scroll" style="padding-top:4px;padding-bottom:32px;">
-      <div class="upload-area">
-        <div style="font-size:28px;color:var(--text-2);">📷</div>
-        <div style="font-size:13px;font-weight:600;color:var(--text-2);">Добавить фото</div>
-        <div style="font-size:11px;color:var(--border);">JPG, PNG до 10 МБ</div>
+      <input type="file" id="postImageInput" accept="image/*" style="display:none" onchange="_onPostImagePicked(this)">
+      <div class="upload-area" id="postUploadArea" onclick="document.getElementById('postImageInput').click()" style="overflow:hidden;position:relative;">
+        <img id="postUploadImg" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:12px;">
+        <button id="postUploadClear" onclick="event.stopPropagation();_clearPostImage()" style="display:none;position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.6);border:none;border-radius:50%;width:22px;height:22px;color:#fff;font-size:13px;cursor:pointer;z-index:1;line-height:1;">✕</button>
+        <div id="postUploadPlaceholder" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <div style="font-size:28px;color:var(--text-2);">📷</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text-2);">Добавить фото</div>
+          <div style="font-size:11px;color:var(--border);">JPG, PNG до 10 МБ</div>
+        </div>
       </div>
       <div style="padding:0 20px 10px;"><div class="label">Категория</div></div>
       <div class="hscroll-wrap" style="margin-bottom:16px;"><div class="hscroll">
@@ -3004,6 +3009,7 @@ function onEnterScreen(id) {
   if (id === 's-review')         renderReviewScreen();
   if (id === 's-admin')          renderAdminDashboard();
   if (id === 's-admin-feed')      renderAdminFeed();
+  if (id === 's-admin-post')      _clearPostImage();
   if (id === 's-admin-clients')   renderAdminClients();
   if (id === 's-admin-push')      renderAdminPush();
   if (id === 's-admin-push-new')  updatePushAudience();
@@ -3130,6 +3136,49 @@ function adminCat(el) {
   el.classList.add('active');
 }
 
+let _postImageBase64 = null;
+
+function _onPostImagePicked(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const tmpImg = new Image();
+    tmpImg.onload = function() {
+      const MAX = 800;
+      let w = tmpImg.width, h = tmpImg.height;
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(tmpImg, 0, 0, w, h);
+      _postImageBase64 = canvas.toDataURL('image/jpeg', 0.75);
+      const img = document.getElementById('postUploadImg');
+      const ph  = document.getElementById('postUploadPlaceholder');
+      const clr = document.getElementById('postUploadClear');
+      if (img) { img.src = _postImageBase64; img.style.display = 'block'; }
+      if (ph)  ph.style.display = 'none';
+      if (clr) clr.style.display = 'block';
+    };
+    tmpImg.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function _clearPostImage() {
+  _postImageBase64 = null;
+  const input = document.getElementById('postImageInput');
+  const img   = document.getElementById('postUploadImg');
+  const ph    = document.getElementById('postUploadPlaceholder');
+  const clr   = document.getElementById('postUploadClear');
+  if (input) input.value = '';
+  if (img)  { img.src = ''; img.style.display = 'none'; }
+  if (ph)   ph.style.display = 'flex';
+  if (clr)  clr.style.display = 'none';
+}
+
 function publishPost(draft) {
   const cat = document.querySelector('#s-admin-post .hscroll .chip.active');
   const ta  = document.querySelector('#s-admin-post .admin-textarea');
@@ -3141,11 +3190,13 @@ function publishPost(draft) {
     id: Date.now(),
     cat: catName,
     text,
+    image: _postImageBase64 || null,
     date: new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }),
     draft: !!draft
   });
   localStorage.setItem('yc_feed_posts', JSON.stringify(posts));
   if (ta) ta.value = '';
+  _clearPostImage();
   go('s-admin-feed', 'tab');
 }
 
@@ -3166,8 +3217,11 @@ function renderAdminFeed() {
   listEl.innerHTML = posts.map((p, i) => {
     const icon = _CAT_ICONS[p.cat] || '📝';
     const last = i === posts.length - 1 ? 'border-bottom:none;' : '';
+    const thumb = p.image
+      ? `<img src="${p.image}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`
+      : icon;
     return `<div class="post-row" style="${last}">
-      <div class="post-thumb" style="background:var(--surface);font-size:22px;">${icon}</div>
+      <div class="post-thumb" style="background:var(--surface);font-size:22px;overflow:hidden;">${thumb}</div>
       <div class="post-info"><div class="post-cap">${esc(p.text.slice(0, 60))}</div><div class="post-date">${p.date} · ${esc(p.cat)}</div></div>
       <span class="post-status ${p.draft ? 'draft' : 'pub'}">${p.draft ? 'Черновик' : 'Опубл.'}</span>
       <button onclick="deletePost(${p.id})" style="background:none;border:none;color:var(--text-2);font-size:16px;cursor:pointer;padding:4px;flex-shrink:0;">✕</button>
@@ -3443,15 +3497,16 @@ function renderClientFeed() {
     el.innerHTML = '<div style="padding:60px 20px;text-align:center;color:var(--text-2);font-size:14px;">Публикаций пока нет.<br>Следите за обновлениями!</div>';
     return;
   }
-  const svcId = (SERVICES_DATA[0] && SERVICES_DATA[0].id) || 'svc1';
   el.innerHTML = posts.map((p, i) => {
     const grad = _CAT_GRADS[p.cat] || 'linear-gradient(135deg,#eee,#ccc)';
     const icon = _CAT_ICONS2[p.cat] || '📝';
     const mb = i === posts.length - 1 ? ' style="margin-bottom:24px;"' : '';
+    const photoContent = p.image
+      ? `<img src="${p.image}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:0;">`
+      : `<div class="feed-photo-inner"><div class="feed-photo-icon">${icon}</div></div><div class="feed-photo-overlay"></div>`;
     return `<div class="feed-card"${mb}>
-      <div class="feed-photo" style="background:${grad};">
-        <div class="feed-photo-inner"><div class="feed-photo-icon">${icon}</div></div>
-        <div class="feed-photo-overlay"></div>
+      <div class="feed-photo" style="${p.image ? 'overflow:hidden;' : 'background:' + grad + ';'}">
+        ${photoContent}
       </div>
       <div class="feed-body">
         <div class="feed-tag">${esc(p.cat)}</div>
