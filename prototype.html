@@ -2295,8 +2295,14 @@ async function registerClient() {
   const body = { name, email };
   if (phone.length === 11) body.phone = phone;
   const r = await YC.post(`/clients/${YC.company}`, body);
+  console.log('YCLIENTS create client:', r);
   if (btn) { btn.disabled = false; btn.textContent = 'Создать профиль →'; }
-  const clientId = r.success && r.data ? (r.data.id || r.data.client_id || null) : null;
+  if (!r.success) {
+    const msg = r.meta?.message || r.meta?.error || JSON.stringify(r);
+    if (errEl) { errEl.textContent = msg || 'Ошибка создания профиля'; errEl.style.display = 'block'; }
+    return;
+  }
+  const clientId = r.data?.id || r.data?.client_id || null;
   saveSession({ email, user_token: '', name, phone: phone.length === 11 ? phone : '', client_id: clientId });
   localStorage.removeItem('yc_reg_email');
   if (nameEl) nameEl.value = '';
