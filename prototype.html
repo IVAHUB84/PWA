@@ -2270,7 +2270,7 @@ async function _rescheduleWithSession(session) {
   if (ycStaffId) body.staff_id = parseInt(ycStaffId);
   if (ycSvcId) body.services = [{ id: parseInt(ycSvcId) }];
 
-  const r = await YC.post(`/record/${YC.company}/${id}`, body, 'PUT');
+  const r = await YC.post(`/records/${YC.company}/${id}`, body, 'PUT');
 
   // Оптимистично обновляем UI — даже если YCLIENTS вернул ошибку
   const idx = records.findIndex(x => String(x.id) === String(id));
@@ -2695,24 +2695,26 @@ async function confirmCancel() {
   const btn = document.querySelector('#s-cancel .btn-danger');
   if (btn) { btn.disabled = true; btn.textContent = 'Отменяем…'; }
 
-  // Оптимистично обновляем UI сразу
   const records = _loadStoredRecords();
   const idx = records.findIndex(x => String(x.id) === String(id));
+  const hash = (idx !== -1 ? records[idx].hash : '') || state._cancelHash || '';
+
+  // Оптимистично обновляем UI сразу
   if (idx !== -1) { records[idx].status = 'cancelled'; localStorage.setItem('yc_records', JSON.stringify(records)); }
   state._cancelId = null;
   state._cancelHash = null;
   go('s-home', 'tab');
   renderHomeHero();
 
-  // API вызов в фоне — не блокирует UX
+  // API вызов в фоне — токен в URL, без Authorization заголовка (обходим CORS)
   try {
-    const res = await fetch(`${YC.base}/record/${YC.company}/${id}`, {
-      method: 'DELETE', headers: YC._h()
+    const res = await fetch(`${YC.base}/user/bookrecords/${YC.token}/${id}/${hash}`, {
+      method: 'DELETE',
+      headers: { 'Accept': 'application/vnd.yclients.v2+json', 'Content-Type': 'application/json' }
     });
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      const msg = body?.meta?.message || `HTTP ${res.status}`;
-      alert(`Запись удалена локально, но YCLIENTS вернул ошибку: ${msg}\nПожалуйста, уточните отмену у администратора.`);
+    const body = await res.json().catch(() => null);
+    if (body?.success === false) {
+      alert(`Запись удалена локально, но в YCLIENTS ошибка: ${body?.meta?.message || '?'}\nУточните отмену у администратора.`);
     }
   } catch(e) {}
 }
