@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Реснички, сестрички и две истерички</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1C1C1E">
+<meta name="theme-color" content="#8B3558">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Реснички">
@@ -21,10 +21,12 @@ a, button, [onclick], .tab, .chip, .svc-card, .master-card, .slot, .hero-card, .
 
 :root {
   --bg: #FFFFFF;
-  --surface: #F2F2F7;
+  --surface: #F5EEF2;
   --primary: #1C1C1E;
-  --accent: #C8547F;
+  --accent: #C05272;
   --accent-light: #FCEEF4;
+  --wine: #8B3558;
+  --gold: #C9956C;
   --mint: #6DC9AF;
   --mint-light: #E8F7F2;
   --text: #1C1C1E;
@@ -219,7 +221,7 @@ body {
 .hero-card::before {
   content: ''; position: absolute; top: -60px; right: -60px;
   width: 200px; height: 200px;
-  background: radial-gradient(circle, rgba(200,84,127,0.3) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(192,82,114,0.35) 0%, rgba(139,53,88,0.15) 50%, transparent 70%);
   pointer-events: none;
 }
 .hero-label    { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.45); margin-bottom: 14px; }
@@ -456,7 +458,8 @@ body {
 
 /* ── LOGIN ── */
 .login-wrap  { flex:1; display:flex; flex-direction:column; padding:28px 28px 40px; overflow-y:auto; }
-.login-logo  { font-size:56px; text-align:center; margin-bottom:16px; }
+.login-logo  { text-align:center; margin-bottom:16px; }
+.login-logo img { width:140px; height:140px; object-fit:contain; display:block; margin:0 auto; }
 .login-brand { font-size:24px; font-weight:800; text-align:center; margin-bottom:6px; }
 .login-sub   { font-size:14px; color:var(--text-2); text-align:center; line-height:1.5; margin-bottom:36px; }
 .login-lbl   { font-size:13px; font-weight:600; color:var(--text-2); margin-bottom:8px; }
@@ -735,10 +738,9 @@ body {
     <div class="scroll">
       <div class="home-top">
         <div>
-          <div style="font-size:16px;font-weight:900;color:var(--accent);letter-spacing:-0.3px;line-height:1.15;">Реснички, сестрички</div>
-          <div style="font-size:10px;color:var(--text-2);font-weight:600;letter-spacing:0.05em;text-transform:uppercase;margin-top:2px;">студия красоты</div>
+          <img src="./logo.png" alt="Реснички, сестрички" style="height:42px;object-fit:contain;display:block;">
         </div>
-        <div id="homeAv" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#C8547F,#E8A0C4);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;letter-spacing:-0.5px;cursor:pointer;box-shadow:0 2px 8px rgba(200,84,127,0.35);" onclick="go('s-profile','tab')"></div>
+        <div id="homeAv" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#C05272,#8B3558);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;letter-spacing:-0.5px;cursor:pointer;box-shadow:0 2px 8px rgba(192,82,114,0.35);" onclick="go('s-profile','tab')"></div>
       </div>
 
       <div style="margin:8px 20px 14px;">
@@ -1028,8 +1030,7 @@ body {
   <div class="screen" id="s-login">
     <div class="status-bar"><span class="time">9:41</span><div class="dynamic-island"></div><div class="icons"><svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".7"/><rect x="4.5" y="5.5" width="3" height="6.5" rx=".7"/><rect x="9" y="3" width="3" height="9" rx=".7"/><rect x="13.5" y="0" width="3" height="12" rx=".7"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="8" cy="11" r="1.2" fill="currentColor" stroke="none"/><path d="M4.8 7.8a4.5 4.5 0 016.4 0" stroke-width="1.5"/><path d="M2 5a8 8 0 0112 0" stroke-width="1.5"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="20" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".4"/><path d="M22 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/><rect x="2" y="2" width="15" height="8" rx="2.5" fill="currentColor"/></svg></div></div>
     <div class="login-wrap">
-      <div class="login-logo">👁️</div>
-      <div class="login-brand">Реснички, сестрички<br>и две истерички</div>
+      <div class="login-logo"><img src="./logo.png" alt="Реснички, сестрички"></div>
       <div class="login-sub">Студия красоты · Троицкий бульвар, 4, Троицк</div>
       <div class="login-lbl">Номер телефона</div>
       <div class="login-field">
@@ -1068,7 +1069,7 @@ body {
   <div class="screen" id="s-register">
     <div class="status-bar"><span class="time">9:41</span><div class="dynamic-island"></div><div class="icons"><svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".7"/><rect x="4.5" y="5.5" width="3" height="6.5" rx=".7"/><rect x="9" y="3" width="3" height="9" rx=".7"/><rect x="13.5" y="0" width="3" height="12" rx=".7"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="8" cy="11" r="1.2" fill="currentColor" stroke="none"/><path d="M4.8 7.8a4.5 4.5 0 016.4 0" stroke-width="1.5"/><path d="M2 5a8 8 0 0112 0" stroke-width="1.5"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="20" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".4"/><path d="M22 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/><rect x="2" y="2" width="15" height="8" rx="2.5" fill="currentColor"/></svg></div></div>
     <div class="login-wrap">
-      <div class="login-logo">🌸</div>
+      <div class="login-logo"><img src="./logo.png" alt="Реснички, сестрички"></div>
       <div class="login-brand">Добро пожаловать!</div>
       <div class="login-sub">Расскажите немного о себе, чтобы мастера знали как к вам обращаться</div>
       <div class="login-lbl">Ваше имя</div>
