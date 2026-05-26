@@ -1,10 +1,32 @@
-const CACHE_VERSION = 'v4';
+const CACHE_VERSION = 'v5';
 const STATIC_CACHE  = `studio-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `studio-runtime-${CACHE_VERSION}`;
 
 const APP_SHELL = [
   './prototype.html',
   './style.css',
+  './app.js',
+  './modules/constants.js',
+  './modules/utils.js',
+  './modules/state.js',
+  './modules/storage.js',
+  './modules/api.js',
+  './modules/navigation.js',
+  './modules/auth.js',
+  './modules/consent.js',
+  './modules/booking.js',
+  './modules/slots.js',
+  './modules/services.js',
+  './modules/masters.js',
+  './modules/history.js',
+  './modules/profile.js',
+  './modules/review.js',
+  './modules/feed.js',
+  './modules/admin.js',
+  './modules/github.js',
+  './modules/notifications.js',
+  './modules/scenarios.js',
+  './modules/search.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',

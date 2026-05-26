@@ -48,7 +48,7 @@ export function renderServices() {
   }
   list.innerHTML = data.map((s, i) => {
     const last = i === data.length - 1 ? ' style="margin-bottom:24px;"' : '';
-    return `<div class="svc-card"${last} onclick="selectService('${esc(s.id)}')">
+    return `<div class="svc-card"${last} onclick="selectService(${JSON.stringify(s.id)})">
       <div class="svc-line"></div>
       <div class="svc-body"><div class="svc-name">${esc(s.name)}</div><div class="svc-meta">${s.dur} мин · ${esc(s.cat)}</div></div>
       <div class="svc-right"><div class="svc-price">${esc(s.priceStr)}</div><div class="svc-cta">Записаться →</div></div>

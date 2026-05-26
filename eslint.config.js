@@ -39,6 +39,7 @@ export default [
         atob: 'readonly',
         requestAnimationFrame: 'readonly',
         Image: 'readonly',
+        URLSearchParams: 'readonly',
       },
     },
     rules: {
