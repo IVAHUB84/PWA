@@ -15,7 +15,8 @@ export function renderProfileScreen() {
   const initials = getInitials(s.name || s.email || '?');
   if (nameEl) nameEl.textContent = s.name || s.email;
   if (phoneEl) phoneEl.textContent = s.email || s.phone;
-  const savedPhoto = localStorage.getItem('yc_profile_photo');
+  const rawPhoto = localStorage.getItem('yc_profile_photo');
+  const savedPhoto = rawPhoto && /^data:image\//.test(rawPhoto) ? rawPhoto : null;
   const inner = document.getElementById('profAvInner');
   if (avEl) {
     if (savedPhoto) {
@@ -101,7 +102,7 @@ export function renderHomeHero() {
   const ml = document.getElementById('homeMastersList');
   if (ml && MASTERS_DATA.length) {
     ml.innerHTML = MASTERS_DATA.slice(0, 4).map(m => `
-      <div class="master-card-sm" onclick="bookWithMaster('${esc(m.id)}')">
+      <div class="master-card-sm" onclick="bookWithMaster(${JSON.stringify(m.id)})">
         <div class="master-av-sm" style="background:${m.grad};overflow:hidden;">${_hasRealAvatar(m) ? `<img src="${m.avatar_big || m.avatar}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">` : `<div class="av-initials">${getInitials(m.name)}</div>`}</div>
         <div class="master-name-sm">${esc(m.short || m.name)}</div>
         <div class="master-role-sm">${esc(m.role)}</div>

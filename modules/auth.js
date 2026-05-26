@@ -183,12 +183,12 @@ async function _sendCodeToFallbackEmail(phone, clientId, clientName) {
   if (errEl) errEl.style.display = 'none';
   const code = String(Math.floor(1000 + Math.random() * 9000));
   const codeHash = await _sha256(code);
-  localStorage.setItem('yc_otp', JSON.stringify({ codeHash, email, expiry: Date.now() + 10 * 60 * 1000, attempts: 0 }));
-  localStorage.setItem('yc_auth_pending', JSON.stringify({ email, phone: String(phone), client_id: clientId, client_name: clientName }));
   try {
     await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
       to_email: email, name: clientName || 'Клиент', phone: '', topic: 'Код подтверждения', message: code, agreement: 'да',
     });
+    localStorage.setItem('yc_otp', JSON.stringify({ codeHash, email, expiry: Date.now() + 10 * 60 * 1000, attempts: 0 }));
+    localStorage.setItem('yc_auth_pending', JSON.stringify({ email, phone: String(phone), client_id: clientId, client_name: clientName }));
     go('s-otp');
   } catch (e) {
     const msg = e?.text || e?.message || JSON.stringify(e) || 'ошибка';
@@ -212,17 +212,18 @@ export async function sendEmailCode() {
   if (btn) { btn.disabled = true; btn.textContent = 'Отправляем…'; }
   const code = String(Math.floor(1000 + Math.random() * 9000));
   const codeHash = await _sha256(code);
-  localStorage.setItem('yc_otp', JSON.stringify({ codeHash, email, expiry: Date.now() + 10 * 60 * 1000, attempts: 0 }));
   try {
     await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
       to_email: email, name: 'Клиент', phone: '', topic: 'Код подтверждения', message: code, agreement: 'да',
     });
+    localStorage.setItem('yc_otp', JSON.stringify({ codeHash, email, expiry: Date.now() + 10 * 60 * 1000, attempts: 0 }));
     go('s-otp');
   } catch (e) {
     const msg = e?.text || e?.message || JSON.stringify(e) || 'неизвестная ошибка';
     if (errEl) { errEl.textContent = 'Ошибка: ' + msg; errEl.style.display = 'block'; }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Получить код →'; }
   }
-  if (btn) { btn.disabled = false; btn.textContent = 'Получить код →'; }
 }
 
 // ── RETRY EMAIL OTP ──
