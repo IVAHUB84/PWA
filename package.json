@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "devDependencies": {
     "sharp": "^0.34.5",
     "eslint": "^9",
@@ -8,7 +9,7 @@
   },
   "scripts": {
     "icons": "node docs/generate-icons.js",
-    "lint": "eslint 'docs/modules/**/*.js' docs/app.js",
-    "fmt": "prettier --write 'docs/modules/**/*.js' docs/app.js"
+    "lint": "eslint docs/modules",
+    "fmt": "prettier --write docs/modules"
   }
 }
