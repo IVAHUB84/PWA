@@ -23,8 +23,8 @@ a, button, [onclick], .tab, .chip, .svc-card, .master-card, .slot, .hero-card, .
   --bg: #FAF1F3;
   --surface: #FFFFFF;
   --primary: #1C1C1E;
-  --accent: #C05272;
-  --accent-light: #FCEEF4;
+  --accent: #8B3558;
+  --accent-light: #F2E8EE;
   --wine: #8B3558;
   --gold: #C9956C;
   --mint: #6DC9AF;
@@ -38,7 +38,7 @@ a, button, [onclick], .tab, .chip, .svc-card, .master-card, .slot, .hero-card, .
 }
 
 body {
-  background: #EEE0E4;
+  background: #E4DDD8;
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -220,7 +220,7 @@ body {
 .hero-card::before {
   content: ''; position: absolute; top: -60px; right: -60px;
   width: 200px; height: 200px;
-  background: radial-gradient(circle, rgba(192,82,114,0.35) 0%, rgba(139,53,88,0.15) 50%, transparent 70%);
+  background: radial-gradient(circle, rgba(139,53,88,0.3) 0%, rgba(139,53,88,0.1) 50%, transparent 70%);
   pointer-events: none;
 }
 .hero-label    { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.45); margin-bottom: 14px; }
@@ -739,7 +739,7 @@ body {
         <div>
           <img src="./logo.png" alt="Реснички, сестрички" style="height:42px;object-fit:contain;display:block;">
         </div>
-        <div id="homeAv" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#C05272,#8B3558);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;letter-spacing:-0.5px;cursor:pointer;box-shadow:0 2px 8px rgba(192,82,114,0.35);" onclick="go('s-profile','tab')"></div>
+        <div id="homeAv" style="width:44px;height:44px;border-radius:50%;background:#8B3558;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;letter-spacing:-0.5px;cursor:pointer;box-shadow:0 2px 8px rgba(139,53,88,0.35);" onclick="go('s-profile','tab')"></div>
       </div>
 
       <div style="margin:8px 20px 14px;">
@@ -3976,7 +3976,7 @@ async function _loadClientLoyalty() {
 }
 function _importanceLabel(importance) {
   switch (Number(importance)) {
-    case 1: return { label: 'Важный',       color: '#C05272' };
+    case 1: return { label: 'Важный',       color: '#8B3558' };
     case 2: return { label: 'Очень важный', color: '#8B3558' };
     case 3: return { label: 'VIP',          color: '#FFD700' };
     default: return { label: 'Обычный',     color: 'var(--text-2)' };
