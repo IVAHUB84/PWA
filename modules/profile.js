@@ -1,0 +1,216 @@
+import { getSession } from './storage.js';
+import { _loadStoredRecords } from './storage.js';
+import { _loadClientLoyalty } from './api.js';
+import { YC } from './api.js';
+import { MASTERS_DATA } from './state.js';
+import { getInitials, esc, _fmtDatetime, _importanceLabel, _hasRealAvatar } from './utils.js';
+
+export function renderProfileScreen() {
+  const s = getSession();
+  const nameEl = document.getElementById('profName');
+  const phoneEl = document.getElementById('profPhone');
+  const avEl = document.getElementById('profAv');
+  const homeAv = document.getElementById('homeAv');
+  if (!s) return;
+  const initials = getInitials(s.name || s.email || '?');
+  if (nameEl) nameEl.textContent = s.name || s.email;
+  if (phoneEl) phoneEl.textContent = s.email || s.phone;
+  const savedPhoto = localStorage.getItem('yc_profile_photo');
+  const inner = document.getElementById('profAvInner');
+  if (avEl) {
+    if (savedPhoto) {
+      avEl.style.backgroundImage = `url(${savedPhoto})`;
+      avEl.style.backgroundSize = 'cover';
+      avEl.style.backgroundPosition = 'center';
+      if (inner) inner.textContent = '';
+    } else {
+      avEl.style.backgroundImage = '';
+      if (inner) inner.textContent = initials;
+    }
+  }
+  if (homeAv) {
+    if (savedPhoto) {
+      homeAv.style.backgroundImage = `url(${savedPhoto})`;
+      homeAv.style.backgroundSize = 'cover';
+      homeAv.style.backgroundPosition = 'center';
+      homeAv.textContent = '';
+    } else {
+      homeAv.style.backgroundImage = '';
+      homeAv.textContent = initials;
+    }
+  }
+
+  const fav = MASTERS_DATA.find(m => m.fav);
+  const favNameEl = document.getElementById('profFavName');
+  const favRoleEl = document.getElementById('profFavRole');
+  const favAvEl = document.getElementById('profFavAv');
+  if (fav) {
+    if (favNameEl) favNameEl.textContent = fav.name;
+    if (favRoleEl) favRoleEl.textContent = fav.role;
+    if (favAvEl) {
+      favAvEl.textContent = '';
+      favAvEl.style.backgroundImage = '';
+      if (_hasRealAvatar(fav)) {
+        favAvEl.style.backgroundImage = `url('${fav.avatar_big || fav.avatar}')`;
+        favAvEl.style.backgroundSize = 'cover';
+        favAvEl.style.backgroundPosition = 'center';
+      } else {
+        favAvEl.textContent = getInitials(fav.name);
+        favAvEl.style.fontSize = '14px';
+        favAvEl.style.fontWeight = '800';
+        favAvEl.style.color = '#fff';
+      }
+    }
+  } else {
+    if (favNameEl) favNameEl.textContent = 'Не выбран';
+    if (favRoleEl) favRoleEl.textContent = 'Выберите на экране мастеров';
+    if (favAvEl) {
+      favAvEl.textContent = '?';
+      favAvEl.style.backgroundImage = '';
+      favAvEl.style.fontSize = '18px';
+    }
+  }
+
+  const recentEl = document.getElementById('profRecentVisits');
+  if (recentEl) {
+    const now = new Date();
+    const past = _loadStoredRecords()
+      .filter(r => r.status !== 'cancelled' && new Date(r.datetime.replace(' ', 'T')) <= now)
+      .sort((a, b) => new Date(b.datetime) - new Date(a.datetime))
+      .slice(0, 2);
+    if (past.length) {
+      recentEl.innerHTML = past.map(r => `
+        <div class="s-row" onclick="rebook('${esc(String(r.svcId))}')">
+          <div style="width:36px;height:36px;border-radius:10px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:16px;">✨</div>
+          <div style="flex:1;"><div style="font-size:14px;font-weight:600;">${esc(r.svcName)}</div><div style="font-size:12px;color:var(--text-2);">${esc(r.masterName)} · ${_fmtDatetime(r.datetime)}</div></div>
+          <button class="btn-ghost" style="font-size:13px;">Повторить</button>
+        </div>`).join('');
+    } else {
+      recentEl.innerHTML = '<div style="padding:14px 16px;font-size:13px;color:var(--text-2);">Визитов пока нет</div>';
+    }
+  }
+}
+
+export function renderHomeHero() {
+  const el = document.getElementById('homeHero');
+  if (!el) return;
+
+  const installBanner = document.getElementById('installBanner');
+  if (installBanner) installBanner.style.display = localStorage.getItem('yc_install_seen') ? 'none' : 'flex';
+
+  const ml = document.getElementById('homeMastersList');
+  if (ml && MASTERS_DATA.length) {
+    ml.innerHTML = MASTERS_DATA.slice(0, 4).map(m => `
+      <div class="master-card-sm" onclick="bookWithMaster('${esc(m.id)}')">
+        <div class="master-av-sm" style="background:${m.grad};overflow:hidden;">${_hasRealAvatar(m) ? `<img src="${m.avatar_big || m.avatar}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">` : `<div class="av-initials">${getInitials(m.name)}</div>`}</div>
+        <div class="master-name-sm">${esc(m.short || m.name)}</div>
+        <div class="master-role-sm">${esc(m.role)}</div>
+      </div>`).join('');
+  }
+
+  const records = _loadStoredRecords();
+  const now = new Date();
+  const upcoming = records
+    .filter(r => r.status !== 'cancelled' && new Date(r.datetime.replace(' ', 'T')) > now)
+    .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+  const next = upcoming[0] || null;
+
+  _renderHomeFeedPreview();
+
+  if (!next) {
+    el.innerHTML = `<div style="margin:0 20px 16px;padding:20px;background:var(--surface);border-radius:18px;text-align:center;">
+      <div style="font-size:28px;margin-bottom:8px;">📅</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:6px;">Нет предстоящих записей</div>
+      <button class="btn-primary" style="margin-top:8px;" onclick="go('s-services','tab')">Записаться →</button>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = `<div class="hero-card" onclick="go('s-history')" style="padding:14px 16px;margin-bottom:14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.5);">Ближайший визит</span>
+      <div style="display:flex;gap:6px;">
+        <button class="hero-btn" style="flex:none;padding:0 10px;height:26px;font-size:12px;" onclick="event.stopPropagation();rescheduleRecord(${JSON.stringify(next.id)})">Перенести</button>
+        <button class="hero-btn" style="flex:none;padding:0 10px;height:26px;font-size:12px;" data-cid="${next.id}" data-chash="${next.hash || ''}" onclick="event.stopPropagation();cancelRecord(this.dataset.cid,this.dataset.chash)">Отменить</button>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;color:#fff;">${getInitials(next.masterName)}</div>
+      <div>
+        <div style="font-size:15px;font-weight:800;margin-bottom:2px;">${esc(next.svcName)}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.6);">${esc(next.masterName)} · ${_fmtDatetime(next.datetime)}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+export function _renderHomeFeedPreview() {
+  const el = document.getElementById('homeFeedPreview');
+  const sec = document.getElementById('homeFeedSection');
+  if (!el) return;
+  const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => !p.draft);
+  if (!posts.length) {
+    el.style.display = 'none';
+    if (sec) sec.style.display = 'none';
+    return;
+  }
+  el.style.display = 'flex';
+  if (sec) sec.style.display = '';
+  const p = posts[0];
+  const _ICONS = { 'Брови': '✨', 'Ногти': '💅', 'Лицо': '🌿', 'Волосы': '💆', 'Тело': '🧖', 'Акции': '🎁' };
+  const icon = _ICONS[p.cat] || '📝';
+  const thumb = p.image
+    ? `<img src="${esc(p.image)}" style="width:44px;height:44px;object-fit:cover;border-radius:10px;flex-shrink:0;">`
+    : `<div style="font-size:36px;flex-shrink:0;">${icon}</div>`;
+  const preview = p.text.length > 60 ? p.text.slice(0, 60) + '…' : p.text;
+  el.innerHTML = `${thumb}<div style="flex:1;"><div style="font-size:14px;font-weight:700;margin-bottom:3px;">${esc(preview)}</div><div style="font-size:12px;color:var(--text-2);">${esc(p.date)} · ${esc(p.cat)}</div></div>`;
+}
+
+export async function renderLoyaltyBlock() {
+  const el = document.getElementById('loyaltyBlock');
+  if (!el) return;
+  const sess = getSession();
+  if (!sess) { el.style.display = 'none'; return; }
+  el.style.display = '';
+  el.innerHTML = `<div id="importanceBadge" style="font-size:13px;color:var(--text-2);">Важность: <span style="font-weight:700;">…</span></div>`;
+  const data = await _loadClientLoyalty();
+  const imp = data?.importance ?? null;
+  const lvl = _importanceLabel(imp);
+  const badge = document.getElementById('importanceBadge');
+  if (badge) badge.innerHTML = `Важность: <span style="font-weight:700;color:${lvl.color};">${lvl.label}</span>`;
+}
+
+export function _onProfilePhotoPicked(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) { alert('Выберите файл изображения'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const size = 200;
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      const min = Math.min(img.width, img.height);
+      const sx = (img.width - min) / 2, sy = (img.height - min) / 2;
+      ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
+      const b64 = canvas.toDataURL('image/jpeg', 0.8);
+      try {
+        localStorage.setItem('yc_profile_photo', b64);
+      } catch {
+        alert('Не удалось сохранить фото: недостаточно места в хранилище браузера.');
+        return;
+      }
+      renderProfileScreen();
+      const sess = getSession();
+      if (sess && sess.client_id) {
+        YC.post(`/clients/${YC.company}/${sess.client_id}`, { avatar: b64 }, 'PUT').catch(() => {});
+      }
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+Object.assign(window, { renderProfileScreen, renderHomeHero, _renderHomeFeedPreview, renderLoyaltyBlock, _onProfilePhotoPicked });
