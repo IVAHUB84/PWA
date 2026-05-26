@@ -2813,44 +2813,62 @@ async function _fetchAndMergeServerRecords(clientId) {
 
 // ── CANCEL REAL BOOKING ──
 function cancelRecord(id, hash) {
+  state._cancelId = id;
+  state._cancelHash = hash || '';
   const records = _loadStoredRecords();
   const rec = records.find(r => String(r.id) === String(id));
-  if (!rec) return;
-  state._cancelId = id;
-  state._cancelHash = hash;
   const cancelCard = document.querySelector('#s-cancel .cancel-card');
   if (cancelCard) {
-    cancelCard.innerHTML = `
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-        <div style="width:44px;height:44px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--accent);flex-shrink:0;">${getInitials(rec.masterName)}</div>
-        <div><div style="font-size:15px;font-weight:700;">${rec.masterName}</div><div style="font-size:12px;color:var(--text-2);">Мастер</div></div>
-      </div>
-      <div style="font-size:17px;font-weight:800;margin-bottom:6px;">${rec.svcName}</div>
-      <div style="font-size:14px;color:var(--text-2);">${_fmtDatetime(rec.datetime)} · ${rec.dur} мин${rec.price ? ' · ' + rec.price : ''}</div>`;
+    if (rec) {
+      cancelCard.innerHTML = `
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <div style="width:44px;height:44px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--accent);flex-shrink:0;">${getInitials(rec.masterName)}</div>
+          <div><div style="font-size:15px;font-weight:700;">${rec.masterName}</div><div style="font-size:12px;color:var(--text-2);">Мастер</div></div>
+        </div>
+        <div style="font-size:17px;font-weight:800;margin-bottom:6px;">${rec.svcName}</div>
+        <div style="font-size:14px;color:var(--text-2);">${_fmtDatetime(rec.datetime)} · ${rec.dur} мин${rec.price ? ' · ' + rec.price : ''}</div>`;
+    } else {
+      cancelCard.innerHTML = `<div style="font-size:15px;font-weight:700;">Запись #${id}</div>`;
+    }
   }
   go('s-cancel');
 }
 
 async function confirmCancel() {
   const id = state._cancelId;
+  const hash = state._cancelHash || '';
   if (!id) return;
   const btn = document.querySelector('#s-cancel .btn-danger');
   if (btn) { btn.disabled = true; btn.textContent = 'Отменяем…'; }
 
-  let apiOk = false;
   try {
-    const res = await fetch(`${YC.base}/record/${YC.company}/${id}`, {
+    const hashParam = hash ? `?record_hash=${encodeURIComponent(hash)}` : '';
+    const res = await fetch(`${YC.base}/record/${YC.company}/${id}${hashParam}`, {
       method: 'DELETE',
       headers: YC._h()
     });
     const data = await res.json().catch(() => ({}));
+    console.log('Cancel DELETE status:', res.status, 'body:', data);
+
     if (res.status >= 400) {
-      if (btn) { btn.disabled = false; btn.textContent = 'Да, отменить запись'; }
-      alert(`Не удалось отменить: ${data?.meta?.message || 'Ошибка ' + res.status}. Позвоните в студию.`);
-      return;
+      // Fallback: try PUT with deleted:true (some YCLIENTS configs require this)
+      console.log('DELETE failed, trying PUT deleted:true');
+      const putRes = await fetch(`${YC.base}/record/${YC.company}/${id}`, {
+        method: 'PUT',
+        headers: YC._h(),
+        body: JSON.stringify({ deleted: 1 })
+      });
+      const putData = await putRes.json().catch(() => ({}));
+      console.log('Cancel PUT status:', putRes.status, 'body:', putData);
+      if (putRes.status >= 400) {
+        if (btn) { btn.disabled = false; btn.textContent = 'Да, отменить запись'; }
+        const msg = putData?.meta?.message || data?.meta?.message || `Ошибка ${res.status}`;
+        alert(`Не удалось отменить: ${msg}. Позвоните в студию.`);
+        return;
+      }
     }
-    apiOk = true;
   } catch(e) {
+    console.error('Cancel error:', e);
     if (btn) { btn.disabled = false; btn.textContent = 'Да, отменить запись'; }
     alert('Нет соединения с сервером. Попробуйте позже.');
     return;
