@@ -2681,7 +2681,7 @@ function _renderHistoryFromCache() {
           <div style="font-size:16px;font-weight:800;margin-bottom:12px;">${esc(r.svcName)}</div>
           <div style="display:flex;gap:8px;">
             <button class="hero-btn" style="font-size:13px;" onclick="rescheduleRecord(${JSON.stringify(r.id)})">Перенести</button>
-            <button class="hero-btn" style="font-size:13px;" onclick="cancelRecord(${JSON.stringify(r.id)},${JSON.stringify(r.hash)})">Отменить</button>
+            <button class="hero-btn" style="font-size:13px;" data-cid="${r.id}" data-chash="${r.hash||''}" onclick="cancelRecord(this.dataset.cid,this.dataset.chash)">Отменить</button>
           </div>
         </div>`).join('');
     }
@@ -2745,7 +2745,7 @@ function renderHomeHero() {
       <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.5);">Ближайший визит</span>
       <div style="display:flex;gap:6px;">
         <button class="hero-btn" style="flex:none;padding:0 10px;height:26px;font-size:12px;" onclick="event.stopPropagation();rescheduleRecord(${JSON.stringify(next.id)})">Перенести</button>
-        <button class="hero-btn" style="flex:none;padding:0 10px;height:26px;font-size:12px;" onclick="event.stopPropagation();cancelRecord(${JSON.stringify(next.id)},${JSON.stringify(next.hash)})">Отменить</button>
+        <button class="hero-btn" style="flex:none;padding:0 10px;height:26px;font-size:12px;" data-cid="${next.id}" data-chash="${next.hash||''}" onclick="event.stopPropagation();cancelRecord(this.dataset.cid,this.dataset.chash)">Отменить</button>
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;">
