@@ -131,10 +131,10 @@ body {
   -webkit-tap-highlight-color: transparent; user-select: none;
 }
 .tab-icon { display: flex; align-items: center; justify-content: center; }
-.tab-icon svg { width: 24px; height: 24px; color: var(--text-2); transition: color .2s; }
-.tab-label { font-size: 10px; font-weight: 500; color: var(--text-2); transition: color .2s; }
-.tab.active .tab-label { color: var(--accent); font-weight: 600; }
-.tab.active .tab-icon svg { color: var(--accent); }
+.tab-icon svg { width: 24px; height: 24px; color: var(--accent); opacity: 0.35; transition: opacity .2s; }
+.tab-label { font-size: 10px; font-weight: 500; color: var(--accent); opacity: 0.35; transition: opacity .2s; }
+.tab.active .tab-label { opacity: 1; font-weight: 600; }
+.tab.active .tab-icon svg { opacity: 1; }
 .tab-center { flex: 1.2; padding-top: 0; position: relative; }
 .tab-center-btn {
   display: flex; flex-direction: column; align-items: center; gap: 3px;
@@ -731,11 +731,32 @@ body {
           </div>
     <div class="scroll">
       <div class="home-top">
-        <div class="home-greeting">
-          <h2 id="homeGreeting">Привет 👋</h2>
-          <p>Реснички, сестрички и две истерички · Троицк</p>
+        <div>
+          <div style="font-size:16px;font-weight:900;color:var(--accent);letter-spacing:-0.3px;line-height:1.15;">Реснички, сестрички</div>
+          <div style="font-size:10px;color:var(--text-2);font-weight:600;letter-spacing:0.05em;text-transform:uppercase;margin-top:2px;">студия красоты</div>
         </div>
-        <div id="homeAv" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#C9956C,#E8C4A0);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;letter-spacing:-0.5px;cursor:pointer;box-shadow:0 2px 8px rgba(201,149,108,0.35);" onclick="go('s-profile','tab')"></div>
+        <div id="homeAv" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#C8547F,#E8A0C4);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;letter-spacing:-0.5px;cursor:pointer;box-shadow:0 2px 8px rgba(200,84,127,0.35);" onclick="go('s-profile','tab')"></div>
+      </div>
+
+      <div style="margin:8px 20px 14px;">
+        <div class="search-bar" style="margin:0;" id="homeSearchBar">
+          <span style="color:var(--text-2);">🔍</span>
+          <input type="text" id="homeSearch" placeholder="Мастер или услуга…" oninput="_homeSearch(this.value)" autocomplete="off">
+        </div>
+        <div id="homeSearchResults" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:14px;margin-top:4px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.1);"></div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin:0 20px 14px;">
+        <div style="flex:1;padding:14px 12px;background:var(--accent);border-radius:16px;color:#fff;cursor:pointer;text-align:center;" onclick="go('s-services','tab')">
+          <div style="font-size:22px;margin-bottom:5px;">✂️</div>
+          <div style="font-size:13px;font-weight:700;">Записаться</div>
+          <div style="font-size:10px;opacity:0.75;margin-top:2px;">для себя</div>
+        </div>
+        <div style="flex:1;padding:14px 12px;background:var(--surface);border-radius:16px;cursor:pointer;text-align:center;" onclick="showBookForOtherModal()">
+          <div style="font-size:22px;margin-bottom:5px;">👩‍👧</div>
+          <div style="font-size:13px;font-weight:700;">Записать другого</div>
+          <div style="font-size:10px;color:var(--text-2);margin-top:2px;">подругу, маму...</div>
+        </div>
       </div>
 
       <div id="homeHero"></div>
@@ -939,6 +960,9 @@ body {
       <span class="time">9:41</span><div class="dynamic-island"></div>    </div>
     <div class="page-title" style="padding-top:8px;">Профиль</div>
     <div class="scroll">
+      <div id="loyaltyBlock" style="margin:0 20px 16px;padding:16px;background:var(--surface);border-radius:18px;">
+        <div style="padding:20px;text-align:center;color:var(--text-2);font-size:13px;">Загрузка…</div>
+      </div>
       <div class="prof-head">
         <div id="profAv" class="prof-av" style="background:linear-gradient(135deg,#C9956C,#E8C4A0);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;letter-spacing:-1px;box-shadow:0 4px 16px rgba(200,84,127,0.3);cursor:pointer;overflow:hidden;position:relative;" onclick="document.getElementById('profPhotoInput').click()">
           <span id="profAvInner"></span>
@@ -1251,7 +1275,14 @@ body {
   <!-- ══ FEED ══ -->
   <div class="screen" id="s-feed">
     <div class="status-bar"><span class="time">9:41</span><div class="dynamic-island"></div><div class="icons"><svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".7"/><rect x="4.5" y="5.5" width="3" height="6.5" rx=".7"/><rect x="9" y="3" width="3" height="9" rx=".7"/><rect x="13.5" y="0" width="3" height="12" rx=".7"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="8" cy="11" r="1.2" fill="currentColor" stroke="none"/><path d="M4.8 7.8a4.5 4.5 0 016.4 0" stroke-width="1.5"/><path d="M2 5a8 8 0 0112 0" stroke-width="1.5"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="20" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".4"/><path d="M22 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/><rect x="2" y="2" width="15" height="8" rx="2.5" fill="currentColor"/></svg></div></div>
-    <div class="nav-bar" style="border-bottom:1px solid var(--border);"><div style="width:60px;"></div><div style="font-size:17px;font-weight:700;">Лента студии</div><div style="width:60px;"></div></div>
+    <div class="nav-bar" style="border-bottom:1px solid var(--border);"><div style="width:60px;"></div><div style="font-size:17px;font-weight:700;">Лента студии</div>
+      <div style="width:60px;text-align:right;position:relative;">
+        <button class="btn-ghost" style="font-size:13px;padding:4px 8px;" onclick="_toggleFeedFilter()">Фильтр ▾</button>
+        <div id="feedFilterDrop" style="display:none;position:absolute;right:0;top:32px;background:var(--bg);border:1px solid var(--border);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);z-index:100;min-width:130px;overflow:hidden;">
+          <div style="padding:4px 0;" id="feedFilterList"></div>
+        </div>
+      </div>
+    </div>
     <div class="scroll" id="feedList" style="padding-top:8px;">
       <div style="padding:40px 20px;text-align:center;color:var(--text-2);font-size:14px;">Загрузка…</div>
     </div>
@@ -2677,15 +2708,10 @@ function _renderHistoryFromCache() {
 // ── HOME HERO ──
 function renderHomeHero() {
   const el = document.getElementById('homeHero');
-  const gr = document.getElementById('homeGreeting');
   if (!el) return;
 
   const installBanner = document.getElementById('installBanner');
   if (installBanner) installBanner.style.display = localStorage.getItem('yc_install_seen') ? 'none' : 'flex';
-
-  const session = getSession();
-  const name = session ? session.name : '';
-  if (gr) gr.textContent = name ? `Привет, ${name.split(' ')[0]} 👋` : 'Привет 👋';
 
   const ml = document.getElementById('homeMastersList');
   if (ml && MASTERS_DATA.length) {
@@ -2714,17 +2740,20 @@ function renderHomeHero() {
     return;
   }
 
-  el.innerHTML = `<div class="hero-card" onclick="go('s-history')">
-    <div class="hero-label">Ближайший визит</div>
-    <div class="hero-master">
-      <div class="hero-avatar" style="background:var(--accent-light);"><div class="av-initials" style="font-size:18px;color:var(--accent);">${getInitials(next.masterName)}</div></div>
-      <div><div style="font-size:15px;font-weight:700;">${esc(next.masterName)}</div></div>
+  el.innerHTML = `<div class="hero-card" onclick="go('s-history')" style="padding:14px 16px;margin-bottom:14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.5);">Ближайший визит</span>
+      <div style="display:flex;gap:6px;">
+        <button class="hero-btn" style="flex:none;padding:0 10px;height:26px;font-size:12px;" onclick="event.stopPropagation();rescheduleRecord(${JSON.stringify(next.id)})">Перенести</button>
+        <button class="hero-btn" style="flex:none;padding:0 10px;height:26px;font-size:12px;" onclick="event.stopPropagation();cancelRecord(${JSON.stringify(next.id)},${JSON.stringify(next.hash)})">Отменить</button>
+      </div>
     </div>
-    <div class="hero-service">${esc(next.svcName)}</div>
-    <div class="hero-dt">${_fmtDatetime(next.datetime)} · ${next.dur} мин</div>
-    <div class="hero-actions">
-      <button class="hero-btn" onclick="event.stopPropagation();rescheduleRecord(${JSON.stringify(next.id)})">Перенести</button>
-      <button class="hero-btn" onclick="event.stopPropagation();cancelRecord(${JSON.stringify(next.id)},${JSON.stringify(next.hash)})">Отменить</button>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;color:#fff;">${getInitials(next.masterName)}</div>
+      <div>
+        <div style="font-size:15px;font-weight:800;margin-bottom:2px;">${esc(next.svcName)}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.6);">${esc(next.masterName)} · ${_fmtDatetime(next.datetime)}</div>
+      </div>
     </div>
   </div>`;
 }
@@ -2808,25 +2837,32 @@ async function confirmCancel() {
   const btn = document.querySelector('#s-cancel .btn-danger');
   if (btn) { btn.disabled = true; btn.textContent = 'Отменяем…'; }
 
-  const records = _loadStoredRecords();
-  const idx = records.findIndex(x => String(x.id) === String(id));
-
-  if (idx !== -1) { records[idx].status = 'cancelled'; localStorage.setItem('yc_records', JSON.stringify(records)); }
-  state._cancelId = null;
-  state._cancelHash = null;
-  go('s-home', 'tab');
-  renderHomeHero();
-
+  let apiOk = false;
   try {
     const res = await fetch(`${YC.base}/record/${YC.company}/${id}`, {
       method: 'DELETE',
       headers: YC._h()
     });
-    const body = await res.json().catch(() => null);
-    if (body && body.success === false) {
-      alert(`Запись удалена локально, но в YCLIENTS ошибка: ${body?.meta?.message || '?'}\nУточните отмену у администратора.`);
+    const data = await res.json().catch(() => ({}));
+    if (res.status >= 400) {
+      if (btn) { btn.disabled = false; btn.textContent = 'Да, отменить запись'; }
+      alert(`Не удалось отменить: ${data?.meta?.message || 'Ошибка ' + res.status}. Позвоните в студию.`);
+      return;
     }
-  } catch(e) {}
+    apiOk = true;
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Да, отменить запись'; }
+    alert('Нет соединения с сервером. Попробуйте позже.');
+    return;
+  }
+
+  const records = _loadStoredRecords();
+  const idx = records.findIndex(x => String(x.id) === String(id));
+  if (idx !== -1) { records[idx].status = 'cancelled'; localStorage.setItem('yc_records', JSON.stringify(records)); }
+  state._cancelId = null;
+  state._cancelHash = null;
+  go('s-home', 'tab');
+  renderHomeHero();
 }
 
 // ── DATA MODEL ──
@@ -3101,7 +3137,7 @@ function onEnterScreen(id) {
       }
     });
   }
-  if (id === 's-profile')  renderProfileScreen();
+  if (id === 's-profile')  { renderProfileScreen(); renderLoyaltyBlock(); }
   if (id === 's-feed')           renderClientFeed();
   if (id === 's-review')         renderReviewScreen();
   if (id === 's-admin')          renderAdminDashboard();
@@ -3286,6 +3322,10 @@ function _onProfilePhotoPicked(input) {
       const b64 = canvas.toDataURL('image/jpeg', 0.8);
       localStorage.setItem('yc_profile_photo', b64);
       renderProfileScreen();
+      const _sess = getSession();
+      if (_sess && _sess.client_id) {
+        YC.post(`/clients/${YC.company}/${_sess.client_id}`, { avatar: b64 }, 'PUT').catch(() => {});
+      }
     };
     img.src = e.target.result;
   };
@@ -3770,6 +3810,135 @@ function _paintFeed(el, posts) {
   }).join('');
 }
 
+// ── HOME SEARCH (task 8) ──
+function _homeSearch(q) {
+  const res = document.getElementById('homeSearchResults');
+  if (!res) return;
+  q = q.trim().toLowerCase();
+  if (!q) { res.style.display = 'none'; return; }
+  const masters = MASTERS_DATA.filter(m => m.name.toLowerCase().includes(q) || (m.role||'').toLowerCase().includes(q));
+  const svcs = SERVICES_DATA.filter(s => s.name.toLowerCase().includes(q) || (s.cat||'').toLowerCase().includes(q));
+  if (!masters.length && !svcs.length) {
+    res.innerHTML = '<div style="padding:12px 16px;font-size:13px;color:var(--text-2);">Ничего не найдено</div>';
+    res.style.display = 'block'; return;
+  }
+  let html = '';
+  masters.slice(0,3).forEach(m => {
+    html += `<div style="padding:10px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid var(--border);" onclick="bookWithMaster('${m.id}');document.getElementById('homeSearch').value='';document.getElementById('homeSearchResults').style.display='none'">
+      <div style="width:32px;height:32px;border-radius:50%;background:${m.grad};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;">${getInitials(m.name)}</div>
+      <div><div style="font-size:13px;font-weight:700;">${esc(m.name)}</div><div style="font-size:11px;color:var(--text-2);">${esc(m.role)}</div></div>
+    </div>`;
+  });
+  svcs.slice(0,4).forEach(s => {
+    html += `<div style="padding:10px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid var(--border);" onclick="quickBook('${s.id}');document.getElementById('homeSearch').value='';document.getElementById('homeSearchResults').style.display='none'">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">✂️</div>
+      <div><div style="font-size:13px;font-weight:700;">${esc(s.name)}</div><div style="font-size:11px;color:var(--text-2);">${esc(s.cat)} · ${esc(s.priceStr)}</div></div>
+    </div>`;
+  });
+  res.innerHTML = html;
+  res.style.display = 'block';
+}
+
+// ── BOOK FOR OTHER (task 6) ──
+function showBookForOtherModal() {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:flex-end;';
+  overlay.innerHTML = `<div style="background:var(--bg);width:100%;border-radius:24px 24px 0 0;padding:24px 20px 40px;max-width:393px;margin:auto;">
+    <div style="font-size:17px;font-weight:800;margin-bottom:16px;">Кого записываем?</div>
+    <div style="margin-bottom:12px;"><div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:6px;">ИМЯ</div>
+      <input id="_oName" placeholder="Имя" style="width:100%;box-sizing:border-box;height:48px;border:1.5px solid var(--border);border-radius:12px;padding:0 14px;font-size:15px;font-family:inherit;background:var(--surface);"></div>
+    <div style="margin-bottom:20px;"><div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:6px;">ТЕЛЕФОН</div>
+      <input id="_oPhone" placeholder="+7..." type="tel" style="width:100%;box-sizing:border-box;height:48px;border:1.5px solid var(--border);border-radius:12px;padding:0 14px;font-size:15px;font-family:inherit;background:var(--surface);"></div>
+    <button style="width:100%;height:52px;background:var(--accent);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="_confirmBookOther()">Записать →</button>
+    <button style="width:100%;margin-top:10px;height:44px;background:none;border:none;color:var(--text-2);font-size:15px;cursor:pointer;font-family:inherit;" onclick="this.closest('[data-overlay]').remove()">Отмена</button>
+  </div>`;
+  overlay.dataset.overlay = '1';
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.getElementById('phone').appendChild(overlay);
+}
+function _confirmBookOther() {
+  const name = (document.getElementById('_oName') || {}).value || '';
+  const phone = (document.getElementById('_oPhone') || {}).value || '';
+  if (!name.trim()) { alert('Введите имя'); return; }
+  document.querySelector('[data-overlay]')?.remove();
+  state._bookOtherName = name.trim();
+  state._bookOtherPhone = phone.trim();
+  go('s-services', 'tab');
+}
+
+// ── FEED CATEGORY FILTER (task 7) ──
+let _feedActiveCat = '';
+function _toggleFeedFilter() {
+  const drop = document.getElementById('feedFilterDrop');
+  if (!drop) return;
+  const visible = drop.style.display !== 'none';
+  drop.style.display = visible ? 'none' : 'block';
+  if (!visible) {
+    const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => !p.draft);
+    const cats = ['Все', ...new Set(posts.map(p => p.cat).filter(Boolean))];
+    const list = document.getElementById('feedFilterList');
+    if (list) list.innerHTML = cats.map(c => `<div style="padding:11px 16px;font-size:14px;cursor:pointer;${_feedActiveCat === (c==='Все'?'':c) ? 'font-weight:700;color:var(--accent);' : ''}" onclick="_feedFilterCat('${c==='Все'?'':c}')">${c}</div>`).join('');
+    setTimeout(() => document.addEventListener('click', _closeFeedFilter, {once:true}), 10);
+  }
+}
+function _closeFeedFilter(e) {
+  const drop = document.getElementById('feedFilterDrop');
+  if (drop && !drop.contains(e.target)) drop.style.display = 'none';
+}
+function _feedFilterCat(cat) {
+  _feedActiveCat = cat;
+  const drop = document.getElementById('feedFilterDrop');
+  if (drop) drop.style.display = 'none';
+  const btn = document.querySelector('#s-feed .btn-ghost');
+  if (btn) btn.textContent = cat ? cat + ' ▾' : 'Фильтр ▾';
+  const el = document.getElementById('feedList');
+  if (!el) return;
+  const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => !p.draft);
+  const filtered = cat ? posts.filter(p => p.cat === cat) : posts;
+  _paintFeed(el, filtered);
+}
+
+// ── CLIENT LOYALTY (task 10) ──
+async function _loadClientLoyalty() {
+  const sess = getSession();
+  if (!sess || !sess.client_id) return null;
+  try {
+    const r = await YC.get(`/clients/${YC.company}/${sess.client_id}`);
+    if (r.success && r.data) return r.data;
+  } catch {}
+  return null;
+}
+function _loyaltyLevel(discount) {
+  if (!discount) return { label: 'Бронза', color: '#CD7F32' };
+  if (discount >= 15) return { label: 'Золото', color: '#FFD700' };
+  if (discount >= 8) return { label: 'Серебро', color: '#C0C0C0' };
+  return { label: 'Бронза', color: '#CD7F32' };
+}
+async function renderLoyaltyBlock() {
+  const el = document.getElementById('loyaltyBlock');
+  if (!el) return;
+  const sess = getSession();
+  if (!sess) return;
+  const photo = localStorage.getItem('yc_profile_photo');
+  const initials = getInitials(sess.name || sess.email || '?');
+  const data = await _loadClientLoyalty();
+  const discount = data?.discount || data?.card?.discount || 0;
+  const lvl = _loyaltyLevel(discount);
+  el.innerHTML = `<div style="display:flex;align-items:center;gap:14px;">
+    <div style="width:56px;height:56px;border-radius:50%;flex-shrink:0;overflow:hidden;box-shadow:0 3px 12px rgba(200,84,127,0.3);${photo ? '' : 'background:linear-gradient(135deg,#C8547F,#E8A0C4);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;'}">
+      ${photo ? `<img src="${esc(photo)}" style="width:100%;height:100%;object-fit:cover;">` : initials}
+    </div>
+    <div style="flex:1;">
+      <div style="font-size:16px;font-weight:800;margin-bottom:2px;">${esc(sess.name || sess.email)}</div>
+      <div style="font-size:12px;color:var(--text-2);">${sess.phone || ''}</div>
+    </div>
+    <div style="text-align:center;padding:8px 12px;background:var(--surface);border-radius:12px;min-width:70px;">
+      <div style="font-size:14px;font-weight:900;color:${lvl.color};">${lvl.label}</div>
+      ${discount ? `<div style="font-size:12px;color:var(--text-2);margin-top:2px;">−${discount}%</div>` : ''}
+    </div>
+  </div>`;
+}
+
 // ── PUSH NOTIFICATION ──
 async function _sendNotification(title, body) {
   if (!('Notification' in window)) return false;
@@ -3808,6 +3977,13 @@ renderServices();
   } else {
     renderHomeHero();
     renderProfileScreen();
+    renderLoyaltyBlock();
+    _ghRead().then(gh => {
+      if (gh && gh.sha !== null) {
+        localStorage.setItem('yc_feed_posts', JSON.stringify(gh.posts));
+        _renderHomeFeedPreview();
+      }
+    });
   }
 })();
 initApp();
