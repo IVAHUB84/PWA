@@ -2512,7 +2512,9 @@ async function sendCodeByPhone() {
   }
 
   const code = String(Math.floor(1000 + Math.random() * 9000));
-  localStorage.setItem('yc_otp', JSON.stringify({ code, email, phone, client_id: client.id, client_name: client.name || '', expiry: Date.now() + 10 * 60 * 1000 }));
+  const codeHash = await _sha256(code);
+  localStorage.setItem('yc_otp', JSON.stringify({ codeHash, email, expiry: Date.now() + 10 * 60 * 1000, attempts: 0 }));
+  localStorage.setItem('yc_auth_pending', JSON.stringify({ email, phone, client_id: client.id, client_name: client.name || '' }));
   if (btn) { btn.disabled = true; document.getElementById('loginBtnText').textContent = 'Отправляем…'; document.getElementById('loginBtnSpinner').style.display = 'inline-block'; }
   try {
     await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
@@ -2542,9 +2544,11 @@ function _showPhoneEmailInput(phone, client) {
       <input type="email" inputmode="email" id="loginEmailFb" placeholder="your@email.com"
         style="background:none;border:none;outline:none;font-size:17px;font-weight:500;font-family:inherit;flex:1;color:var(--text);">
     </div>
-    <button class="btn-primary" style="margin-top:8px;" onclick="_sendCodeToFallbackEmail('${phone}',${client.id},'${client.name||''}')">Отправить код →</button>`;
+    <button class="btn-primary" style="margin-top:8px;" id="sendCodeFbBtn">Отправить код →</button>`;
   const btn = document.getElementById('loginBtn');
   if (btn) btn.parentNode.insertBefore(div, btn.nextSibling);
+  const fbBtn = document.getElementById('sendCodeFbBtn');
+  if (fbBtn) fbBtn.addEventListener('click', () => _sendCodeToFallbackEmail(phone, client.id, client.name || ''));
 }
 
 async function _sendCodeToFallbackEmail(phone, clientId, clientName) {
@@ -2558,7 +2562,9 @@ async function _sendCodeToFallbackEmail(phone, clientId, clientName) {
   }
   if (errEl) errEl.style.display = 'none';
   const code = String(Math.floor(1000 + Math.random() * 9000));
-  localStorage.setItem('yc_otp', JSON.stringify({ code, email, phone: String(phone), client_id: clientId, client_name: clientName, expiry: Date.now() + 10 * 60 * 1000 }));
+  const codeHash = await _sha256(code);
+  localStorage.setItem('yc_otp', JSON.stringify({ codeHash, email, expiry: Date.now() + 10 * 60 * 1000, attempts: 0 }));
+  localStorage.setItem('yc_auth_pending', JSON.stringify({ email, phone: String(phone), client_id: clientId, client_name: clientName }));
   try {
     await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
       to_email: email, name: clientName || 'Клиент', phone: '', topic: 'Код подтверждения', message: code, agreement: 'да'
@@ -2594,7 +2600,8 @@ async function sendEmailCode() {
   if (errEl) errEl.style.display = 'none';
   if (btn) { btn.disabled = true; btn.textContent = 'Отправляем…'; }
   const code = String(Math.floor(1000 + Math.random() * 9000));
-  localStorage.setItem('yc_otp', JSON.stringify({ code, email, expiry: Date.now() + 10 * 60 * 1000 }));
+  const codeHash = await _sha256(code);
+  localStorage.setItem('yc_otp', JSON.stringify({ codeHash, email, expiry: Date.now() + 10 * 60 * 1000, attempts: 0 }));
   try {
     await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
       to_email: email, name: 'Клиент', phone: '', topic: 'Код подтверждения', message: code, agreement: 'да'
@@ -2611,7 +2618,8 @@ async function retryEmail() {
   const stored = JSON.parse(localStorage.getItem('yc_otp') || 'null');
   if (!stored) return;
   const code = String(Math.floor(1000 + Math.random() * 9000));
-  localStorage.setItem('yc_otp', JSON.stringify({ ...stored, code, expiry: Date.now() + 10 * 60 * 1000 }));
+  const codeHash = await _sha256(code);
+  localStorage.setItem('yc_otp', JSON.stringify({ ...stored, codeHash, attempts: 0, expiry: Date.now() + 10 * 60 * 1000 }));
   try {
     await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
       to_email: stored.email, name: 'Клиент', phone: '', topic: 'Код подтверждения', message: code, agreement: 'да'
@@ -3958,7 +3966,7 @@ function _toggleFeedFilter() {
     const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => !p.draft);
     const cats = ['Все', ...new Set(posts.map(p => p.cat).filter(Boolean))];
     const list = document.getElementById('feedFilterList');
-    if (list) list.innerHTML = cats.map(c => `<div style="padding:11px 16px;font-size:14px;cursor:pointer;${_feedActiveCat === (c==='Все'?'':c) ? 'font-weight:700;color:var(--accent);' : ''}" onclick="_feedFilterCat('${c==='Все'?'':c}')">${c}</div>`).join('');
+    if (list) list.innerHTML = cats.map(c => { const val = c === 'Все' ? '' : c; return `<div style="padding:11px 16px;font-size:14px;cursor:pointer;${_feedActiveCat === val ? 'font-weight:700;color:var(--accent);' : ''}" data-cat="${esc(val)}" onclick="_feedFilterCat(this.dataset.cat)">${esc(c)}</div>`; }).join('');
     setTimeout(() => document.addEventListener('click', _closeFeedFilter, {once:true}), 10);
   }
 }
