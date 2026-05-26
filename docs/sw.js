@@ -4,6 +4,7 @@ const RUNTIME_CACHE = `studio-runtime-${CACHE_VERSION}`;
 
 const APP_SHELL = [
   './prototype.html',
+  './style.css',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
