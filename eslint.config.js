@@ -37,6 +37,8 @@ export default [
         Uint8Array: 'readonly',
         btoa: 'readonly',
         atob: 'readonly',
+        requestAnimationFrame: 'readonly',
+        Image: 'readonly',
       },
     },
     rules: {
