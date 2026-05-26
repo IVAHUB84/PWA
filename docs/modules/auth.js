@@ -58,7 +58,10 @@ export function _otpClear() {
 
 export function _setOtpError(msg) {
   const hint = document.querySelector('#s-otp .otp-hint');
-  if (hint) hint.innerHTML = `<span style="color:var(--red)">${msg}</span>`;
+  if (hint) {
+    hint.style.display = 'block';
+    hint.innerHTML = `<span style="color:var(--red)">${msg}</span>`;
+  }
 }
 
 let _sendingCode = false;
@@ -276,34 +279,30 @@ export async function verifyOtp() {
     localStorage.removeItem('yc_otp');
     localStorage.removeItem('yc_auth_pending');
 
-    if (client_id) {
-      saveSession({ email: email || '', user_token: '', name: client_name || '', phone: phone || '', client_id });
+    const _navigateHome = () => {
       _otpClear();
-      _renderHomeHeroFn();
-      _renderProfileScreenFn();
+      try { _renderHomeHeroFn(); } catch(e) { console.error('renderHomeHero failed', e); }
+      try { _renderProfileScreenFn(); } catch(e) { console.error('renderProfileScreen failed', e); }
       if (state._bookAfterLogin) { state._bookAfterLogin = false; go('s-services', 'tab'); }
       else { go('s-home', 'tab'); }
+    };
+
+    if (client_id) {
+      saveSession({ email: email || '', user_token: '', name: client_name || '', phone: phone || '', client_id });
+      _navigateHome();
       return;
     }
 
     const existing = getSession();
     if (existing && existing.email === email) {
-      _otpClear();
-      _renderHomeHeroFn();
-      _renderProfileScreenFn();
-      if (state._bookAfterLogin) { state._bookAfterLogin = false; go('s-services', 'tab'); }
-      else { go('s-home', 'tab'); }
+      _navigateHome();
       return;
     }
 
     const client = await _findClientByEmail(email);
     if (client) {
       saveSession({ email, user_token: '', name: client.name || '', phone: client.phone || '', client_id: client.id });
-      _otpClear();
-      _renderHomeHeroFn();
-      _renderProfileScreenFn();
-      if (state._bookAfterLogin) { state._bookAfterLogin = false; go('s-services', 'tab'); }
-      else { go('s-home', 'tab'); }
+      _navigateHome();
     } else {
       localStorage.setItem('yc_reg_email', email);
       _otpClear();
