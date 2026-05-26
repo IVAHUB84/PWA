@@ -1041,7 +1041,7 @@ body {
       <button class="btn-primary" id="loginBtn" onclick="sendCodeByPhone()" style="display:flex;align-items:center;justify-content:center;gap:8px;"><span id="loginBtnText">Получить код →</span><span class="btn-spinner" id="loginBtnSpinner"></span></button>
       <div class="login-hint">Найдём вас по номеру и отправим код на почту.<br>Вход доступен только для клиентам студии.</div>
       <div class="login-divider" style="margin-top:24px;">для сотрудников студии</div>
-      <button onclick="enterAdmin()" style="width:100%;padding:14px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <button id="adminLoginBtn" onclick="enterAdmin()" style="display:none;width:100%;padding:14px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;align-items:center;justify-content:center;gap:8px;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         Войти как администратор
       </button>
@@ -1476,6 +1476,10 @@ function setTx(el, x, animated) {
 function go(id, mode) {
   const current = navHistory[navHistory.length - 1];
   if (current === id) { onEnterScreen(id); return; }
+  if (current === 's-otp' && id !== 's-otp' && _otpCountdownTimer) {
+    clearInterval(_otpCountdownTimer);
+    _otpCountdownTimer = null;
+  }
   const fromEl = document.getElementById(current);
   const toEl   = document.getElementById(id);
   if (!toEl) return;
@@ -1802,10 +1806,21 @@ function acceptConsent() {
   go('s-home', 'tab');
 }
 
-function enterAdmin() {
+async function enterAdmin() {
+  const storedHash = localStorage.getItem('yc_admin_pin_hash');
+  if (!storedHash) {
+    const pin = prompt('Установите PIN-код администратора (минимум 6 символов):');
+    if (!pin || pin.length < 6) { alert('PIN слишком короткий — минимум 6 символов'); return; }
+    const pin2 = prompt('Повторите PIN:');
+    if (pin !== pin2) { alert('PIN не совпадает'); return; }
+    localStorage.setItem('yc_admin_pin_hash', await _sha256(pin));
+    go('s-admin', 'tab');
+    renderAdminDashboard();
+    return;
+  }
   const pin = prompt('PIN-код администратора:');
   if (pin === null) return;
-  if (pin !== '1111') { alert('Неверный PIN-код'); return; }
+  if (await _sha256(pin) !== storedHash) { alert('Неверный PIN-код'); return; }
   go('s-admin', 'tab');
   renderAdminDashboard();
 }
@@ -2043,6 +2058,10 @@ const _GRADS = [
 ];
 
 async function initApp() {
+  if (new URLSearchParams(window.location.search).has('admin')) {
+    const btn = document.getElementById('adminLoginBtn');
+    if (btn) { btn.style.display = 'flex'; }
+  }
   try {
     const [catsRes, svcRes, staffRes] = await Promise.all([
       YC.get(`/service_categories/${YC.company}`),
@@ -2173,7 +2192,7 @@ function getSession() {
 }
 function saveSession(data) { localStorage.setItem('yc_session', JSON.stringify(data)); }
 function clearSession() {
-  ['yc_session','yc_records','yc_phone','yc_client_name','yc_otp','yc_reg_email','yc_reg_phone','yc_reg_client_id'].forEach(k => localStorage.removeItem(k));
+  ['yc_session','yc_records','yc_phone','yc_client_name','yc_otp','yc_auth_pending','yc_reg_email','yc_reg_phone','yc_reg_client_id'].forEach(k => localStorage.removeItem(k));
 }
 function logout() { clearSession(); go('s-login', 'tab'); }
 
@@ -2275,10 +2294,18 @@ async function verifyOtp() {
   const stored = JSON.parse(localStorage.getItem('yc_otp') || 'null');
   if (!stored) { _setOtpError('Сессия истекла, войдите снова'); return; }
   if (Date.now() > stored.expiry) { _setOtpError('Код истёк, запросите новый'); return; }
-  if (stored.code !== entered) { _setOtpError('Неверный код'); return; }
+  if ((stored.attempts || 0) >= 5) { _setOtpError('Слишком много попыток. Запросите новый код.'); return; }
 
-  const { email, phone, client_id, client_name } = stored;
+  const enteredHash = await _sha256(entered);
+  stored.attempts = (stored.attempts || 0) + 1;
+  localStorage.setItem('yc_otp', JSON.stringify(stored));
+
+  if (stored.codeHash !== enteredHash) { _setOtpError('Неверный код'); return; }
+
+  const pending = JSON.parse(localStorage.getItem('yc_auth_pending') || 'null');
+  const { email, phone, client_id, client_name } = pending || {};
   localStorage.removeItem('yc_otp');
+  localStorage.removeItem('yc_auth_pending');
 
   // Если OTP был по телефону и у нас уже есть client_id — сразу сохраняем сессию
   if (client_id) {
@@ -3782,7 +3809,9 @@ async function _ghRead() {
     if (r.status === 404) return { posts: [], sha: null };
     if (!r.ok) return null;
     const d = await r.json();
-    return { posts: JSON.parse(_b64dec(d.content)), sha: d.sha };
+    const parsed = JSON.parse(_b64dec(d.content));
+    if (!Array.isArray(parsed)) return { posts: [], sha: d.sha };
+    return { posts: parsed, sha: d.sha };
   } catch { return null; }
 }
 
