@@ -2011,6 +2011,7 @@ const YC = {
       const url = new URL(this.base + path);
       Object.entries(params).forEach(([k,v]) => url.searchParams.append(k, v));
       const r = await fetch(url.toString(), { headers: this._h() });
+      if (!r.ok) return { success: false, _status: r.status };
       return r.json();
     } catch(e) { return { success: false }; }
   },
@@ -2019,6 +2020,7 @@ const YC = {
       const r = await fetch(this.base + path, {
         method, headers: this._h(), body: JSON.stringify(body)
       });
+      if (!r.ok) return { success: false, _status: r.status };
       return r.json();
     } catch(e) { return { success: false }; }
   }
@@ -2076,7 +2078,7 @@ async function initApp() {
     }
     const cur = document.querySelector('.screen.active');
     if (cur && cur.id === 's-services') renderServices();
-  } catch(e) { console.warn('API init:', e); }
+  } catch(e) { /* API init failed silently */ }
 }
 
 function _updateCatChips() {
@@ -2389,6 +2391,11 @@ async function _rescheduleWithSession(session) {
 
   const r = await YC.post(`/record/${YC.company}/${id}`, body, 'PUT');
 
+  if (!r.success) {
+    alert(`Не удалось перенести запись: ${r.meta?.message || 'ошибка сервера'}. Позвоните в студию.`);
+    return;
+  }
+
   const records = _loadStoredRecords();
   const idx = records.findIndex(x => String(x.id) === String(id));
   if (idx !== -1) { records[idx].datetime = datetime; localStorage.setItem('yc_records', JSON.stringify(records)); }
@@ -2398,29 +2405,36 @@ async function _rescheduleWithSession(session) {
   const title = document.querySelector('#s-confirm .confirm-title');
   const sub = document.querySelector('#s-confirm .confirm-sub');
   if (title) title.textContent = 'Запись перенесена!';
-  if (sub) sub.textContent = r.success ? 'Время успешно изменено' : 'Время изменено локально. Подтвердите у администратора.';
-  if (!r.success) {
-    setTimeout(() => alert(`Запись перенесена локально, но YCLIENTS вернул ошибку: ${r.meta?.message || 'неизвестная ошибка'}.\nПожалуйста, уточните перенос у администратора.`), 400);
-  }
+  if (sub) sub.textContent = 'Время успешно изменено';
 }
 
+let _bookInProgress = false;
 async function _bookWithSession(session) {
-  const svc = getService();
-  const m = getMaster();
-  const datetime = `${state.dateISO || new Date().toISOString().slice(0,10)} ${state.slot || '10:00'}:00`;
-  const body = {
-    phone: session.phone || '',
-    fullname: session.name || '',
-    email: session.email || '',
-    appointments: [{ id: 1, services: [parseInt(svc.id) || 0], staff_id: m ? parseInt(m.id) : 0, datetime }],
-    notify_by_sms: 1
-  };
-  const r = await YC.post(`/book_record/${YC.company}`, body);
-  if (r.success) {
-    _saveBookedRecord(r.data && r.data[0]);
-    go('s-confirm');
-  } else {
-    alert(r.meta?.message || 'Не удалось создать запись. Попробуйте снова.');
+  if (_bookInProgress) return;
+  _bookInProgress = true;
+  const confirmBtn = document.querySelector('#s-confirm-pre .btn-primary, #s-slots .btn-primary');
+  if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.textContent = 'Записываем…'; }
+  try {
+    const svc = getService();
+    const m = getMaster();
+    const datetime = `${state.dateISO || new Date().toISOString().slice(0,10)} ${state.slot || '10:00'}:00`;
+    const body = {
+      phone: session.phone || '',
+      fullname: session.name || '',
+      email: session.email || '',
+      appointments: [{ id: 1, services: [parseInt(svc.id) || 0], staff_id: m ? parseInt(m.id) : 0, datetime }],
+      notify_by_sms: 1
+    };
+    const r = await YC.post(`/book_record/${YC.company}`, body);
+    if (r.success) {
+      _saveBookedRecord(r.data && r.data[0]);
+      go('s-confirm');
+    } else {
+      alert(r.meta?.message || 'Не удалось создать запись. Попробуйте снова.');
+    }
+  } finally {
+    _bookInProgress = false;
+    if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = 'Подтвердить запись'; }
   }
 }
 
@@ -2882,10 +2896,10 @@ function cancelRecord(id, hash) {
       cancelCard.innerHTML = `
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
           <div style="width:44px;height:44px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--accent);flex-shrink:0;">${getInitials(rec.masterName)}</div>
-          <div><div style="font-size:15px;font-weight:700;">${rec.masterName}</div><div style="font-size:12px;color:var(--text-2);">Мастер</div></div>
+          <div><div style="font-size:15px;font-weight:700;">${esc(rec.masterName)}</div><div style="font-size:12px;color:var(--text-2);">Мастер</div></div>
         </div>
-        <div style="font-size:17px;font-weight:800;margin-bottom:6px;">${rec.svcName}</div>
-        <div style="font-size:14px;color:var(--text-2);">${_fmtDatetime(rec.datetime)} · ${rec.dur} мин${rec.price ? ' · ' + rec.price : ''}</div>`;
+        <div style="font-size:17px;font-weight:800;margin-bottom:6px;">${esc(rec.svcName)}</div>
+        <div style="font-size:14px;color:var(--text-2);">${esc(_fmtDatetime(rec.datetime))} · ${esc(String(rec.dur))} мин${rec.price ? ' · ' + esc(String(rec.price)) : ''}</div>`;
     } else {
       cancelCard.innerHTML = `<div style="font-size:15px;font-weight:700;">Запись #${id}</div>`;
     }
@@ -2907,7 +2921,6 @@ async function confirmCancel() {
     });
     const text = await res.text();
     const data = text ? JSON.parse(text) : {};
-    console.log('Cancel DELETE status:', res.status, 'body:', data);
 
     if (res.status >= 400) {
       if (btn) { btn.disabled = false; btn.textContent = 'Да, отменить запись'; }
@@ -2916,7 +2929,6 @@ async function confirmCancel() {
       return;
     }
   } catch(e) {
-    console.error('Cancel error:', e);
     if (btn) { btn.disabled = false; btn.textContent = 'Да, отменить запись'; }
     alert('Нет соединения с сервером. Попробуйте позже.');
     return;
@@ -2977,6 +2989,10 @@ function getService() { return SERVICES_DATA.find(s => s.id === state.serviceId)
 function getMaster()  { return state.masterId ? MASTERS_DATA.find(m => m.id === state.masterId) : null; }
 function getInitials(name) { if (!name) return '?'; return name.trim().split(/\s+/).map(w => w[0] || '').join('').slice(0, 2).toUpperCase() || '?'; }
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+async function _sha256(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
 
 const _NO_AVATAR = ['no-master-sm.png', 'no-master.png'];
 function _hasRealAvatar(m) {
@@ -3084,7 +3100,6 @@ async function renderMasters() {
   let masters = [];
   try {
     const r = await YC.get(`/book_staff/${YC.company}`, { service_ids: svc.id });
-    console.log('[renderMasters] svc.id=', svc.id, 'API returned', r.data?.length, 'staff, MASTERS_DATA has', MASTERS_DATA.length);
     if (r.success && r.data && r.data.length) {
       const ids = new Set(r.data.map(s => String(s.id)));
       const filtered = MASTERS_DATA.filter(m => ids.has(m.id));
@@ -3101,7 +3116,7 @@ async function renderMasters() {
         }));
       }
     }
-  } catch(e) { console.warn('[renderMasters]', e); }
+  } catch(e) { /* fall through to MASTERS_DATA */ }
   if (!masters.length) masters = MASTERS_DATA;
   const svcCat = svc.cat;
   if (svcCat) {
@@ -3772,7 +3787,7 @@ async function _ghWrite(posts, sha, token) {
       headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
       body: JSON.stringify(body)
     });
-    if (r.status === 401) { localStorage.removeItem('yc_gh_token'); return false; }
+    if (r.status === 401) { sessionStorage.removeItem('yc_gh_token'); return false; }
     return r.ok;
   } catch { return false; }
 }
@@ -3790,11 +3805,11 @@ async function _ghPullToLocal() {
 }
 
 async function _ghSyncPosts(postsToWrite) {
-  let token = localStorage.getItem('yc_gh_token');
+  let token = sessionStorage.getItem('yc_gh_token');
   if (!token) {
     token = prompt('Введите GitHub Personal Access Token (нужен для синхронизации постов с клиентами).\n\nПолучить: GitHub → Settings → Developer settings → Personal access tokens → Generate new token → выбрать scope "public_repo"');
     if (!token) return;
-    localStorage.setItem('yc_gh_token', token.trim());
+    sessionStorage.setItem('yc_gh_token', token.trim());
     token = token.trim();
   }
   const gh = await _ghRead();
@@ -3809,7 +3824,7 @@ function _adminResetToken() {
   const t = prompt(msg + '\n\nПолучить: GitHub → Settings → Developer settings → Personal access tokens → Generate new token → scope: public_repo');
   if (t === null) return;
   if (t.trim()) { localStorage.setItem('yc_gh_token', t.trim()); alert('Токен сохранён.'); }
-  else { localStorage.removeItem('yc_gh_token'); alert('Токен сброшен.'); }
+  else { sessionStorage.removeItem('yc_gh_token'); alert('Токен сброшен.'); }
 }
 
 // ── CLIENT FEED ──
