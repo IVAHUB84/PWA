@@ -1,0 +1,110 @@
+import { _normalizePhone } from './utils.js';
+import { getSession } from './storage.js';
+
+export const EMAILJS = {
+  serviceId:  'service_m2fr45h',
+  templateId: 'template_0wps847',
+  publicKey:  'B16bxReUihFyj_-OI',
+};
+
+export const YC = {
+  token:     'Pe1mZ3x1V99eA6eUWqV5',
+  userToken: '0c328eecdfc15d40b2a9fe4fec08f741',
+  company:   1940850,
+  base:      'https://api.yclients.com/api/v1',
+  _h() {
+    return {
+      Authorization: `Bearer ${this.token}, User ${this.userToken}`,
+      Accept: 'application/vnd.yclients.v2+json',
+      'Content-Type': 'application/json',
+    };
+  },
+  async get(path, params = {}) {
+    try {
+      const url = new URL(this.base + path);
+      Object.entries(params).forEach(([k, v]) => url.searchParams.append(k, v));
+      const r = await fetch(url.toString(), { headers: this._h() });
+      if (!r.ok) return { success: false, _status: r.status };
+      return r.json();
+    } catch { return { success: false }; }
+  },
+  async post(path, body, method = 'POST') {
+    try {
+      const r = await fetch(this.base + path, {
+        method, headers: this._h(), body: JSON.stringify(body),
+      });
+      if (!r.ok) return { success: false, _status: r.status };
+      return r.json();
+    } catch { return { success: false }; }
+  },
+};
+
+export async function _findClientByPhone(phone) {
+  try {
+    const r = await YC.get(`/clients/${YC.company}`, { phone });
+    if (r.success && Array.isArray(r.data) && r.data.length) {
+      return r.data.find(c => _normalizePhone(c.phone || '') === phone) || r.data[0];
+    }
+  } catch {}
+  return null;
+}
+
+export async function _findClientByEmail(email) {
+  try {
+    const r = await YC.get(`/clients/${YC.company}`, { email });
+    if (r.success && Array.isArray(r.data) && r.data.length) {
+      return r.data.find(c => (c.email || '').toLowerCase() === email.toLowerCase()) || null;
+    }
+  } catch {}
+  return null;
+}
+
+export async function _fetchAndMergeServerRecords(clientId) {
+  try {
+    const r = await YC.get(`/records/${YC.company}`, { client_id: clientId, count: 50 });
+    if (!r.success || !Array.isArray(r.data)) return;
+    const now = new Date();
+    const serverRecords = r.data.map(rec => {
+      const svc = rec.services && rec.services[0];
+      const staff = rec.staff || {};
+      const dt = (rec.date || '').replace('T', ' ').slice(0, 16) + ':00';
+      return {
+        id: rec.id,
+        hash: rec.record_hash || '',
+        svcName: svc ? svc.title : 'Услуга',
+        svcId: svc ? String(svc.id) : '',
+        masterName: staff.name || 'Мастер',
+        masterId: staff.id ? String(staff.id) : '',
+        ycStaffId: rec.staff_id || (staff.id || null),
+        ycSvcId: svc ? svc.id : null,
+        seanceLength: rec.seance_length || 3600,
+        datetime: dt,
+        price: svc ? (svc.cost ? svc.cost + ' ₽' : '') : '',
+        dur: Math.round((rec.seance_length || 3600) / 60),
+        status: rec.deleted ? 'cancelled' : (new Date(dt.replace(' ', 'T')) > now ? 'upcoming' : 'past'),
+      };
+    });
+    const local = JSON.parse(localStorage.getItem('yc_records') || '[]');
+    const localCancelledIds = new Set(local.filter(r => r.status === 'cancelled').map(r => String(r.id)));
+    const filteredServer = serverRecords.filter(r => !localCancelledIds.has(String(r.id)));
+    const serverIds = new Set(filteredServer.map(r => String(r.id)));
+    const localOnly = local.filter(r => !serverIds.has(String(r.id))).map(r => {
+      if (r.status === 'upcoming' && r.id && !isNaN(Number(r.id))) return { ...r, status: 'cancelled' };
+      return r;
+    });
+    const merged = [...filteredServer, ...localOnly];
+    merged.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+    localStorage.setItem('yc_records', JSON.stringify(merged));
+    return merged;
+  } catch {}
+}
+
+export async function _loadClientLoyalty() {
+  const sess = getSession();
+  if (!sess || !sess.client_id) return null;
+  try {
+    const r = await YC.get(`/clients/${YC.company}/${sess.client_id}`);
+    if (r.success && r.data) return r.data;
+  } catch {}
+  return null;
+}
