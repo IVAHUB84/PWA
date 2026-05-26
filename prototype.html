@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Реснички, сестрички и две истерички</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#8B3558">
+<meta name="theme-color" content="#FAF7F3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Реснички">
@@ -20,11 +20,11 @@ a, button, [onclick], .tab, .chip, .svc-card, .master-card, .slot, .hero-card, .
 }
 
 :root {
-  --bg: #FFFFFF;
-  --surface: #F5EEF2;
+  --bg: #FAF7F3;
+  --surface: #FFFFFF;
   --primary: #1C1C1E;
-  --accent: #C05272;
-  --accent-light: #FCEEF4;
+  --accent: #8B3558;
+  --accent-light: #F8EDE3;
   --wine: #8B3558;
   --gold: #C9956C;
   --mint: #6DC9AF;
@@ -38,7 +38,7 @@ a, button, [onclick], .tab, .chip, .svc-card, .master-card, .slot, .hero-card, .
 }
 
 body {
-  background: #1a1a1a;
+  background: #E4DDD8;
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -52,9 +52,9 @@ body {
   display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; align-items: flex-start;
 }
 .scenario-btn {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
-  color: rgba(255,255,255,0.7);
+  background: rgba(0,0,0,0.06);
+  border: 1px solid rgba(0,0,0,0.12);
+  color: rgba(0,0,0,0.6);
   border-radius: 20px;
   padding: 8px 18px;
   font-size: 13px; font-weight: 600;
@@ -62,11 +62,11 @@ body {
   transition: all 0.2s;
   font-family: inherit;
 }
-.scenario-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+.scenario-btn:hover { background: rgba(0,0,0,0.1); color: rgba(0,0,0,0.9); }
 .scenario-btn.playing { background: var(--accent); border-color: var(--accent); color: #fff; }
 
 .scenario-hint {
-  font-size: 12px; color: rgba(255,255,255,0.35);
+  font-size: 12px; color: rgba(0,0,0,0.35);
   text-align: center; letter-spacing: 0.02em;
 }
 
@@ -78,9 +78,8 @@ body {
   border-radius: 54px;
   overflow: hidden;
   box-shadow:
-    0 60px 120px rgba(0,0,0,0.6),
-    0 0 0 1px rgba(255,255,255,0.08),
-    inset 0 0 0 2px rgba(255,255,255,0.12);
+    0 40px 80px rgba(0,0,0,0.18),
+    0 0 0 1px rgba(0,0,0,0.08);
   position: relative;
 }
 
@@ -122,7 +121,7 @@ body {
   height: 83px; padding: 0 0 34px;
   display: flex; align-items: flex-start; justify-content: space-around;
   border-top: 1px solid var(--border); flex-shrink: 0;
-  background: rgba(255,255,255,0.94);
+  background: rgba(250,247,243,0.94);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   overflow: visible;
@@ -221,7 +220,7 @@ body {
 .hero-card::before {
   content: ''; position: absolute; top: -60px; right: -60px;
   width: 200px; height: 200px;
-  background: radial-gradient(circle, rgba(192,82,114,0.35) 0%, rgba(139,53,88,0.15) 50%, transparent 70%);
+  background: radial-gradient(circle, rgba(139,53,88,0.3) 0%, rgba(139,53,88,0.1) 50%, transparent 70%);
   pointer-events: none;
 }
 .hero-label    { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.45); margin-bottom: 14px; }
@@ -449,7 +448,7 @@ body {
   background: linear-gradient(135deg,#3D2B1F 0%,#1C1C1E 100%);
   border-radius: 16px; cursor: pointer; position: relative; overflow: hidden;
 }
-.offer-home-banner::after { content:''; position:absolute; top:-30px; right:-30px; width:120px; height:120px; background:radial-gradient(circle,rgba(200,84,127,.35) 0%,transparent 70%); pointer-events:none; }
+.offer-home-banner::after { content:''; position:absolute; top:-30px; right:-30px; width:120px; height:120px; background:radial-gradient(circle,rgba(201,149,108,.25) 0%,transparent 70%); pointer-events:none; }
 .ohb-tag   { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--accent); margin-bottom:4px; }
 .ohb-title { font-size:16px; font-weight:800; color:#fff; margin-bottom:4px; }
 .ohb-price { font-size:13px; color:rgba(255,255,255,.55); }
@@ -740,7 +739,7 @@ body {
         <div>
           <img src="./logo.png" alt="Реснички, сестрички" style="height:42px;object-fit:contain;display:block;">
         </div>
-        <div id="homeAv" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#C05272,#8B3558);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;letter-spacing:-0.5px;cursor:pointer;box-shadow:0 2px 8px rgba(192,82,114,0.35);" onclick="go('s-profile','tab')"></div>
+        <div id="homeAv" style="width:44px;height:44px;border-radius:50%;background:#8B3558;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;letter-spacing:-0.5px;cursor:pointer;box-shadow:0 2px 8px rgba(139,53,88,0.35);" onclick="go('s-profile','tab')"></div>
       </div>
 
       <div style="margin:8px 20px 14px;">
@@ -965,15 +964,15 @@ body {
       <span class="time">9:41</span><div class="dynamic-island"></div>    </div>
     <div class="page-title" style="padding-top:8px;">Профиль</div>
     <div class="scroll">
-      <div id="loyaltyBlock" style="margin:0 20px 16px;padding:16px;background:var(--surface);border-radius:18px;"></div>
       <div class="prof-head">
-        <div id="profAv" class="prof-av" style="background:linear-gradient(135deg,#C9956C,#E8C4A0);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;letter-spacing:-1px;box-shadow:0 4px 16px rgba(200,84,127,0.3);cursor:pointer;overflow:hidden;position:relative;" onclick="document.getElementById('profPhotoInput').click()">
+        <div id="profAv" class="prof-av" style="background:linear-gradient(135deg,#C9956C,#E8C4A0);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;letter-spacing:-1px;box-shadow:0 4px 16px rgba(139,53,88,0.25);cursor:pointer;overflow:hidden;position:relative;" onclick="document.getElementById('profPhotoInput').click()">
           <span id="profAvInner"></span>
           <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.35);font-size:10px;text-align:center;padding:3px 0;color:#fff;font-weight:600;">фото</div>
         </div>
         <input type="file" id="profPhotoInput" accept="image/*" style="display:none" onchange="_onProfilePhotoPicked(this)">
         <div><div class="prof-name" id="profName"></div><div class="prof-phone" id="profPhone"></div></div>
       </div>
+      <div id="loyaltyBlock" style="margin:4px 20px 16px;padding:10px 16px;background:var(--surface);border-radius:14px;"></div>
       <div style="padding:0 20px 6px;"><div class="label">Избранный мастер</div></div>
       <div class="settings-group" id="profFavMasterBlock">
         <div class="s-row" id="profFavMasterRow">
@@ -2012,6 +2011,7 @@ const YC = {
       const url = new URL(this.base + path);
       Object.entries(params).forEach(([k,v]) => url.searchParams.append(k, v));
       const r = await fetch(url.toString(), { headers: this._h() });
+      if (!r.ok) return { success: false, _status: r.status };
       return r.json();
     } catch(e) { return { success: false }; }
   },
@@ -2020,6 +2020,7 @@ const YC = {
       const r = await fetch(this.base + path, {
         method, headers: this._h(), body: JSON.stringify(body)
       });
+      if (!r.ok) return { success: false, _status: r.status };
       return r.json();
     } catch(e) { return { success: false }; }
   }
@@ -2077,7 +2078,7 @@ async function initApp() {
     }
     const cur = document.querySelector('.screen.active');
     if (cur && cur.id === 's-services') renderServices();
-  } catch(e) { console.warn('API init:', e); }
+  } catch(e) { /* API init failed silently */ }
 }
 
 function _updateCatChips() {
@@ -2390,6 +2391,11 @@ async function _rescheduleWithSession(session) {
 
   const r = await YC.post(`/record/${YC.company}/${id}`, body, 'PUT');
 
+  if (!r.success) {
+    alert(`Не удалось перенести запись: ${r.meta?.message || 'ошибка сервера'}. Позвоните в студию.`);
+    return;
+  }
+
   const records = _loadStoredRecords();
   const idx = records.findIndex(x => String(x.id) === String(id));
   if (idx !== -1) { records[idx].datetime = datetime; localStorage.setItem('yc_records', JSON.stringify(records)); }
@@ -2399,29 +2405,36 @@ async function _rescheduleWithSession(session) {
   const title = document.querySelector('#s-confirm .confirm-title');
   const sub = document.querySelector('#s-confirm .confirm-sub');
   if (title) title.textContent = 'Запись перенесена!';
-  if (sub) sub.textContent = r.success ? 'Время успешно изменено' : 'Время изменено локально. Подтвердите у администратора.';
-  if (!r.success) {
-    setTimeout(() => alert(`Запись перенесена локально, но YCLIENTS вернул ошибку: ${r.meta?.message || 'неизвестная ошибка'}.\nПожалуйста, уточните перенос у администратора.`), 400);
-  }
+  if (sub) sub.textContent = 'Время успешно изменено';
 }
 
+let _bookInProgress = false;
 async function _bookWithSession(session) {
-  const svc = getService();
-  const m = getMaster();
-  const datetime = `${state.dateISO || new Date().toISOString().slice(0,10)} ${state.slot || '10:00'}:00`;
-  const body = {
-    phone: session.phone || '',
-    fullname: session.name || '',
-    email: session.email || '',
-    appointments: [{ id: 1, services: [parseInt(svc.id) || 0], staff_id: m ? parseInt(m.id) : 0, datetime }],
-    notify_by_sms: 1
-  };
-  const r = await YC.post(`/book_record/${YC.company}`, body);
-  if (r.success) {
-    _saveBookedRecord(r.data && r.data[0]);
-    go('s-confirm');
-  } else {
-    alert(r.meta?.message || 'Не удалось создать запись. Попробуйте снова.');
+  if (_bookInProgress) return;
+  _bookInProgress = true;
+  const confirmBtn = document.querySelector('#s-confirm-pre .btn-primary, #s-slots .btn-primary');
+  if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.textContent = 'Записываем…'; }
+  try {
+    const svc = getService();
+    const m = getMaster();
+    const datetime = `${state.dateISO || new Date().toISOString().slice(0,10)} ${state.slot || '10:00'}:00`;
+    const body = {
+      phone: session.phone || '',
+      fullname: session.name || '',
+      email: session.email || '',
+      appointments: [{ id: 1, services: [parseInt(svc.id) || 0], staff_id: m ? parseInt(m.id) : 0, datetime }],
+      notify_by_sms: 1
+    };
+    const r = await YC.post(`/book_record/${YC.company}`, body);
+    if (r.success) {
+      _saveBookedRecord(r.data && r.data[0]);
+      go('s-confirm');
+    } else {
+      alert(r.meta?.message || 'Не удалось создать запись. Попробуйте снова.');
+    }
+  } finally {
+    _bookInProgress = false;
+    if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = 'Подтвердить запись'; }
   }
 }
 
@@ -2499,7 +2512,9 @@ async function sendCodeByPhone() {
   }
 
   const code = String(Math.floor(1000 + Math.random() * 9000));
-  localStorage.setItem('yc_otp', JSON.stringify({ code, email, phone, client_id: client.id, client_name: client.name || '', expiry: Date.now() + 10 * 60 * 1000 }));
+  const codeHash = await _sha256(code);
+  localStorage.setItem('yc_otp', JSON.stringify({ codeHash, email, expiry: Date.now() + 10 * 60 * 1000, attempts: 0 }));
+  localStorage.setItem('yc_auth_pending', JSON.stringify({ email, phone, client_id: client.id, client_name: client.name || '' }));
   if (btn) { btn.disabled = true; document.getElementById('loginBtnText').textContent = 'Отправляем…'; document.getElementById('loginBtnSpinner').style.display = 'inline-block'; }
   try {
     await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
@@ -2529,9 +2544,11 @@ function _showPhoneEmailInput(phone, client) {
       <input type="email" inputmode="email" id="loginEmailFb" placeholder="your@email.com"
         style="background:none;border:none;outline:none;font-size:17px;font-weight:500;font-family:inherit;flex:1;color:var(--text);">
     </div>
-    <button class="btn-primary" style="margin-top:8px;" onclick="_sendCodeToFallbackEmail('${phone}',${client.id},'${client.name||''}')">Отправить код →</button>`;
+    <button class="btn-primary" style="margin-top:8px;" id="sendCodeFbBtn">Отправить код →</button>`;
   const btn = document.getElementById('loginBtn');
   if (btn) btn.parentNode.insertBefore(div, btn.nextSibling);
+  const fbBtn = document.getElementById('sendCodeFbBtn');
+  if (fbBtn) fbBtn.addEventListener('click', () => _sendCodeToFallbackEmail(phone, client.id, client.name || ''));
 }
 
 async function _sendCodeToFallbackEmail(phone, clientId, clientName) {
@@ -2545,7 +2562,9 @@ async function _sendCodeToFallbackEmail(phone, clientId, clientName) {
   }
   if (errEl) errEl.style.display = 'none';
   const code = String(Math.floor(1000 + Math.random() * 9000));
-  localStorage.setItem('yc_otp', JSON.stringify({ code, email, phone: String(phone), client_id: clientId, client_name: clientName, expiry: Date.now() + 10 * 60 * 1000 }));
+  const codeHash = await _sha256(code);
+  localStorage.setItem('yc_otp', JSON.stringify({ codeHash, email, expiry: Date.now() + 10 * 60 * 1000, attempts: 0 }));
+  localStorage.setItem('yc_auth_pending', JSON.stringify({ email, phone: String(phone), client_id: clientId, client_name: clientName }));
   try {
     await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
       to_email: email, name: clientName || 'Клиент', phone: '', topic: 'Код подтверждения', message: code, agreement: 'да'
@@ -2581,7 +2600,8 @@ async function sendEmailCode() {
   if (errEl) errEl.style.display = 'none';
   if (btn) { btn.disabled = true; btn.textContent = 'Отправляем…'; }
   const code = String(Math.floor(1000 + Math.random() * 9000));
-  localStorage.setItem('yc_otp', JSON.stringify({ code, email, expiry: Date.now() + 10 * 60 * 1000 }));
+  const codeHash = await _sha256(code);
+  localStorage.setItem('yc_otp', JSON.stringify({ codeHash, email, expiry: Date.now() + 10 * 60 * 1000, attempts: 0 }));
   try {
     await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
       to_email: email, name: 'Клиент', phone: '', topic: 'Код подтверждения', message: code, agreement: 'да'
@@ -2598,7 +2618,8 @@ async function retryEmail() {
   const stored = JSON.parse(localStorage.getItem('yc_otp') || 'null');
   if (!stored) return;
   const code = String(Math.floor(1000 + Math.random() * 9000));
-  localStorage.setItem('yc_otp', JSON.stringify({ ...stored, code, expiry: Date.now() + 10 * 60 * 1000 }));
+  const codeHash = await _sha256(code);
+  localStorage.setItem('yc_otp', JSON.stringify({ ...stored, codeHash, attempts: 0, expiry: Date.now() + 10 * 60 * 1000 }));
   try {
     await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
       to_email: stored.email, name: 'Клиент', phone: '', topic: 'Код подтверждения', message: code, agreement: 'да'
@@ -2883,10 +2904,10 @@ function cancelRecord(id, hash) {
       cancelCard.innerHTML = `
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
           <div style="width:44px;height:44px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--accent);flex-shrink:0;">${getInitials(rec.masterName)}</div>
-          <div><div style="font-size:15px;font-weight:700;">${rec.masterName}</div><div style="font-size:12px;color:var(--text-2);">Мастер</div></div>
+          <div><div style="font-size:15px;font-weight:700;">${esc(rec.masterName)}</div><div style="font-size:12px;color:var(--text-2);">Мастер</div></div>
         </div>
-        <div style="font-size:17px;font-weight:800;margin-bottom:6px;">${rec.svcName}</div>
-        <div style="font-size:14px;color:var(--text-2);">${_fmtDatetime(rec.datetime)} · ${rec.dur} мин${rec.price ? ' · ' + rec.price : ''}</div>`;
+        <div style="font-size:17px;font-weight:800;margin-bottom:6px;">${esc(rec.svcName)}</div>
+        <div style="font-size:14px;color:var(--text-2);">${esc(_fmtDatetime(rec.datetime))} · ${esc(String(rec.dur))} мин${rec.price ? ' · ' + esc(String(rec.price)) : ''}</div>`;
     } else {
       cancelCard.innerHTML = `<div style="font-size:15px;font-weight:700;">Запись #${id}</div>`;
     }
@@ -2908,7 +2929,6 @@ async function confirmCancel() {
     });
     const text = await res.text();
     const data = text ? JSON.parse(text) : {};
-    console.log('Cancel DELETE status:', res.status, 'body:', data);
 
     if (res.status >= 400) {
       if (btn) { btn.disabled = false; btn.textContent = 'Да, отменить запись'; }
@@ -2917,7 +2937,6 @@ async function confirmCancel() {
       return;
     }
   } catch(e) {
-    console.error('Cancel error:', e);
     if (btn) { btn.disabled = false; btn.textContent = 'Да, отменить запись'; }
     alert('Нет соединения с сервером. Попробуйте позже.');
     return;
@@ -2978,6 +2997,10 @@ function getService() { return SERVICES_DATA.find(s => s.id === state.serviceId)
 function getMaster()  { return state.masterId ? MASTERS_DATA.find(m => m.id === state.masterId) : null; }
 function getInitials(name) { if (!name) return '?'; return name.trim().split(/\s+/).map(w => w[0] || '').join('').slice(0, 2).toUpperCase() || '?'; }
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+async function _sha256(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
 
 const _NO_AVATAR = ['no-master-sm.png', 'no-master.png'];
 function _hasRealAvatar(m) {
@@ -3085,7 +3108,6 @@ async function renderMasters() {
   let masters = [];
   try {
     const r = await YC.get(`/book_staff/${YC.company}`, { service_ids: svc.id });
-    console.log('[renderMasters] svc.id=', svc.id, 'API returned', r.data?.length, 'staff, MASTERS_DATA has', MASTERS_DATA.length);
     if (r.success && r.data && r.data.length) {
       const ids = new Set(r.data.map(s => String(s.id)));
       const filtered = MASTERS_DATA.filter(m => ids.has(m.id));
@@ -3102,7 +3124,7 @@ async function renderMasters() {
         }));
       }
     }
-  } catch(e) { console.warn('[renderMasters]', e); }
+  } catch(e) { /* fall through to MASTERS_DATA */ }
   if (!masters.length) masters = MASTERS_DATA;
   const svcCat = svc.cat;
   if (svcCat) {
@@ -3387,7 +3409,7 @@ function _onProfilePhotoPicked(input) {
       const sx = (img.width - min) / 2, sy = (img.height - min) / 2;
       ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
       const b64 = canvas.toDataURL('image/jpeg', 0.8);
-      localStorage.setItem('yc_profile_photo', b64);
+      try { localStorage.setItem('yc_profile_photo', b64); } catch { alert('Не удалось сохранить фото: недостаточно места в хранилище браузера.'); return; }
       renderProfileScreen();
       const _sess = getSession();
       if (_sess && _sess.client_id) {
@@ -3773,7 +3795,7 @@ async function _ghWrite(posts, sha, token) {
       headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
       body: JSON.stringify(body)
     });
-    if (r.status === 401) { localStorage.removeItem('yc_gh_token'); return false; }
+    if (r.status === 401) { sessionStorage.removeItem('yc_gh_token'); return false; }
     return r.ok;
   } catch { return false; }
 }
@@ -3791,11 +3813,11 @@ async function _ghPullToLocal() {
 }
 
 async function _ghSyncPosts(postsToWrite) {
-  let token = localStorage.getItem('yc_gh_token');
+  let token = sessionStorage.getItem('yc_gh_token');
   if (!token) {
     token = prompt('Введите GitHub Personal Access Token (нужен для синхронизации постов с клиентами).\n\nПолучить: GitHub → Settings → Developer settings → Personal access tokens → Generate new token → выбрать scope "public_repo"');
     if (!token) return;
-    localStorage.setItem('yc_gh_token', token.trim());
+    sessionStorage.setItem('yc_gh_token', token.trim());
     token = token.trim();
   }
   const gh = await _ghRead();
@@ -3805,12 +3827,12 @@ async function _ghSyncPosts(postsToWrite) {
 }
 
 function _adminResetToken() {
-  const cur = localStorage.getItem('yc_gh_token');
+  const cur = sessionStorage.getItem('yc_gh_token');
   const msg = cur ? 'Токен задан. Введите новый или оставьте пустым для сброса:' : 'Введите GitHub Personal Access Token:';
   const t = prompt(msg + '\n\nПолучить: GitHub → Settings → Developer settings → Personal access tokens → Generate new token → scope: public_repo');
   if (t === null) return;
-  if (t.trim()) { localStorage.setItem('yc_gh_token', t.trim()); alert('Токен сохранён.'); }
-  else { localStorage.removeItem('yc_gh_token'); alert('Токен сброшен.'); }
+  if (t.trim()) { sessionStorage.setItem('yc_gh_token', t.trim()); alert('Токен сохранён.'); }
+  else { sessionStorage.removeItem('yc_gh_token'); alert('Токен сброшен.'); }
 }
 
 // ── CLIENT FEED ──
@@ -3944,7 +3966,7 @@ function _toggleFeedFilter() {
     const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => !p.draft);
     const cats = ['Все', ...new Set(posts.map(p => p.cat).filter(Boolean))];
     const list = document.getElementById('feedFilterList');
-    if (list) list.innerHTML = cats.map(c => `<div style="padding:11px 16px;font-size:14px;cursor:pointer;${_feedActiveCat === (c==='Все'?'':c) ? 'font-weight:700;color:var(--accent);' : ''}" onclick="_feedFilterCat('${c==='Все'?'':c}')">${c}</div>`).join('');
+    if (list) list.innerHTML = cats.map(c => { const val = c === 'Все' ? '' : c; return `<div style="padding:11px 16px;font-size:14px;cursor:pointer;${_feedActiveCat === val ? 'font-weight:700;color:var(--accent);' : ''}" data-cat="${esc(val)}" onclick="_feedFilterCat(this.dataset.cat)">${esc(c)}</div>`; }).join('');
     setTimeout(() => document.addEventListener('click', _closeFeedFilter, {once:true}), 10);
   }
 }
@@ -3975,36 +3997,26 @@ async function _loadClientLoyalty() {
   } catch {}
   return null;
 }
-function _loyaltyLevel(discount) {
-  if (!discount) return { label: 'Бронза', color: '#CD7F32' };
-  if (discount >= 15) return { label: 'Золото', color: '#FFD700' };
-  if (discount >= 8) return { label: 'Серебро', color: '#C0C0C0' };
-  return { label: 'Бронза', color: '#CD7F32' };
+function _importanceLabel(importance) {
+  switch (Number(importance)) {
+    case 1: return { label: 'Важный',       color: '#8B3558' };
+    case 2: return { label: 'Очень важный', color: '#8B3558' };
+    case 3: return { label: 'VIP',          color: '#FFD700' };
+    default: return { label: 'Обычный',     color: 'var(--text-2)' };
+  }
 }
 async function renderLoyaltyBlock() {
   const el = document.getElementById('loyaltyBlock');
   if (!el) return;
   const sess = getSession();
   if (!sess) { el.style.display = 'none'; return; }
-  const photo = localStorage.getItem('yc_profile_photo');
-  const initials = getInitials(sess.name || sess.email || '?');
-  const avatarHtml = photo
-    ? `<img src="${esc(photo)}" style="width:100%;height:100%;object-fit:cover;">`
-    : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;background:linear-gradient(135deg,#C8547F,#E8A0C4);">${initials}</div>`;
   el.style.display = '';
-  el.innerHTML = `<div style="display:flex;align-items:center;gap:14px;">
-    <div style="width:56px;height:56px;border-radius:50%;flex-shrink:0;overflow:hidden;box-shadow:0 3px 12px rgba(200,84,127,0.3);">${avatarHtml}</div>
-    <div style="flex:1;">
-      <div style="font-size:16px;font-weight:800;margin-bottom:2px;">${esc(sess.name || sess.email)}</div>
-      <div style="font-size:12px;color:var(--text-2);">${sess.phone || ''}</div>
-    </div>
-    <div id="loyaltyLevelBadge" style="text-align:center;padding:8px 12px;background:rgba(0,0,0,0.05);border-radius:12px;min-width:70px;font-size:13px;color:var(--text-2);">…</div>
-  </div>`;
+  el.innerHTML = `<div id="importanceBadge" style="font-size:13px;color:var(--text-2);">Важность: <span style="font-weight:700;">…</span></div>`;
   const data = await _loadClientLoyalty();
-  const discount = data?.discount || data?.card?.discount || 0;
-  const lvl = _loyaltyLevel(discount);
-  const badge = document.getElementById('loyaltyLevelBadge');
-  if (badge) badge.innerHTML = `<div style="font-size:14px;font-weight:900;color:${lvl.color};">${lvl.label}</div>${discount ? `<div style="font-size:12px;color:var(--text-2);margin-top:2px;">−${discount}%</div>` : ''}`;
+  const imp = data?.importance ?? null;
+  const lvl = _importanceLabel(imp);
+  const badge = document.getElementById('importanceBadge');
+  if (badge) badge.innerHTML = `Важность: <span style="font-weight:700;color:${lvl.color};">${lvl.label}</span>`;
 }
 
 // ── PUSH NOTIFICATION ──
