@@ -3197,7 +3197,7 @@ function onEnterScreen(id) {
       _fetchAndMergeServerRecords(_hs.client_id).then(() => renderHomeHero());
     }
     _ghRead().then(gh => {
-      if (gh && gh.sha !== null) {
+      if (gh && gh.sha !== null && gh.posts.length) {
         localStorage.setItem('yc_feed_posts', JSON.stringify(gh.posts));
         _renderHomeFeedPreview();
       }
@@ -4046,7 +4046,7 @@ renderServices();
     renderProfileScreen();
     renderLoyaltyBlock();
     _ghRead().then(gh => {
-      if (gh && gh.sha !== null) {
+      if (gh && gh.sha !== null && gh.posts.length) {
         localStorage.setItem('yc_feed_posts', JSON.stringify(gh.posts));
         _renderHomeFeedPreview();
       }
