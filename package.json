@@ -1,0 +1,14 @@
+{
+  "devDependencies": {
+    "sharp": "^0.34.5",
+    "eslint": "^9",
+    "@eslint/js": "^9",
+    "prettier": "^3",
+    "playwright": "^1.60.0"
+  },
+  "scripts": {
+    "icons": "node docs/generate-icons.js",
+    "lint": "eslint 'docs/modules/**/*.js' docs/app.js",
+    "fmt": "prettier --write 'docs/modules/**/*.js' docs/app.js"
+  }
+}
