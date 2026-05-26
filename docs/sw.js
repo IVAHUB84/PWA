@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v5';
+const CACHE_VERSION = 'v6';
 const STATIC_CACHE  = `studio-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `studio-runtime-${CACHE_VERSION}`;
 
@@ -69,17 +69,27 @@ self.addEventListener('fetch', event => {
   if (NETWORK_ONLY_HOSTS.some(h => url.hostname.includes(h))) return;
 
   const isSameOrigin = url.origin === self.location.origin;
-  const isShell = isSameOrigin &&
+  const isJs = isSameOrigin && (url.pathname.endsWith('.js'));
+  const isShell = isSameOrigin && !isJs &&
     APP_SHELL.some(p => url.pathname.endsWith(p.replace('./', '/')));
 
+  if (isJs) {
+    // JS-модули: network-first, fallback на кэш (чтобы фиксы применялись сразу)
+    event.respondWith(
+      fetch(request).then(res => {
+        if (res.ok) caches.open(STATIC_CACHE).then(c => c.put(request, res.clone()));
+        return res;
+      }).catch(() => caches.match(request))
+    );
+    return;
+  }
+
   if (isShell) {
-    // App shell: cache-first + фоновое обновление
+    // HTML/CSS/иконки: cache-first + фоновое обновление
     event.respondWith(
       caches.match(request).then(cached => {
         const networkFetch = fetch(request).then(res => {
-          if (res.ok) {
-            caches.open(STATIC_CACHE).then(c => c.put(request, res.clone()));
-          }
+          if (res.ok) caches.open(STATIC_CACHE).then(c => c.put(request, res.clone()));
           return res;
         });
         return cached || networkFetch;
