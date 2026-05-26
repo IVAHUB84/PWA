@@ -3401,7 +3401,7 @@ function _onProfilePhotoPicked(input) {
       const sx = (img.width - min) / 2, sy = (img.height - min) / 2;
       ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
       const b64 = canvas.toDataURL('image/jpeg', 0.8);
-      localStorage.setItem('yc_profile_photo', b64);
+      try { localStorage.setItem('yc_profile_photo', b64); } catch { alert('Не удалось сохранить фото: недостаточно места в хранилище браузера.'); return; }
       renderProfileScreen();
       const _sess = getSession();
       if (_sess && _sess.client_id) {
@@ -3819,11 +3819,11 @@ async function _ghSyncPosts(postsToWrite) {
 }
 
 function _adminResetToken() {
-  const cur = localStorage.getItem('yc_gh_token');
+  const cur = sessionStorage.getItem('yc_gh_token');
   const msg = cur ? 'Токен задан. Введите новый или оставьте пустым для сброса:' : 'Введите GitHub Personal Access Token:';
   const t = prompt(msg + '\n\nПолучить: GitHub → Settings → Developer settings → Personal access tokens → Generate new token → scope: public_repo');
   if (t === null) return;
-  if (t.trim()) { localStorage.setItem('yc_gh_token', t.trim()); alert('Токен сохранён.'); }
+  if (t.trim()) { sessionStorage.setItem('yc_gh_token', t.trim()); alert('Токен сохранён.'); }
   else { sessionStorage.removeItem('yc_gh_token'); alert('Токен сброшен.'); }
 }
 
