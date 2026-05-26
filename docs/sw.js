@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v6';
+const CACHE_VERSION = 'v7';
 const STATIC_CACHE  = `studio-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `studio-runtime-${CACHE_VERSION}`;
 
@@ -77,7 +77,7 @@ self.addEventListener('fetch', event => {
     // JS-модули: network-first, fallback на кэш (чтобы фиксы применялись сразу)
     event.respondWith(
       fetch(request).then(res => {
-        if (res.ok) caches.open(STATIC_CACHE).then(c => c.put(request, res.clone()));
+        if (res.ok) { const c2 = res.clone(); caches.open(STATIC_CACHE).then(c => c.put(request, c2)); }
         return res;
       }).catch(() => caches.match(request))
     );
@@ -89,7 +89,7 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       caches.match(request).then(cached => {
         const networkFetch = fetch(request).then(res => {
-          if (res.ok) caches.open(STATIC_CACHE).then(c => c.put(request, res.clone()));
+          if (res.ok) { const c2 = res.clone(); caches.open(STATIC_CACHE).then(c => c.put(request, c2)); }
           return res;
         });
         return cached || networkFetch;

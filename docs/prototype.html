@@ -361,6 +361,7 @@
       <input class="otp-box" type="text" inputmode="numeric" maxlength="1" id="otp3">
       <input class="otp-box" type="text" inputmode="numeric" maxlength="1" id="otp4" placeholder="·">
     </div>
+    <button class="btn-primary" style="margin-top:16px;" onclick="verifyOtp()">Подтвердить →</button>
     <div class="otp-hint" id="otpRetryHint" style="display:none;">Не пришёл код? <button class="btn-ghost" style="font-size:14px;" onclick="retryEmail()">Отправить снова</button></div>
     <div id="otpTimer" style="text-align:center;color:var(--text-2);font-size:13px;margin-top:4px;">Повторный код через <b id="otpCountdown">3:00</b></div>
   </div>
