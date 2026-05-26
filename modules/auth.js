@@ -217,6 +217,7 @@ export async function sendEmailCode() {
       to_email: email, name: 'Клиент', phone: '', topic: 'Код подтверждения', message: code, agreement: 'да',
     });
     localStorage.setItem('yc_otp', JSON.stringify({ codeHash, email, expiry: Date.now() + 10 * 60 * 1000, attempts: 0 }));
+    localStorage.setItem('yc_auth_pending', JSON.stringify({ email, phone: '', client_id: null, client_name: '' }));
     go('s-otp');
   } catch (e) {
     const msg = e?.text || e?.message || JSON.stringify(e) || 'неизвестная ошибка';
