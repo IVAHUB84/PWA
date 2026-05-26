@@ -52,7 +52,9 @@ export function _hasRealAvatar(m) {
 export function _avatarHtml(m, size = 48, grad = null) {
   const bg = grad || m.grad || _GRADS[0];
   if (_hasRealAvatar(m)) {
-    return `<img src="${m.avatar_big || m.avatar}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.outerHTML='<div style=\\"width:${size}px;height:${size}px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:${Math.round(size * 0.35)}px;font-weight:800;color:#fff;\\">${getInitials(m.name)}</div>'">`;
+    const initials = esc(getInitials(m.name));
+    const safeBg = esc(bg);
+    return `<img src="${esc(m.avatar_big || m.avatar)}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0;" onerror="this.outerHTML='<div style=\\"width:${size}px;height:${size}px;border-radius:50%;background:${safeBg};display:flex;align-items:center;justify-content:center;font-size:${Math.round(size * 0.35)}px;font-weight:800;color:#fff;\\">${initials}</div>'">`;
   }
   return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:${Math.round(size * 0.35)}px;font-weight:800;color:#fff;flex-shrink:0;">${getInitials(m.name)}</div>`;
 }

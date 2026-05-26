@@ -27,7 +27,7 @@ export function updateSlotsScreen() {
 export function updateStickyBottom() {
   const svc = getService();
   const el = document.getElementById('stickyInfo');
-  if (el) el.innerHTML = `<b>${state.dateFull} · ${state.slot}</b> · ${esc(svc.name)}`;
+  if (el) el.innerHTML = `<b>${esc(state.dateFull)} · ${esc(state.slot)}</b> · ${esc(svc.name)}`;
   const btn = document.querySelector('#s-slots .sticky-bottom .btn-primary');
   if (btn) btn.textContent = state._rescheduleId ? 'Перенести запись' : 'Подтвердить запись';
 }
@@ -66,12 +66,16 @@ export async function loadDates() {
   el.innerHTML = '<div style="padding:12px;color:var(--text-2);font-size:13px;">Загрузка…</div>';
   const params = { service_ids: svc.id };
   if (m) params.staff_id = m.id;
-  const r = await YC.get(`/book_dates/${YC.company}`, params);
-  const dates = r.success && r.data && r.data.booking_dates ? r.data.booking_dates : null;
-  if (dates && dates.length) {
-    _renderDates(el, dates);
-  } else {
-    _renderDatesFallback(el);
+  try {
+    const r = await YC.get(`/book_dates/${YC.company}`, params);
+    const dates = r.success && r.data && r.data.booking_dates ? r.data.booking_dates : null;
+    if (dates && dates.length) {
+      _renderDates(el, dates);
+    } else {
+      _renderDatesFallback(el);
+    }
+  } catch {
+    el.innerHTML = '<div style="padding:12px;color:var(--text-2);font-size:13px;">Не удалось загрузить даты. Проверьте соединение.</div>';
   }
 }
 
@@ -124,7 +128,13 @@ export async function loadTimes(iso) {
   const staffId = m ? m.id : 0;
   const params = {};
   if (svc) params.service_ids = svc.id;
-  const r = await YC.get(`/book_times/${YC.company}/${staffId}/${iso}`, params);
+  let r;
+  try {
+    r = await YC.get(`/book_times/${YC.company}/${staffId}/${iso}`, params);
+  } catch {
+    el.innerHTML = '<div style="padding:12px;color:var(--text-2);font-size:13px;">Не удалось загрузить время. Проверьте соединение.</div>';
+    return;
+  }
   if (!r.success || !r.data || !r.data.length) {
     el.innerHTML = '<div style="padding:12px;color:var(--text-2);font-size:13px;">Нет свободных окон на этот день</div>';
     return;

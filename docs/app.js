@@ -156,7 +156,7 @@ async function initApp() {
       }));
     }
     renderServices();
-  } catch { }
+  } catch(e) { console.error('initApp failed', e); }
 }
 
 // ── BOOT ──

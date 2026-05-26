@@ -42,7 +42,7 @@ self.addEventListener('install', event => {
     caches.open(STATIC_CACHE)
       .then(cache => cache.addAll(APP_SHELL))
       .then(() => self.skipWaiting())
-      .catch(() => self.skipWaiting())
+      .catch(err => { console.error('SW install cache failed', err); return self.skipWaiting(); })
   );
 });
 

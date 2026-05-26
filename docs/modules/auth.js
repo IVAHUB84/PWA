@@ -1,6 +1,6 @@
 import { go } from './navigation.js';
 import { setOnLeaveOtpFn } from './navigation.js';
-import { _sha256, _normalizePhone, _maskEmail } from './utils.js';
+import { _sha256, _normalizePhone, _maskEmail, esc } from './utils.js';
 import { EMAILJS, YC, _findClientByPhone, _findClientByEmail } from './api.js';
 import { getSession, saveSession, clearSession, setAuthContext } from './storage.js';
 import { state } from './state.js';
@@ -60,7 +60,7 @@ export function _setOtpError(msg) {
   const hint = document.querySelector('#s-otp .otp-hint');
   if (hint) {
     hint.style.display = 'block';
-    hint.innerHTML = `<span style="color:var(--red)">${msg}</span>`;
+    hint.innerHTML = `<span style="color:var(--red)">${esc(msg)}</span>`;
   }
 }
 
@@ -127,7 +127,7 @@ export async function sendCodeByPhone() {
     if (t) t.textContent = 'Отправляем…';
     if (s) s.style.display = 'inline-block';
   }
-  const code = String(Math.floor(1000 + Math.random() * 9000));
+  const code = String(1000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 9000));
   const codeHash = await _sha256(code);
   try {
     await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
@@ -184,7 +184,7 @@ async function _sendCodeToFallbackEmail(phone, clientId, clientName) {
     return;
   }
   if (errEl) errEl.style.display = 'none';
-  const code = String(Math.floor(1000 + Math.random() * 9000));
+  const code = String(1000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 9000));
   const codeHash = await _sha256(code);
   try {
     await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
@@ -213,7 +213,7 @@ export async function sendEmailCode() {
   }
   if (errEl) errEl.style.display = 'none';
   if (btn) { btn.disabled = true; btn.textContent = 'Отправляем…'; }
-  const code = String(Math.floor(1000 + Math.random() * 9000));
+  const code = String(1000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 9000));
   const codeHash = await _sha256(code);
   try {
     await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
@@ -234,7 +234,7 @@ export async function sendEmailCode() {
 export async function retryEmail() {
   const stored = JSON.parse(localStorage.getItem('yc_otp') || 'null');
   if (!stored) return;
-  const code = String(Math.floor(1000 + Math.random() * 9000));
+  const code = String(1000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 9000));
   const codeHash = await _sha256(code);
   try {
     await emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
@@ -299,7 +299,13 @@ export async function verifyOtp() {
       return;
     }
 
-    const client = await _findClientByEmail(email);
+    let client;
+    try {
+      client = await _findClientByEmail(email);
+    } catch {
+      _setOtpError('Ошибка соединения. Попробуйте снова.');
+      return;
+    }
     if (client) {
       saveSession({ email, user_token: '', name: client.name || '', phone: client.phone || '', client_id: client.id });
       _navigateHome();

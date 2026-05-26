@@ -79,7 +79,7 @@ async function _rescheduleWithSession(session) {
       ycSvcId = fr.data.services && fr.data.services[0] && fr.data.services[0].id;
       seanceLength = fr.data.seance_length || 3600;
     }
-  } catch {}
+  } catch(e) { console.error('reschedule: failed to fetch record from API', e); }
 
   if (!ycStaffId || !ycSvcId) {
     const records = _loadStoredRecords();
