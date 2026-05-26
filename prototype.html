@@ -2842,30 +2842,19 @@ async function confirmCancel() {
   if (btn) { btn.disabled = true; btn.textContent = 'Отменяем…'; }
 
   try {
-    const hashParam = hash ? `?record_hash=${encodeURIComponent(hash)}` : '';
-    const res = await fetch(`${YC.base}/record/${YC.company}/${id}${hashParam}`, {
+    const res = await fetch(`${YC.base}/record/${YC.company}/${id}`, {
       method: 'DELETE',
       headers: YC._h()
     });
-    const data = await res.json().catch(() => ({}));
+    const text = await res.text();
+    const data = text ? JSON.parse(text) : {};
     console.log('Cancel DELETE status:', res.status, 'body:', data);
 
     if (res.status >= 400) {
-      // Fallback: try PUT with deleted:true (some YCLIENTS configs require this)
-      console.log('DELETE failed, trying PUT deleted:true');
-      const putRes = await fetch(`${YC.base}/record/${YC.company}/${id}`, {
-        method: 'PUT',
-        headers: YC._h(),
-        body: JSON.stringify({ deleted: 1 })
-      });
-      const putData = await putRes.json().catch(() => ({}));
-      console.log('Cancel PUT status:', putRes.status, 'body:', putData);
-      if (putRes.status >= 400) {
-        if (btn) { btn.disabled = false; btn.textContent = 'Да, отменить запись'; }
-        const msg = putData?.meta?.message || data?.meta?.message || `Ошибка ${res.status}`;
-        alert(`Не удалось отменить: ${msg}. Позвоните в студию.`);
-        return;
-      }
+      if (btn) { btn.disabled = false; btn.textContent = 'Да, отменить запись'; }
+      const msg = data?.meta?.message || `Ошибка ${res.status}`;
+      alert(`Не удалось отменить: ${msg}. Позвоните в студию.`);
+      return;
     }
   } catch(e) {
     console.error('Cancel error:', e);
