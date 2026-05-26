@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Реснички, сестрички и две истерички</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#FAF1F3">
+<meta name="theme-color" content="#FAF7F3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Реснички">
@@ -20,11 +20,11 @@ a, button, [onclick], .tab, .chip, .svc-card, .master-card, .slot, .hero-card, .
 }
 
 :root {
-  --bg: #FAF1F3;
+  --bg: #FAF7F3;
   --surface: #FFFFFF;
   --primary: #1C1C1E;
   --accent: #8B3558;
-  --accent-light: #F2E8EE;
+  --accent-light: #F8EDE3;
   --wine: #8B3558;
   --gold: #C9956C;
   --mint: #6DC9AF;
@@ -121,7 +121,7 @@ body {
   height: 83px; padding: 0 0 34px;
   display: flex; align-items: flex-start; justify-content: space-around;
   border-top: 1px solid var(--border); flex-shrink: 0;
-  background: rgba(250,241,243,0.94);
+  background: rgba(250,247,243,0.94);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   overflow: visible;
@@ -448,7 +448,7 @@ body {
   background: linear-gradient(135deg,#3D2B1F 0%,#1C1C1E 100%);
   border-radius: 16px; cursor: pointer; position: relative; overflow: hidden;
 }
-.offer-home-banner::after { content:''; position:absolute; top:-30px; right:-30px; width:120px; height:120px; background:radial-gradient(circle,rgba(200,84,127,.35) 0%,transparent 70%); pointer-events:none; }
+.offer-home-banner::after { content:''; position:absolute; top:-30px; right:-30px; width:120px; height:120px; background:radial-gradient(circle,rgba(201,149,108,.25) 0%,transparent 70%); pointer-events:none; }
 .ohb-tag   { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--accent); margin-bottom:4px; }
 .ohb-title { font-size:16px; font-weight:800; color:#fff; margin-bottom:4px; }
 .ohb-price { font-size:13px; color:rgba(255,255,255,.55); }
@@ -965,7 +965,7 @@ body {
     <div class="page-title" style="padding-top:8px;">Профиль</div>
     <div class="scroll">
       <div class="prof-head">
-        <div id="profAv" class="prof-av" style="background:linear-gradient(135deg,#C9956C,#E8C4A0);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;letter-spacing:-1px;box-shadow:0 4px 16px rgba(200,84,127,0.3);cursor:pointer;overflow:hidden;position:relative;" onclick="document.getElementById('profPhotoInput').click()">
+        <div id="profAv" class="prof-av" style="background:linear-gradient(135deg,#C9956C,#E8C4A0);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;letter-spacing:-1px;box-shadow:0 4px 16px rgba(139,53,88,0.25);cursor:pointer;overflow:hidden;position:relative;" onclick="document.getElementById('profPhotoInput').click()">
           <span id="profAvInner"></span>
           <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.35);font-size:10px;text-align:center;padding:3px 0;color:#fff;font-weight:600;">фото</div>
         </div>
