@@ -97,7 +97,7 @@ export function renderHomeHero() {
     <div style="display:flex;align-items:center;gap:10px;">
       <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;color:#fff;">${getInitials(next.masterName)}</div>
       <div>
-        <div style="font-size:15px;font-weight:800;margin-bottom:2px;">${esc(next.svcName)}</div>
+        <div style="font-size:15px;font-weight:800;margin-bottom:2px;">${esc(next.svcName)}${next.forName ? ` <span style="font-weight:500;opacity:0.7;">· для ${esc(next.forName)}</span>` : ''}</div>
         <div style="font-size:12px;color:rgba(255,255,255,0.6);">${esc(next.masterName)} · ${_fmtDatetime(next.datetime)}</div>
       </div>
     </div>

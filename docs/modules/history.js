@@ -35,7 +35,8 @@ export function _renderHistoryFromCache() {
             <div style="flex:1;"><div style="font-size:14px;font-weight:700;">${esc(r.masterName)}</div></div>
             <div style="text-align:right;font-size:13px;font-weight:700;color:var(--accent);">${_fmtDatetime(r.datetime)}</div>
           </div>
-          <div style="font-size:16px;font-weight:800;margin-bottom:12px;">${esc(r.svcName)}</div>
+          <div style="font-size:16px;font-weight:800;margin-bottom:${r.forName ? '4px' : '12px'};">${esc(r.svcName)}</div>
+          ${r.forName ? `<div style="font-size:12px;color:var(--text-2);margin-bottom:12px;">для ${esc(r.forName)}</div>` : ''}
           <div style="display:flex;gap:8px;">
             <button class="hero-btn" style="font-size:13px;" data-rid="${esc(String(r.id))}" onclick="rescheduleRecord(this.dataset.rid)">Перенести</button>
             <button class="hero-btn" style="font-size:13px;" data-cid="${r.id}" data-chash="${r.hash || ''}" onclick="cancelRecord(this.dataset.cid,this.dataset.chash)">Отменить</button>

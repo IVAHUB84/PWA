@@ -28,6 +28,7 @@ function _saveBookedRecord(rec) {
     masterName: m ? m.name : 'Любой мастер', masterId: m ? m.id : 0,
     ycStaffId, ycSvcId,
     datetime, price: svc.priceStr, dur: svc.dur, status: 'upcoming',
+    forName: state._bookOtherName || '',
   });
   localStorage.setItem('yc_records', JSON.stringify(records));
 }
