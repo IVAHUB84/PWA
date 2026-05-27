@@ -36,12 +36,12 @@ export async function renderClientFeed() {
   }
 
   const gh = await _ghReadFn();
-  if (gh && gh.sha !== null && gh.posts.length) {
+  if (gh && gh.ok && gh.posts.length) {
     const published = gh.posts.filter(p => !p.draft);
-    localStorage.setItem('yc_feed_posts', JSON.stringify(gh.posts.filter(p => !p.draft)));
+    localStorage.setItem('yc_feed_posts', JSON.stringify(published));
     _renderFeedCats(published);
     _paintFeed(el, published);
-  } else if (gh && gh.sha !== null && !gh.posts.length) {
+  } else if (gh && gh.ok && !gh.posts.length) {
     localStorage.setItem('yc_feed_posts', '[]');
     _renderFeedCats([]);
     _paintFeed(el, []);

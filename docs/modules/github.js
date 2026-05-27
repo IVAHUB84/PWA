@@ -1,24 +1,34 @@
-import { _GH_API } from './constants.js';
-import { _b64enc, _b64dec } from './utils.js';
+import { _GH_API, _GH_RAW } from './constants.js';
+import { _b64enc } from './utils.js';
+
+const _VALID_POST = p =>
+  p && typeof p.id === 'number' &&
+  typeof p.text === 'string' && typeof p.cat === 'string' && typeof p.date === 'string' &&
+  (!p.image || /^https:\/\/\S+$/.test(p.image));
 
 export async function _ghRead() {
   try {
-    const r = await fetch(_GH_API + '?_=' + Date.now(), { headers: { 'Accept': 'application/vnd.github.v3+json' } });
-    if (r.status === 404) return { posts: [], sha: null };
+    const r = await fetch(_GH_RAW + '?_=' + Date.now());
+    if (r.status === 404) return { posts: [], ok: true };
     if (!r.ok) return null;
-    const d = await r.json();
-    const parsed = JSON.parse(_b64dec(d.content));
-    if (!Array.isArray(parsed)) return { posts: [], sha: d.sha };
-    const posts = parsed.filter(p =>
-      p && typeof p.id === 'number' &&
-      typeof p.text === 'string' && typeof p.cat === 'string' && typeof p.date === 'string' &&
-      (!p.image || /^https:\/\/\S+$/.test(p.image))
-    );
-    return { posts, sha: d.sha };
+    const parsed = await r.json();
+    if (!Array.isArray(parsed)) return { posts: [], ok: true };
+    return { posts: parsed.filter(_VALID_POST), ok: true };
   } catch { return null; }
 }
 
-export async function _ghWrite(posts, sha, token) {
+async function _ghGetSha(token) {
+  try {
+    const r = await fetch(_GH_API, {
+      headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' },
+    });
+    if (!r.ok) return null;
+    return (await r.json()).sha || null;
+  } catch { return null; }
+}
+
+async function _ghWrite(posts, token) {
+  const sha = await _ghGetSha(token);
   const body = { message: 'Update feed posts', content: _b64enc(JSON.stringify(posts)) };
   if (sha) body.sha = sha;
   try {
@@ -27,7 +37,7 @@ export async function _ghWrite(posts, sha, token) {
       headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
       body: JSON.stringify(body),
     });
-    if (r.status === 401) { sessionStorage.removeItem('yc_gh_token'); return false; }
+    if (r.status === 401) { localStorage.removeItem('yc_gh_token'); return false; }
     return r.ok;
   } catch { return false; }
 }
@@ -46,26 +56,27 @@ export async function _ghPullToLocal() {
 
 export async function _ghSyncPosts(postsToWrite) {
   if (!Array.isArray(postsToWrite)) return;
-  let token = sessionStorage.getItem('yc_gh_token');
+  let token = localStorage.getItem('yc_gh_token');
   if (!token) {
-    token = prompt('Введите GitHub Personal Access Token (нужен для синхронизации постов с клиентами).\n\nПолучить: GitHub → Settings → Developer settings → Personal access tokens → Generate new token → выбрать scope "public_repo"');
+    token = prompt('Введите GitHub Personal Access Token.\n\nПолучить: GitHub → Settings → Developer settings → Personal access tokens → Generate new token → scope: public_repo\n\nТокен сохранится навсегда.');
     if (!token) return;
-    sessionStorage.setItem('yc_gh_token', token.trim());
+    localStorage.setItem('yc_gh_token', token.trim());
     token = token.trim();
   }
-  const gh = await _ghRead();
-  if (!gh) { alert('Не удалось прочитать данные с GitHub'); return; }
-  const ok = await _ghWrite(postsToWrite, gh.sha, token);
-  if (!ok) { alert('Ошибка записи на GitHub. Токен сброшен — попробуйте снова.'); }
+  const ok = await _ghWrite(postsToWrite, token);
+  if (!ok) {
+    localStorage.removeItem('yc_gh_token');
+    alert('Ошибка записи на GitHub. Токен сброшен — попробуйте опубликовать снова.');
+  }
 }
 
 export function _adminResetToken() {
-  const cur = sessionStorage.getItem('yc_gh_token');
+  const cur = localStorage.getItem('yc_gh_token');
   const msg = cur ? 'Токен задан. Введите новый или оставьте пустым для сброса:' : 'Введите GitHub Personal Access Token:';
-  const t = prompt(msg + '\n\nПолучить: GitHub → Settings → Developer settings → Personal access tokens → Generate new token → scope: public_repo');
+  const t = prompt(msg + '\n\nПолучить: GitHub → Settings → Developer settings → Personal access tokens → scope: public_repo');
   if (t === null) return;
-  if (t.trim()) { sessionStorage.setItem('yc_gh_token', t.trim()); alert('Токен сохранён.'); }
-  else { sessionStorage.removeItem('yc_gh_token'); alert('Токен сброшен.'); }
+  if (t.trim()) { localStorage.setItem('yc_gh_token', t.trim()); alert('Токен сохранён.'); }
+  else { localStorage.removeItem('yc_gh_token'); alert('Токен сброшен.'); }
 }
 
 Object.assign(window, { _adminResetToken });
