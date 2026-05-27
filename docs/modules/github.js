@@ -4,7 +4,7 @@ import { _b64enc } from './utils.js';
 const _VALID_POST = p =>
   p && typeof p.id === 'number' &&
   typeof p.text === 'string' && typeof p.cat === 'string' && typeof p.date === 'string' &&
-  (!p.image || /^https:\/\/\S+$/.test(p.image));
+  (!p.image || /^https:\/\/\S+$/.test(p.image) || /^data:image\//.test(p.image));
 
 export async function _ghRead() {
   try {
