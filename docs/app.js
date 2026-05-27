@@ -7,7 +7,7 @@ import { registerOnEnter } from './modules/navigation.js';
 import { setAuthRenderFns } from './modules/auth.js';
 import { setBookingRenderFns } from './modules/booking.js';
 import { setGhReadFn, renderClientFeed } from './modules/feed.js';
-import { renderServices, _updateCatChips } from './modules/services.js';
+import { renderServices } from './modules/services.js';
 import { renderMasters } from './modules/masters.js';
 import { updateSlotsScreen, loadDates, updateConfirmScreen } from './modules/slots.js';
 import { renderHistoryScreen } from './modules/history.js';
@@ -135,7 +135,7 @@ async function initApp() {
         dur: s.duration || 60,
         priceStr: _fmtPrice(s.price_min, s.price_max),
       })));
-      _updateCatChips();
+      renderServices();
     }
     if (staffRes.success && staffRes.data && staffRes.data.length) {
       const storedFavs = new Set(JSON.parse(localStorage.getItem('yc_favs') || '[]'));
