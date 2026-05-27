@@ -11,7 +11,7 @@ import { renderServices, _updateCatChips } from './modules/services.js';
 import { renderMasters } from './modules/masters.js';
 import { updateSlotsScreen, loadDates, updateConfirmScreen } from './modules/slots.js';
 import { renderHistoryScreen } from './modules/history.js';
-import { renderHomeHero, renderProfileScreen, renderLoyaltyBlock, _renderHomeFeedPreview } from './modules/profile.js';
+import { renderHomeHero, renderProfileScreen, renderLoyaltyBlock, _renderHomeFeedPreview, _initOfferUrgency } from './modules/profile.js';
 import { renderReviewScreen } from './modules/review.js';
 import { renderAdminDashboard, renderAdminFeed, _clearPostImage, renderAdminClients, renderAdminPush, updatePushAudience } from './modules/admin.js';
 import { _ghRead } from './modules/github.js';
@@ -49,6 +49,7 @@ registerOnEnter('s-home', () => {
 registerOnEnter('s-profile',  () => { renderProfileScreen(); renderLoyaltyBlock(); });
 registerOnEnter('s-feed',           () => renderClientFeed());
 registerOnEnter('s-review',         () => renderReviewScreen());
+registerOnEnter('s-offer',          () => _initOfferUrgency());
 registerOnEnter('s-admin',          () => renderAdminDashboard());
 registerOnEnter('s-admin-feed',     () => renderAdminFeed());
 registerOnEnter('s-admin-post',     () => _clearPostImage());

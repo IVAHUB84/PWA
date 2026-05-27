@@ -486,7 +486,7 @@ body {
 
 /* ── CANCEL ── */
 .cancel-card    { margin:0 20px 16px; background:var(--surface); border-radius:16px; padding:18px; }
-.cancel-warning { margin:0 20px 24px; background:#FFF8E6; border-left:3px solid #F4B400; border-radius:0 12px 12px 0; padding:12px 14px; font-size:13px; color:#7a5c00; line-height:1.5; }
+.cancel-warning { margin:0 20px 24px; background:var(--accent-light); border-left:3px solid var(--gold); border-radius:0 12px 12px 0; padding:12px 14px; font-size:13px; color:var(--text); line-height:1.5; }
 .btn-danger     { background:var(--red); color:#fff; border:none; border-radius:14px; height:52px; width:100%; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; margin-bottom:12px; transition:opacity .15s; }
 .btn-secondary  { background:none; border:1.5px solid var(--primary); color:var(--primary); border-radius:14px; height:52px; width:100%; font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; }
 
@@ -495,8 +495,9 @@ body {
 .stars-row      { display:flex; gap:8px; justify-content:center; padding:4px 0 24px; }
 .star           { font-size:38px; cursor:pointer; transition:transform .15s; filter:grayscale(1) opacity(.35); }
 .star.on        { filter:none; transform:scale(1.08); }
-.review-textarea { margin:0 20px; width:calc(100% - 40px); min-height:100px; background:var(--surface); border:1.5px solid var(--border); border-radius:14px; padding:14px; font-size:15px; font-family:inherit; color:var(--text); resize:none; outline:none; margin-bottom:20px; }
+.review-textarea { margin:0 20px; width:calc(100% - 40px); min-height:100px; background:var(--surface); border:1.5px solid var(--border); border-radius:14px; padding:14px; font-size:15px; font-family:inherit; color:var(--text); resize:none; outline:none; margin-bottom:6px; }
 .review-textarea::placeholder { color:var(--text-2); }
+.char-count { margin:0 20px 16px; font-size:11px; color:var(--text-2); text-align:right; width:calc(100% - 40px); }
 
 /* ── OFFER SCREEN ── */
 .offer-wrap      { flex:1; display:flex; flex-direction:column; align-items:center; padding:8px 24px 40px; overflow-y:auto; }
@@ -515,6 +516,18 @@ body {
 .cs-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
 .cs-add  { width:36px; height:36px; border-radius:10px; background:var(--accent-light); color:var(--accent); border:none; font-size:24px; line-height:1; cursor:pointer; font-family:inherit; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:background 0.2s,color 0.2s; }
 .cs-add.sel { background:var(--accent); color:#fff; font-size:18px; }
+.cs-total { margin:0 20px 16px; padding:14px 16px; background:var(--surface); border-radius:14px; display:flex; align-items:center; justify-content:space-between; font-size:15px; font-weight:700; border:1px solid var(--border); }
+/* ── SKELETON ── */
+@keyframes skel-shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.skel { background:linear-gradient(90deg,var(--surface) 25%,var(--border) 50%,var(--surface) 75%); background-size:200% 100%; animation:skel-shimmer 1.4s ease-in-out infinite; border-radius:8px; }
+.skel-card { margin:0 16px 16px; background:var(--surface); border-radius:16px; overflow:hidden; box-shadow:0 1px 6px rgba(0,0,0,0.07); }
+.skel-img { height:180px; border-radius:0; }
+.skel-body { padding:12px 14px 14px; display:flex; flex-direction:column; gap:8px; }
+.skel-line { height:12px; border-radius:6px; }
+.skel-w80 { width:80%; }
+.skel-w50 { width:50%; }
+/* ── OFFER URGENCY ── */
+.offer-urgency { display:flex; align-items:center; gap:6px; background:var(--accent-light); color:var(--accent); border-radius:100px; padding:6px 14px; font-size:12px; font-weight:700; margin-bottom:12px; }
 
 /* ── SCENARIO GROUPS ── */
 .scenario-group      { display:flex; flex-direction:column; gap:6px; align-items:center; }

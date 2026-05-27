@@ -25,7 +25,14 @@ export async function renderClientFeed() {
     _renderFeedCats(cached);
     _paintFeed(el, cached);
   } else {
-    el.innerHTML = '<div style="padding:60px 20px;text-align:center;color:var(--text-2);font-size:14px;">Загрузка…</div>';
+    el.innerHTML = [1,2,3].map(() => `
+      <div class="skel-card">
+        <div class="skel skel-img"></div>
+        <div class="skel-body">
+          <div class="skel skel-line skel-w80"></div>
+          <div class="skel skel-line skel-w50"></div>
+        </div>
+      </div>`).join('');
   }
 
   const gh = await _ghReadFn();

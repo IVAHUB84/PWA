@@ -168,6 +168,36 @@ export async function renderLoyaltyBlock() {
   }
 }
 
+export function _csToggle(btn, price) {
+  if (!btn.dataset.price) btn.dataset.price = price;
+  btn.classList.toggle('active');
+  const total = Array.from(document.querySelectorAll('.cs-add.active'))
+    .reduce((acc, b) => acc + Number(b.dataset.price || 0), 0);
+  const totalEl = document.getElementById('csTotalAmt');
+  const wrapEl  = document.getElementById('csTotal');
+  if (totalEl) totalEl.textContent = total.toLocaleString('ru-RU') + ' ₽';
+  if (wrapEl)  wrapEl.style.display = total > 0 ? '' : 'none';
+}
+
+export function _reviewCount(textarea) {
+  const el = document.getElementById('reviewCharCount');
+  if (el) el.textContent = `${textarea.value.length} / ${textarea.maxLength || 300}`;
+}
+
+export function _initOfferUrgency() {
+  const el = document.getElementById('offerUrgency');
+  if (!el) return;
+  const expireText = document.querySelector('.offer-expire')?.textContent || '';
+  const match = expireText.match(/(\d{1,2})\s+(\S+)\s+(\d{4})/);
+  if (!match) { el.style.display = 'none'; return; }
+  const months = { 'января':0,'февраля':1,'марта':2,'апреля':3,'мая':4,'июня':5,'июля':6,'августа':7,'сентября':8,'октября':9,'ноября':10,'декабря':11 };
+  const d = new Date(Number(match[3]), months[match[2]] ?? 0, Number(match[1]));
+  const diff = Math.ceil((d - Date.now()) / 86400000);
+  if (diff <= 0) { el.style.display = 'none'; return; }
+  el.style.display = '';
+  el.textContent = diff <= 3 ? `Осталось ${diff} дн.` : `До конца акции ${diff} дней`;
+}
+
 export function _setTheme(theme) {
   localStorage.setItem('yc_theme', theme);
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -210,4 +240,4 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () 
   if ((localStorage.getItem('yc_theme') || 'system') === 'system') _setTheme('system');
 });
 
-Object.assign(window, { renderProfileScreen, renderHomeHero, _renderHomeFeedPreview, renderLoyaltyBlock, _toggleNotifSettings, _toggleThemeSettings, _setTheme, _initThemeUI });
+Object.assign(window, { renderProfileScreen, renderHomeHero, _renderHomeFeedPreview, renderLoyaltyBlock, _toggleNotifSettings, _toggleThemeSettings, _setTheme, _initThemeUI, _csToggle, _reviewCount, _initOfferUrgency });
