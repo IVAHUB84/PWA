@@ -173,4 +173,13 @@ export async function renderLoyaltyBlock() {
   }
 }
 
-Object.assign(window, { renderProfileScreen, renderHomeHero, _renderHomeFeedPreview, renderLoyaltyBlock });
+export function _toggleNotifSettings() {
+  const g  = document.getElementById('notifSettingsGroup');
+  const ch = document.getElementById('notifSettingsChevron');
+  if (!g) return;
+  const open = g.style.display !== 'none';
+  g.style.display = open ? 'none' : '';
+  if (ch) ch.style.transform = open ? '' : 'rotate(90deg)';
+}
+
+Object.assign(window, { renderProfileScreen, renderHomeHero, _renderHomeFeedPreview, renderLoyaltyBlock, _toggleNotifSettings });

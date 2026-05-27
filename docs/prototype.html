@@ -283,8 +283,11 @@
         </div>
       </div>
 
-      <div style="padding:16px 20px 6px;"><div class="label">Настройки</div></div>
-      <div class="settings-group">
+      <div style="padding:16px 20px 6px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;" onclick="_toggleNotifSettings()">
+        <div class="label">Настройки уведомлений</div>
+        <div id="notifSettingsChevron" style="font-size:18px;color:var(--text-2);transition:transform .2s;line-height:1;">›</div>
+      </div>
+      <div class="settings-group" id="notifSettingsGroup" style="display:none;">
         <div class="s-row"><div class="s-ico">🔔</div><div class="s-lbl">Напоминания о визите</div><div class="toggle on" onclick="consentToggle(this,'notify')"></div></div>
         <div class="s-row"><div class="s-ico">🎁</div><div class="s-lbl">Акции и предложения</div><div class="toggle on" onclick="consentToggle(this,'promo')"></div></div>
         <div class="s-row" id="photoConsentRow"><div class="s-ico">📸</div><div class="s-lbl">Публикация фото и видео</div><div class="toggle on" onclick="consentToggle(this,'photo')"></div></div>
