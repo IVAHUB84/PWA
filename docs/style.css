@@ -395,7 +395,7 @@ body {
 .s-val { font-size: 14px; color: var(--text-2); }
 .toggle { width: 51px; height: 31px; border-radius: 100px; background: var(--border); position: relative; cursor: pointer; flex-shrink: 0; transition: background 0.2s; }
 .toggle.on { background: var(--green); }
-.toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; background: #fff; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: transform 0.2s; }
+.toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; background: var(--bg); border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: transform 0.2s; }
 .toggle.on::after { transform: translateX(20px); }
 
 /* ── STEP INDICATOR ── */
@@ -479,9 +479,9 @@ body {
   text-align:center; outline:none; font-family:inherit; caret-color:var(--accent);
 }
 .otp-box::placeholder { color:var(--border); font-weight:400; font-size:24px; }
-.otp-box.filled { border-color:var(--primary); background:#fff; }
-.otp-box.cursor { border-color:var(--accent); background:#fff; }
-.otp-box:focus  { border-color:var(--accent); background:#fff; }
+.otp-box.filled { border-color:var(--primary); background:var(--surface); }
+.otp-box.cursor { border-color:var(--accent); background:var(--surface); }
+.otp-box:focus  { border-color:var(--accent); background:var(--surface); }
 @keyframes blink { 50%{border-color:var(--border);} }
 .otp-hint { text-align:center; font-size:14px; color:var(--text-2); padding:0 20px; }
 
@@ -729,7 +729,7 @@ body {
 .push-hs-lbl { font-size:10px; color:var(--text-2); }
 .seg-control { display:flex; background:var(--surface); border-radius:10px; padding:3px; margin:0 20px 14px; }
 .seg-btn { flex:1; height:34px; border-radius:8px; border:none; background:none; font-size:13px; font-weight:600; color:var(--text-2); cursor:pointer; font-family:inherit; transition:all .15s; }
-.seg-btn.active { background:#fff; color:var(--text); box-shadow:0 1px 4px rgba(0,0,0,0.1); }
+.seg-btn.active { background:var(--bg); color:var(--text); box-shadow:0 1px 4px rgba(0,0,0,0.1); }
 
 #sw-update-banner { position:fixed; bottom:calc(83px + 12px); left:16px; right:16px; background:var(--primary); color:#fff; border-radius:14px; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; font-size:13px; font-weight:600; z-index:9999; box-shadow:0 4px 20px rgba(0,0,0,0.25); animation:slideUpBanner .3s ease; }
 #sw-update-banner button { background:var(--accent); color:#fff; border:none; border-radius:8px; padding:6px 14px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; }
