@@ -11,6 +11,7 @@ let _pendingToggle = null;
 let _pendingType = null;
 
 export function acceptConsent() {
+  localStorage.setItem('yc_consent_accepted', '1');
   if ('Notification' in window) {
     Notification.requestPermission().catch(() => {});
   }

@@ -34,6 +34,8 @@ export function renderReviewScreen() {
   }
   if (ta) ta.value = '';
   document.querySelectorAll('#s-review .tip-btn').forEach(b => b.classList.remove('sel'));
+  document.getElementById('_customTipInput')?.remove();
+  document.getElementById('_starsHint')?.remove();
   setStar(0);
 }
 
@@ -47,11 +49,51 @@ export function openRateVisit(recordId, masterId, masterName, svcName, datetime)
   go('s-review');
 }
 
+export function _selectCustomTip(btn) {
+  btn.closest('.tips-row').querySelectorAll('.tip-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  const section = btn.closest('.tips-section');
+  if (!section) return;
+  let inp = document.getElementById('_customTipInput');
+  if (!inp) {
+    inp = document.createElement('input');
+    inp.id = '_customTipInput';
+    inp.type = 'number';
+    inp.inputMode = 'numeric';
+    inp.min = '1';
+    inp.placeholder = 'Введите сумму ₽';
+    inp.style.cssText = 'width:100%;box-sizing:border-box;height:44px;border:1.5px solid var(--border);border-radius:12px;padding:0 14px;font-size:15px;font-family:inherit;background:var(--surface);color:var(--text);margin-top:8px;display:block;';
+    section.appendChild(inp);
+    setTimeout(() => inp.focus(), 50);
+  }
+}
+
 export function submitReview() {
   const stars = document.querySelectorAll('#starsRow .star.on').length;
+  if (!stars) {
+    const row = document.getElementById('starsRow');
+    if (row) {
+      row.style.outline = '2px solid var(--red)';
+      row.style.borderRadius = '8px';
+      setTimeout(() => { row.style.outline = ''; }, 1500);
+    }
+    let hint = document.getElementById('_starsHint');
+    if (!hint) {
+      hint = document.createElement('div');
+      hint.id = '_starsHint';
+      hint.style.cssText = 'text-align:center;color:var(--red);font-size:13px;margin:4px 0;';
+      hint.textContent = 'Выберите оценку';
+      row?.insertAdjacentElement('afterend', hint);
+    }
+    return;
+  }
+  document.getElementById('_starsHint')?.remove();
   const text = (document.getElementById('reviewTextarea')?.value || '').trim();
   const tipBtn = document.querySelector('#s-review .tip-btn.sel');
-  const tips = tipBtn ? tipBtn.textContent.trim() : '';
+  const customInp = document.getElementById('_customTipInput');
+  const tips = tipBtn
+    ? (tipBtn.textContent.trim() === 'Своя сумма' && customInp?.value ? customInp.value + ' ₽' : tipBtn.textContent.trim())
+    : '';
   const reviews = JSON.parse(localStorage.getItem('yc_reviews') || '[]');
   reviews.push({
     recordId: state._reviewRecordId || null,
@@ -78,4 +120,4 @@ export function openReview(platform) {
   if (doneEl) doneEl.style.display = 'block';
 }
 
-Object.assign(window, { setStar, renderReviewScreen, openRateVisit, submitReview, openReview });
+Object.assign(window, { setStar, renderReviewScreen, openRateVisit, submitReview, openReview, _selectCustomTip });

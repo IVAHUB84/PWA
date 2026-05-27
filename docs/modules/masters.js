@@ -50,12 +50,18 @@ export async function renderMasters() {
   const sub = document.getElementById('mastersSub');
   const list = document.getElementById('mastersList');
   if (!list) return;
+  const anyMasterEl = document.querySelector('#s-masters .any-master');
+  const masterLabelEl = document.querySelector('#s-masters .label');
   if (browseAll) {
     if (sub) sub.textContent = 'Все мастера студии';
+    if (anyMasterEl) anyMasterEl.style.display = 'none';
+    if (masterLabelEl) masterLabelEl.style.display = 'none';
     const masters = [...MASTERS_DATA].sort((a, b) => (b.fav ? 1 : 0) - (a.fav ? 1 : 0));
     list.innerHTML = masters.map((m, i) => _masterCardHtml(m, i, masters.length)).join('');
     return;
   }
+  if (anyMasterEl) anyMasterEl.style.display = '';
+  if (masterLabelEl) masterLabelEl.style.display = '';
   const svc = getService();
   if (sub) sub.textContent = `${svc.name} · ${svc.dur} мин`;
   list.innerHTML = '<div style="padding:32px 20px;text-align:center;color:var(--text-2);font-size:14px;">Загрузка мастеров…</div>';

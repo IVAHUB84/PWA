@@ -286,6 +286,7 @@ export async function verifyOtp() {
       try { _renderHomeHeroFn(); } catch(e) { console.error('renderHomeHero failed', e); }
       try { _renderProfileScreenFn(); } catch(e) { console.error('renderProfileScreen failed', e); }
       if (state._bookAfterLogin) { state._bookAfterLogin = false; go('s-services', 'tab'); }
+      else if (!localStorage.getItem('yc_consent_accepted')) { go('s-consent'); }
       else if (!localStorage.getItem('yc_pin_hash')) { window.openPinSetup?.(); }
       else { go('s-home', 'tab'); }
     };

@@ -60,4 +60,13 @@ export function _confirmBookOther() {
   go('s-services', 'tab');
 }
 
+document.addEventListener('click', e => {
+  const bar = document.getElementById('homeSearchBar');
+  const res = document.getElementById('homeSearchResults');
+  if (!res || res.style.display === 'none') return;
+  if (!bar?.contains(e.target) && !res.contains(e.target)) {
+    res.style.display = 'none';
+  }
+});
+
 Object.assign(window, { _homeSearch, showBookForOtherModal, _confirmBookOther });

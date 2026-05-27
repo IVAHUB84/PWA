@@ -238,10 +238,29 @@ export function quickBook(svcId) {
   go('s-masters');
 }
 
-export function rebook(svcId) {
+export function rebook(svcId, masterId) {
   state.serviceId = svcId;
-  state.masterId = null;
-  go('s-masters');
+  if (masterId) {
+    const m = MASTERS_DATA.find(x => String(x.id) === String(masterId));
+    state.masterId = m ? m.id : null;
+  } else {
+    state.masterId = null;
+  }
+  go('s-slots');
+}
+
+export function _submitCrossSell() {
+  const selected = Array.from(document.querySelectorAll('#s-crosssell .cs-add.active'))
+    .map(btn => btn.closest('.cs-card')?.querySelector('[style*="font-weight:700"]')?.textContent || '')
+    .filter(Boolean);
+  if (selected.length) {
+    const toast = document.createElement('div');
+    toast.style.cssText = 'position:fixed;bottom:100px;left:16px;right:16px;z-index:9999;background:var(--accent);color:#fff;border-radius:14px;padding:14px 16px;font-size:14px;font-weight:600;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.2);pointer-events:none;';
+    toast.textContent = 'Пожелания переданы — мастер будет в курсе';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2800);
+  }
+  go('s-home', 'tab');
 }
 
 export function bookWithMaster(masterId) {
@@ -258,5 +277,5 @@ export function bookWithMaster(masterId) {
 
 Object.assign(window, {
   startBooking, rescheduleRecord, cancelRecord, confirmCancel,
-  quickBook, rebook, bookWithMaster,
+  quickBook, rebook, bookWithMaster, _submitCrossSell,
 });

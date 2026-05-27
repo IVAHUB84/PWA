@@ -356,7 +356,7 @@
       </div>
       <div id="loginError" style="color:var(--red);font-size:13px;padding:0 0 8px;display:none;"></div>
       <button class="btn-primary" id="loginBtn" onclick="sendCodeByPhone()" style="display:flex;align-items:center;justify-content:center;gap:8px;"><span id="loginBtnText">Получить код →</span><span class="btn-spinner" id="loginBtnSpinner"></span></button>
-      <div class="login-hint">Найдём вас по номеру и отправим код на почту.<br>Вход доступен только для клиентам студии.</div>
+      <div class="login-hint">Найдём вас по номеру и отправим код на почту.<br>Вход доступен только для клиентов студии.</div>
       <div class="login-divider" style="margin-top:24px;">для сотрудников студии</div>
       <button id="adminLoginBtn" onclick="enterAdmin()" style="display:flex;width:100%;padding:14px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;align-items:center;justify-content:center;gap:8px;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -510,7 +510,7 @@
         <button class="tip-btn" onclick="selectTip(this)">100 ₽</button>
         <button class="tip-btn" onclick="selectTip(this)">200 ₽</button>
         <button class="tip-btn" onclick="selectTip(this)">300 ₽</button>
-        <button class="tip-btn" onclick="selectTip(this)">Своя сумма</button>
+        <button class="tip-btn" onclick="_selectCustomTip(this)">Своя сумма</button>
       </div>
     </div>
     <div style="padding:16px 20px 40px;">
@@ -566,7 +566,7 @@
       <span id="csTotalAmt"></span>
     </div>
     <div style="padding:0 20px 24px;">
-      <button class="btn-primary" onclick="go('s-home','tab')" style="margin-bottom:12px;">Подтвердить запись</button>
+      <button class="btn-primary" onclick="_submitCrossSell()" style="margin-bottom:12px;">Добавить к визиту</button>
       <div style="text-align:center;"><button class="btn-dim" onclick="go('s-home','tab')">Нет, спасибо</button></div>
     </div>
   </div>

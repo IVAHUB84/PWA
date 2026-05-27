@@ -1,6 +1,14 @@
 import { YC } from './api.js';
 import { state, getService, getMaster } from './state.js';
-import { _hasRealAvatar, getInitials, esc } from './utils.js';
+import { _hasRealAvatar, getInitials, esc, _fmtDatetime } from './utils.js';
+import { _loadStoredRecords } from './storage.js';
+
+function _setConfirmBtnEnabled(enabled) {
+  const btn = document.querySelector('#s-slots .sticky-bottom .btn-primary');
+  if (!btn) return;
+  btn.disabled = !enabled;
+  btn.style.opacity = enabled ? '' : '0.45';
+}
 
 // ── SLOTS SCREEN ──
 export function updateSlotsScreen() {
@@ -21,6 +29,27 @@ export function updateSlotsScreen() {
         <div><div style="font-size:15px;font-weight:700;">Любой свободный</div><div style="font-size:13px;color:var(--text-2);">Больше доступных окон</div></div>`;
     }
   }
+
+  // Reschedule context banner
+  let reschBanner = document.getElementById('rescheduleBanner');
+  if (state._rescheduleId && strip) {
+    const records = _loadStoredRecords();
+    const rec = records.find(r => String(r.id) === String(state._rescheduleId));
+    if (rec) {
+      if (!reschBanner) {
+        reschBanner = document.createElement('div');
+        reschBanner.id = 'rescheduleBanner';
+        reschBanner.style.cssText = 'margin:8px 20px 0;padding:10px 14px;background:var(--accent-light);border-radius:12px;border-left:3px solid var(--accent);';
+        strip.insertAdjacentElement('afterend', reschBanner);
+      }
+      reschBanner.innerHTML = `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-2);margin-bottom:3px;">Перенос записи</div>
+        <div style="font-size:14px;font-weight:600;">${esc(rec.svcName)}</div>
+        <div style="font-size:12px;color:var(--text-2);margin-top:2px;">Текущее время: ${esc(_fmtDatetime(rec.datetime))}</div>`;
+    }
+  } else if (reschBanner) {
+    reschBanner.remove();
+  }
+
   updateStickyBottom();
 }
 
@@ -87,7 +116,15 @@ export async function loadDates() {
   }
 }
 
+function _updateMonthLabel(isoDate) {
+  const lbl = document.querySelector('#s-slots .date-picker-lbl');
+  if (!lbl) return;
+  const d = new Date(isoDate + 'T00:00:00');
+  if (!isNaN(d)) lbl.textContent = d.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
+}
+
 function _renderDates(container, availDates) {
+  if (availDates.length) _updateMonthLabel(availDates[0]);
   const set = new Set(availDates);
   const today = new Date();
   const RU_DAYS = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
@@ -107,6 +144,7 @@ function _renderDates(container, availDates) {
 }
 
 function _renderDatesFallback(container) {
+  _updateMonthLabel(new Date().toISOString().slice(0, 10));
   const RU_DAYS = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
   const today = new Date();
   let html = '';
@@ -133,6 +171,7 @@ export async function loadTimes(iso) {
   state.dateFull = dateStr;
   if (lbl) lbl.textContent = 'Доступное время — ' + dateStr;
   el.innerHTML = '<div style="padding:12px;color:var(--text-2);font-size:13px;">Загрузка…</div>';
+  _setConfirmBtnEnabled(false);
   const staffId = m ? m.id : 0;
   const params = {};
   if (svc) params.service_ids = svc.id;
@@ -155,7 +194,7 @@ export async function loadTimes(iso) {
     if (!firstTime) firstTime = time;
     return `<button class="slot${time === firstTime ? ' sel' : ''}" onclick="selectSlot(this,'${time}')">${time}</button>`;
   }).join('');
-  if (firstTime) { state.slot = firstTime; updateStickyBottom(); }
+  if (firstTime) { state.slot = firstTime; updateStickyBottom(); _setConfirmBtnEnabled(true); }
 }
 
 export function selectDate(el, iso) {
