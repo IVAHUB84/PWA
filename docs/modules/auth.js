@@ -232,7 +232,8 @@ export async function sendEmailCode() {
 
 // ── RETRY EMAIL OTP ──
 export async function retryEmail() {
-  const stored = JSON.parse(localStorage.getItem('yc_otp') || 'null');
+  let stored;
+  try { stored = JSON.parse(localStorage.getItem('yc_otp') || 'null'); } catch { stored = null; }
   if (!stored) return;
   const code = String(1000 + (crypto.getRandomValues(new Uint32Array(1))[0] % 9000));
   const codeHash = await _sha256(code);
@@ -265,10 +266,9 @@ export async function verifyOtp() {
     const stored = JSON.parse(localStorage.getItem('yc_otp') || 'null');
     if (!stored) { _setOtpError('Сессия истекла, войдите снова'); return; }
     if (Date.now() > stored.expiry) { _setOtpError('Код истёк, запросите новый'); return; }
-    if ((stored.attempts || 0) >= 5) { _setOtpError('Слишком много попыток. Запросите новый код.'); return; }
-
     stored.attempts = (stored.attempts || 0) + 1;
     localStorage.setItem('yc_otp', JSON.stringify(stored));
+    if (stored.attempts > 5) { _setOtpError('Слишком много попыток. Запросите новый код.'); return; }
 
     const enteredHash = await _sha256(entered);
     if (stored.codeHash !== enteredHash) { _setOtpError('Неверный код'); return; }

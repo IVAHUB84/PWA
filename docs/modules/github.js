@@ -40,7 +40,7 @@ export async function _ghPullToLocal() {
   const ghOnly = gh.posts.filter(p => !localIds.has(p.id));
   if (!ghOnly.length) return false;
   const merged = [...local, ...ghOnly].sort((a, b) => b.id - a.id);
-  localStorage.setItem('yc_feed_posts', JSON.stringify(merged));
+  try { localStorage.setItem('yc_feed_posts', JSON.stringify(merged)); } catch { return false; }
   return true;
 }
 

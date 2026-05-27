@@ -177,23 +177,29 @@ export async function confirmCancel() {
   const btn = document.querySelector('#s-cancel .btn-danger');
   if (btn) { btn.disabled = true; btn.textContent = 'Отменяем…'; }
 
+  const ctrl = new AbortController();
+  const cancelTid = setTimeout(() => ctrl.abort(), 15000);
   try {
     const res = await fetch(`${YC.base}/record/${YC.company}/${id}`, {
       method: 'DELETE',
       headers: YC._h(),
+      signal: ctrl.signal,
     });
     const text = await res.text();
     let data = {};
     try { if (text && text.trim()) data = JSON.parse(text); } catch {}
 
     if (res.status >= 400) {
+      clearTimeout(cancelTid);
       if (btn) { btn.disabled = false; btn.textContent = 'Да, отменить запись'; }
       const msg = (data?.meta?.message || `Ошибка ${res.status}`).slice(0, 200);
       alert(`Не удалось отменить: ${msg}. Позвоните в студию.`);
       _cancelInProgress = false;
       return;
     }
+    clearTimeout(cancelTid);
   } catch {
+    clearTimeout(cancelTid);
     if (btn) { btn.disabled = false; btn.textContent = 'Да, отменить запись'; }
     alert('Нет соединения с сервером. Попробуйте позже.');
     _cancelInProgress = false;

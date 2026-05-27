@@ -51,8 +51,9 @@ export function renderProfileScreen() {
     if (favAvEl) {
       favAvEl.textContent = '';
       favAvEl.style.backgroundImage = '';
-      if (_hasRealAvatar(fav)) {
-        favAvEl.style.backgroundImage = `url('${fav.avatar_big || fav.avatar}')`;
+      const favAvatarSrc = fav.avatar_big || fav.avatar;
+      if (_hasRealAvatar(fav) && /^https?:\/\//.test(favAvatarSrc)) {
+        favAvEl.style.backgroundImage = `url('${favAvatarSrc.replace(/'/g, '%27')}')`;
         favAvEl.style.backgroundSize = 'cover';
         favAvEl.style.backgroundPosition = 'center';
       } else {
@@ -160,8 +161,9 @@ export function _renderHomeFeedPreview() {
   const p = posts[0];
   const _ICONS = { 'Брови': '✨', 'Ногти': '💅', 'Лицо': '🌿', 'Волосы': '💆', 'Тело': '🧖', 'Акции': '🎁' };
   const icon = _ICONS[p.cat] || '📝';
-  const thumb = p.image
-    ? `<img src="${esc(p.image)}" style="width:44px;height:44px;object-fit:cover;border-radius:10px;flex-shrink:0;">`
+  const safeSrc = p.image && /^data:image\/|^https?:\/\//.test(p.image) ? p.image : null;
+  const thumb = safeSrc
+    ? `<img src="${esc(safeSrc)}" style="width:44px;height:44px;object-fit:cover;border-radius:10px;flex-shrink:0;">`
     : `<div style="font-size:36px;flex-shrink:0;">${icon}</div>`;
   const preview = p.text.length > 60 ? p.text.slice(0, 60) + '…' : p.text;
   el.innerHTML = `${thumb}<div style="flex:1;"><div style="font-size:14px;font-weight:700;margin-bottom:3px;">${esc(preview)}</div><div style="font-size:12px;color:var(--text-2);">${esc(p.date)} · ${esc(p.cat)}</div></div>`;

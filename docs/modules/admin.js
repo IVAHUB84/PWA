@@ -5,6 +5,10 @@ import { PUSH_TEMPLATES } from './constants.js';
 import { _ghPullToLocal, _ghSyncPosts } from './github.js';
 import { _sendNotification } from './notifications.js';
 
+function _ls(key) {
+  try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch { return []; }
+}
+
 let _postImageBase64 = null;
 let _adminAllClients = [];
 let _pushAudienceData = [];
@@ -111,7 +115,7 @@ export async function publishPost(draft) {
   };
   try {
     await _ghPullToLocal();
-    const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]');
+    const posts = _ls('yc_feed_posts');
     posts.unshift(post);
     localStorage.setItem('yc_feed_posts', JSON.stringify(posts));
     if (ta) ta.value = '';
@@ -131,7 +135,7 @@ export async function publishPost(draft) {
 
 export async function deletePost(id) {
   await _ghPullToLocal();
-  const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => String(p.id) !== String(id));
+  const posts = _ls('yc_feed_posts').filter(p => String(p.id) !== String(id));
   localStorage.setItem('yc_feed_posts', JSON.stringify(posts));
   renderAdminFeed();
   _ghSyncPosts(posts.filter(p => !p.draft));
@@ -143,7 +147,7 @@ export function renderAdminFeed() {
 }
 
 function _renderAdminFeedFromCache() {
-  const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]');
+  const posts = _ls('yc_feed_posts');
   const countEl = document.getElementById('adminFeedCount');
   const listEl  = document.getElementById('adminFeedList');
   const pub = posts.filter(p => !p.draft).length;
@@ -227,7 +231,7 @@ export function filterAdminClients(q) {
 export function renderAdminPush() {
   const listEl = document.getElementById('adminPushList');
   if (!listEl) return;
-  const campaigns = JSON.parse(localStorage.getItem('yc_push_campaigns') || '[]');
+  const campaigns = _ls('yc_push_campaigns');
   if (!campaigns.length) {
     listEl.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--text-2);font-size:14px;">Рассылок пока нет.<br>Нажмите «+ Новая» чтобы создать.</div>';
     return;
@@ -264,13 +268,13 @@ export function renderAdminPush() {
 }
 
 export function deletePushCampaign(id) {
-  const campaigns = JSON.parse(localStorage.getItem('yc_push_campaigns') || '[]').filter(c => c.id !== id);
+  const campaigns = _ls('yc_push_campaigns').filter(c => c.id !== id);
   localStorage.setItem('yc_push_campaigns', JSON.stringify(campaigns));
   renderAdminPush();
 }
 
 export function clearAllSentPush() {
-  const campaigns = JSON.parse(localStorage.getItem('yc_push_campaigns') || '[]').filter(c => c.scheduled);
+  const campaigns = _ls('yc_push_campaigns').filter(c => c.scheduled);
   localStorage.setItem('yc_push_campaigns', JSON.stringify(campaigns));
   renderAdminPush();
 }
@@ -365,7 +369,7 @@ function _setPushCounts(n1, n2, n3) {
   if (n1) n1.textContent = total ? total + ' получателей' : 'Нет данных';
   if (n2) n2.textContent = active ? active + ' получателей' : 'Нет данных';
   if (n3) {
-    const booked = JSON.parse(localStorage.getItem('yc_records') || '[]')
+    const booked = _ls('yc_records')
       .filter(r => r.status !== 'cancelled' && r.datetime && new Date(r.datetime.replace(' ', 'T')) > new Date()).length;
     n3.textContent = booked ? booked + ' клиентов' : 'Нет предстоящих записей';
   }
@@ -378,7 +382,7 @@ export function sendNewPush() {
   if (!text) { alert('Введите текст уведомления'); return; }
   const audEl = document.querySelector('#s-admin-push-new .audience-row.sel [style*="font-weight:700"]');
   const audience = audEl?.textContent || 'Все клиенты';
-  const campaigns = JSON.parse(localStorage.getItem('yc_push_campaigns') || '[]');
+  const campaigns = _ls('yc_push_campaigns');
   campaigns.unshift({
     id: Date.now(), icon, title: text.slice(0, 50),
     date: new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }),

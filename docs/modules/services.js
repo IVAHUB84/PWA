@@ -7,7 +7,7 @@ export function _updateCatChips() {
   const el = document.getElementById('catChips');
   if (!el) return;
   el.innerHTML = `<span class="chip active" onclick="filterCategory('Все')">Все</span>`
-    + cats.map(c => `<span class="chip" onclick="filterCategory('${esc(c)}')">${esc(c)}</span>`).join('');
+    + cats.map(c => `<span class="chip" onclick="filterCategory(${JSON.stringify(c)})">${esc(c)}</span>`).join('');
 }
 
 export function filterCategory(cat) {
