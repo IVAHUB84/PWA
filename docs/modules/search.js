@@ -16,7 +16,7 @@ export function _homeSearch(q) {
   }
   let html = '';
   masters.slice(0, 3).forEach(m => {
-    html += `<div style="padding:10px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid var(--border);" data-mid="${esc(m.id)}" onclick="bookWithMaster(this.dataset.mid);document.getElementById('homeSearch').value='';document.getElementById('homeSearchResults').style.display='none'">
+    html += `<div style="padding:10px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid var(--border);" data-mid="${esc(m.id)}" onclick="openMasterCard(this.dataset.mid);document.getElementById('homeSearch').value='';document.getElementById('homeSearchResults').style.display='none'">
       <div style="width:32px;height:32px;border-radius:50%;background:${m.grad};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;">${getInitials(m.name)}</div>
       <div><div style="font-size:13px;font-weight:700;">${esc(m.name)}</div><div style="font-size:11px;color:var(--text-2);">${esc(m.role)}</div></div>
     </div>`;

@@ -3,6 +3,7 @@ import { go } from './navigation.js';
 import { YC } from './api.js';
 import { _GRADS } from './constants.js';
 import { _makeShort, _hasRealAvatar, getInitials, esc } from './utils.js';
+import { bookWithMaster } from './booking.js';
 
 function _avgRating(masterId) {
   let reviews;
@@ -128,9 +129,15 @@ export async function openMasterCard(id) {
     : '';
 
   const svcsHtml = services.length
-    ? services.map(s => `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);">
-        <span style="font-size:14px;font-weight:600;">${esc(s.title)}</span>
-        <span style="font-size:13px;color:var(--text-2);">${s.price_min ? s.price_min + ' ₽' : ''}</span>
+    ? services.map(s => `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;" data-sid="${esc(String(s.id))}" data-mid="${esc(String(id))}" onclick="bookServiceFromMaster(this.dataset.mid,this.dataset.sid)">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:600;">${esc(s.title)}</div>
+          ${s.duration ? `<div style="font-size:12px;color:var(--text-2);margin-top:2px;">${s.duration} мин</div>` : ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+          <span style="font-size:13px;color:var(--text-2);">${s.price_min ? s.price_min + ' ₽' : ''}</span>
+          <span style="font-size:13px;font-weight:600;color:var(--accent);">Записать →</span>
+        </div>
       </div>`).join('')
     : '<div style="font-size:13px;color:var(--text-2);padding:12px 0;">Нет данных</div>';
 
@@ -168,7 +175,17 @@ export async function openMasterCard(id) {
 }
 
 export function bookFromMaster(id) {
-  state.masterId = id;
+  bookWithMaster(id);
+}
+
+export function bookServiceFromMaster(masterId, serviceId) {
+  const m = MASTERS_DATA.find(x => x.id === masterId);
+  state.masterId = masterId;
+  state.masterName = m?.name || '';
+  state.masterAvatar = m?.avatar_big || m?.avatar || '';
+  state.masterGrad = m?.grad || '';
+  state.masterPreSelected = true;
+  state.serviceId = serviceId;
   go('s-slots');
 }
 
@@ -177,4 +194,4 @@ export function selectAnyMaster() {
   go('s-slots');
 }
 
-Object.assign(window, { renderMasters, toggleFav, selectMaster, selectAnyMaster, openMasterCard, bookFromMaster });
+Object.assign(window, { renderMasters, toggleFav, selectMaster, selectAnyMaster, openMasterCard, bookFromMaster, bookServiceFromMaster });
