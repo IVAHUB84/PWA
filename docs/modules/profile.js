@@ -104,7 +104,7 @@ export function renderHomeHero() {
   _renderHomeFeedPreview();
 
   if (!next) {
-    el.innerHTML = `<div style="margin:0 20px 16px;padding:20px;background:var(--surface);border-radius:18px;text-align:center;">
+    el.innerHTML = `<div style="margin:0 20px 16px;padding:20px;background:var(--surface);border-radius:18px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.09);border:1px solid var(--border);">
       <div style="font-size:28px;margin-bottom:8px;">📅</div>
       <div style="font-size:15px;font-weight:700;margin-bottom:6px;">Нет предстоящих записей</div>
       <button class="btn-primary" style="margin-top:8px;" onclick="go('s-services','tab')">Записаться →</button>
