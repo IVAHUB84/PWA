@@ -1,7 +1,6 @@
 import { getSession } from './storage.js';
 import { _loadStoredRecords } from './storage.js';
 import { _loadClientLoyalty } from './api.js';
-import { YC } from './api.js';
 import { MASTERS_DATA } from './state.js';
 import { getInitials, esc, _fmtDatetime, _hasRealAvatar } from './utils.js';
 
@@ -9,7 +8,6 @@ export function renderProfileScreen() {
   const s = getSession();
   const nameEl = document.getElementById('profName');
   const phoneEl = document.getElementById('profPhone');
-  const avEl = document.getElementById('profAv');
   const homeAv = document.getElementById('homeAv');
   if (!s) return;
   const initials = getInitials(s.name || s.email || '?');
@@ -17,30 +15,11 @@ export function renderProfileScreen() {
   if (phoneEl) phoneEl.textContent = s.phone ? '+' + s.phone : '';
   const emailEl = document.getElementById('profEmail');
   if (emailEl) emailEl.textContent = s.email || '';
-  const rawPhoto = localStorage.getItem('yc_profile_photo');
-  const savedPhoto = rawPhoto && /^data:image\//.test(rawPhoto) ? rawPhoto : null;
   const inner = document.getElementById('profAvInner');
-  if (avEl) {
-    if (savedPhoto) {
-      avEl.style.backgroundImage = `url(${savedPhoto})`;
-      avEl.style.backgroundSize = 'cover';
-      avEl.style.backgroundPosition = 'center';
-      if (inner) inner.textContent = '';
-    } else {
-      avEl.style.backgroundImage = '';
-      if (inner) inner.textContent = initials;
-    }
-  }
+  if (inner) inner.textContent = initials;
   if (homeAv) {
-    if (savedPhoto) {
-      homeAv.style.backgroundImage = `url(${savedPhoto})`;
-      homeAv.style.backgroundSize = 'cover';
-      homeAv.style.backgroundPosition = 'center';
-      homeAv.textContent = '';
-    } else {
-      homeAv.style.backgroundImage = '';
-      homeAv.textContent = initials;
-    }
+    homeAv.style.backgroundImage = '';
+    homeAv.textContent = initials;
   }
 
   const fav = MASTERS_DATA.find(m => m.fav);
@@ -194,37 +173,4 @@ export async function renderLoyaltyBlock() {
   }
 }
 
-export function _onProfilePhotoPicked(input) {
-  const file = input.files && input.files[0];
-  if (!file) return;
-  if (!file.type.startsWith('image/')) { alert('Выберите файл изображения'); return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const size = 200;
-      canvas.width = size; canvas.height = size;
-      const ctx = canvas.getContext('2d');
-      const min = Math.min(img.width, img.height);
-      const sx = (img.width - min) / 2, sy = (img.height - min) / 2;
-      ctx.drawImage(img, sx, sy, min, min, 0, 0, size, size);
-      const b64 = canvas.toDataURL('image/jpeg', 0.8);
-      try {
-        localStorage.setItem('yc_profile_photo', b64);
-      } catch {
-        alert('Не удалось сохранить фото: недостаточно места в хранилище браузера.');
-        return;
-      }
-      renderProfileScreen();
-      const sess = getSession();
-      if (sess && sess.client_id) {
-        YC.post(`/clients/${YC.company}/${sess.client_id}`, { avatar: b64 }, 'PUT').catch(() => {});
-      }
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-Object.assign(window, { renderProfileScreen, renderHomeHero, _renderHomeFeedPreview, renderLoyaltyBlock, _onProfilePhotoPicked });
+Object.assign(window, { renderProfileScreen, renderHomeHero, _renderHomeFeedPreview, renderLoyaltyBlock });
