@@ -14,7 +14,6 @@
 <link rel="stylesheet" href="style.css">
 <script>(function(){var t=localStorage.getItem('yc_theme')||'system';if(t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark');})()</script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 </head>
 <body>
 
@@ -754,8 +753,16 @@
       <div><div class="admin-brand">Push-кампании</div><div class="admin-title">Рассылки</div></div>
       <button onclick="go('s-admin-push-new')" style="background:rgba(255,255,255,0.15);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;padding:8px 14px;cursor:pointer;font-family:inherit;">+ Новая</button>
     </div>
-    <div class="scroll" style="padding-bottom:20px;" id="adminPushList">
-      <div style="padding:40px 20px;text-align:center;color:var(--text-2);font-size:14px;">Рассылок пока нет</div>
+    <div class="scroll" style="padding-bottom:20px;">
+      <div style="padding:16px 20px 0;">
+        <div style="font-size:12px;color:var(--text-2);font-weight:600;margin-bottom:6px;">Worker URL</div>
+        <input id="workerUrlInput" type="url" placeholder="https://studio-push.xxx.workers.dev" oninput="localStorage.setItem('yc_worker_url',this.value.trim())" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);font-size:14px;font-family:inherit;color:var(--text);">
+        <div style="font-size:12px;color:var(--text-2);font-weight:600;margin:10px 0 6px;">Admin Secret</div>
+        <input id="pushSecretInput" type="password" placeholder="секретный ключ Worker" oninput="localStorage.setItem('yc_push_secret',this.value)" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);font-size:14px;font-family:inherit;color:var(--text);">
+      </div>
+      <div id="adminPushList">
+        <div style="padding:40px 20px;text-align:center;color:var(--text-2);font-size:14px;">Рассылок пока нет</div>
+      </div>
     </div>
     <div class="tab-bar">
       <div class="tab" onclick="go('s-admin','tab')"><div class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div><div class="tab-label">Сводка</div></div>

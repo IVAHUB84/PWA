@@ -33,5 +33,3 @@ export const REVIEW_URLS = {
 export const _GH_API = 'https://api.github.com/repos/IVAHUB84/PWA/contents/docs/posts.json';
 export const _GH_RAW = 'https://ivahub84.github.io/PWA/posts.json';
 
-export const ONESIGNAL_APP_ID  = '88345dbd-e9db-4866-80ce-bf28b3c7af94';
-export const ONESIGNAL_REST_KEY = 'os_v2_app_ra2f3ppj3negnagox4ulhr5psrfl27hvzqquewe345uxj2i2xah5fhxmmxtuvqmrerjwja5z4n5ttvkpxpr5mgud3egiarmgxrdgsiy';

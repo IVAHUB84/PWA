@@ -293,6 +293,7 @@ export async function verifyOtp() {
 
     if (client_id) {
       saveSession({ email: email || '', user_token: '', name: client_name || '', phone: phone || '', client_id });
+      window.subscribePush?.(client_id, phone || '');
       _navigateHome();
       return;
     }
@@ -312,6 +313,7 @@ export async function verifyOtp() {
     }
     if (client) {
       saveSession({ email, user_token: '', name: client.name || '', phone: client.phone || '', client_id: client.id });
+      window.subscribePush?.(client.id, client.phone || '');
       _navigateHome();
     } else {
       localStorage.setItem('yc_reg_email', email);

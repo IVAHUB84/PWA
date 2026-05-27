@@ -1,0 +1,18 @@
+name = "studio-push"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+[[kv_namespaces]]
+binding = "SUBSCRIPTIONS"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+
+[triggers]
+crons = ["0 15 * * *"]
+
+# Secrets (set via wrangler secret put):
+#   VAPID_PUBLIC_KEY       — base64url P-256 public key
+#   VAPID_PRIVATE_KEY_JWK  — JSON string of P-256 private key in JWK format
+#   ADMIN_SECRET           — secret for POST /send (store in localStorage yc_push_secret in admin panel)
+#   YC_TOKEN               — YCLIENTS Bearer token
+#   YC_USER_TOKEN          — YCLIENTS User token
+#   YC_COMPANY             — YCLIENTS company ID (e.g. 1940850)

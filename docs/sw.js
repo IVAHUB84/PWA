@@ -1,10 +1,4 @@
-try {
-  importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
-} catch(e) {
-  console.warn('OneSignal SW load failed', e);
-}
-
-const CACHE_VERSION = 'v27';
+const CACHE_VERSION = 'v28';
 const STATIC_CACHE  = `studio-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `studio-runtime-${CACHE_VERSION}`;
 
@@ -34,6 +28,7 @@ const APP_SHELL = [
   './modules/scenarios.js',
   './modules/search.js',
   './modules/pin.js',
+  './modules/push.js',
   './manifest.json',
   './logo.png',
   './logobest.png',
@@ -140,3 +135,28 @@ self.addEventListener('fetch', event => {
   );
 });
 
+// ── PUSH ─────────────────────────────────────────────────────────────────────
+self.addEventListener('push', event => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch {}
+  const title = data.title || 'Реснички';
+  const opts = {
+    body: data.body || '',
+    icon: data.icon || './icon-192.png',
+    badge: './icon-192.png',
+    data: { url: './' },
+  };
+  event.waitUntil(self.registration.showNotification(title, opts));
+});
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const url = event.notification.data?.url || './';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      const existing = list.find(c => c.url.includes(self.location.origin));
+      if (existing) return existing.focus();
+      return clients.openWindow(url);
+    })
+  );
+});

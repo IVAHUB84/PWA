@@ -1,7 +1,8 @@
 import { YC } from './api.js';
 import { go } from './navigation.js';
 import { esc } from './utils.js';
-import { PUSH_TEMPLATES, ONESIGNAL_APP_ID, ONESIGNAL_REST_KEY } from './constants.js';
+import { PUSH_TEMPLATES } from './constants.js';
+import { sendAdminPush } from './push.js';
 import { _ghPullToLocal, _ghSyncPosts } from './github.js';
 
 function _ls(key) {
@@ -370,28 +371,6 @@ function _setPushCounts(n1, n2, n3) {
   }
 }
 
-async function _sendOneSignalPush(title, body) {
-  try {
-    const r = await fetch('https://api.onesignal.com/api/v1/notifications', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Key ${ONESIGNAL_REST_KEY}`,
-      },
-      body: JSON.stringify({
-        app_id: ONESIGNAL_APP_ID,
-        included_segments: ['All'],
-        headings: { en: title, ru: title },
-        contents: { en: body,  ru: body },
-        url: 'https://ivahub84.github.io/PWA/prototype.html',
-        chrome_web_icon: 'https://ivahub84.github.io/PWA/icon-192.png',
-      }),
-    });
-    return r.ok;
-  } catch {
-    return false;
-  }
-}
 
 export function sendNewPush() {
   const isScheduled = document.getElementById('segLater')?.classList.contains('active');
@@ -414,8 +393,9 @@ export function sendNewPush() {
     _showAdminToast(screen, 'Рассылка запланирована ✓');
     setTimeout(() => go('s-admin-push', 'tab'), 1800);
   } else {
-    _sendOneSignalPush('Реснички, сестрички', text).then(ok => {
-      _showAdminToast(screen, ok ? 'Уведомление отправлено ✓' : 'Ошибка отправки — проверьте REST API Key');
+    const title = document.getElementById('pushNewTitle')?.textContent || 'Реснички';
+    sendAdminPush(title, text).then(ok => {
+      _showAdminToast(screen, ok ? 'Уведомление отправлено ✓' : 'Ошибка: укажите Worker URL и Admin Secret в настройках');
       setTimeout(() => go('s-admin-push', 'tab'), 2000);
     });
   }
