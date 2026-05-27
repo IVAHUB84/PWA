@@ -224,7 +224,7 @@ fetch('./version.json?_=' + Date.now())
   .then(v => {
     if (!v) return;
     const el = document.getElementById('buildInfo');
-    if (el) el.textContent = v.date + '\n' + v.sha;
+    if (el) el.textContent = '#' + v.build + ' · ' + v.date;
   }).catch(() => {});
 
 // ── SERVICE WORKER ──
