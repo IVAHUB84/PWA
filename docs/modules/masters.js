@@ -108,17 +108,15 @@ export async function openMasterCard(id) {
     return;
   }
 
-  const [profileRes, servicesRes, commentsRes, datesRes] = await Promise.all([
+  const [profileRes, servicesRes, commentsRes] = await Promise.all([
     YC.get(`/staff/${YC.company}/${ycId}`),
     YC.get(`/book_services/${YC.company}`, { staff_id: ycId }),
     YC.get(`/comments/${YC.company}`, { staff_id: ycId }),
-    YC.get(`/book_dates/${YC.company}`, { staff_id: ycId }),
   ]);
 
   const m = profileRes.data || {};
   const services = servicesRes.data?.services || [];
   const comments = (commentsRes.data || []).slice(0, 5);
-  const dates = (datesRes.data?.booking_dates || []).slice(0, 7);
 
   const avatarSrc = m.image_group?.images?.norm?.path || m.avatar_big || m.avatar || '';
   const avatarHtml = avatarSrc
@@ -147,10 +145,6 @@ export async function openMasterCard(id) {
       </div>`).join('')
     : '';
 
-  const datesHtml = dates.map(d => {
-    const dt = new Date(d);
-    return `<span style="background:var(--mint-light);color:var(--mint);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;">${dt.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}</span>`;
-  }).join('');
 
   content.innerHTML = `
     <div style="padding:24px 20px 16px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;">
@@ -165,10 +159,7 @@ export async function openMasterCard(id) {
     <div style="padding:0 20px 20px;">
       <button class="btn-primary" data-mid="${esc(String(id))}" onclick="bookFromMaster(this.dataset.mid)">Записаться к этому мастеру</button>
     </div>
-    ${dates.length ? `
-      <div class="section-header"><span class="section-title">Ближайшие окна</span></div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;padding:0 20px 20px;">${datesHtml}</div>` : ''}
-    <div class="section-header"><span class="section-title">Услуги</span></div>
+<div class="section-header"><span class="section-title">Услуги</span></div>
     <div style="padding:0 20px;">${svcsHtml}</div>
     ${commentsHtml ? `
       <div class="section-header" style="margin-top:8px;"><span class="section-title">Отзывы</span></div>
