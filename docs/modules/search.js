@@ -1,6 +1,6 @@
 import { state, MASTERS_DATA, SERVICES_DATA } from './state.js';
 import { go } from './navigation.js';
-import { getInitials, esc } from './utils.js';
+import { getInitials, esc, _normalizePhone } from './utils.js';
 
 export function _homeSearch(q) {
   const res = document.getElementById('homeSearchResults');
@@ -39,7 +39,7 @@ export function showBookForOtherModal() {
     <div style="margin-bottom:12px;"><div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:6px;">ИМЯ</div>
       <input id="_oName" placeholder="Имя" style="width:100%;box-sizing:border-box;height:48px;border:1.5px solid var(--border);border-radius:12px;padding:0 14px;font-size:15px;font-family:inherit;background:var(--surface);"></div>
     <div style="margin-bottom:20px;"><div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:6px;">ТЕЛЕФОН</div>
-      <input id="_oPhone" placeholder="+7..." type="tel" style="width:100%;box-sizing:border-box;height:48px;border:1.5px solid var(--border);border-radius:12px;padding:0 14px;font-size:15px;font-family:inherit;background:var(--surface);"></div>
+      <input id="_oPhone" placeholder="+7 (___) ___-__-__" type="tel" inputmode="numeric" maxlength="18" oninput="_formatPhoneInput(this)" style="width:100%;box-sizing:border-box;height:48px;border:1.5px solid var(--border);border-radius:12px;padding:0 14px;font-size:15px;font-family:inherit;background:var(--surface);"></div>
     <button style="width:100%;height:52px;background:var(--accent);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="_confirmBookOther()">Записать →</button>
     <button style="width:100%;margin-top:10px;height:44px;background:none;border:none;color:var(--text-2);font-size:15px;cursor:pointer;font-family:inherit;" onclick="this.closest('[data-overlay]').remove()">Отмена</button>
   </div>`;
@@ -52,9 +52,11 @@ export function _confirmBookOther() {
   const name = (document.getElementById('_oName') || {}).value || '';
   const phone = (document.getElementById('_oPhone') || {}).value || '';
   if (!name.trim()) { alert('Введите имя'); return; }
+  const normPhone = _normalizePhone(phone);
+  if (normPhone.length !== 11) { alert('Введите корректный номер телефона'); return; }
   document.querySelector('[data-overlay]')?.remove();
   state._bookOtherName = name.trim();
-  state._bookOtherPhone = phone.trim();
+  state._bookOtherPhone = normPhone;
   go('s-services', 'tab');
 }
 

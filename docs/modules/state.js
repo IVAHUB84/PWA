@@ -15,10 +15,10 @@ export let SERVICES_DATA = [
 ];
 
 export let MASTERS_DATA = [
-  { id: 'm1', name: 'Мария Соколова',  short: 'Мария С.',  role: 'Мастер ПМ и бровей', exp: '7 лет',  emoji: '👩', grad: 'linear-gradient(135deg,#F4B8CF,#E8729A)', cats: ['Брови', 'Губы', 'Глаза'],    fav: true,  avail: true,  availText: '● Есть окна сегодня' },
-  { id: 'm2', name: 'Ольга Климова',   short: 'Ольга К.',  role: 'Мастер эпиляции',    exp: '5 лет',  emoji: '👩', grad: 'linear-gradient(135deg,#B8EFE0,#6DC9AF)', cats: ['Эпиляция'],                  fav: false, avail: false, availText: 'Ближайшее окно — 27 мая' },
-  { id: 'm3', name: 'Елена Романова',  short: 'Елена Р.',  role: 'Мастер ресниц',      exp: '4 года', emoji: '👩', grad: 'linear-gradient(135deg,#EDACC3,#C8547F)', cats: ['Глаза'],                     fav: false, avail: true,  availText: '● Есть окна сегодня' },
-  { id: 'm4', name: 'Дарья Михайлова', short: 'Дарья М.',  role: 'Мастер ПМ',          exp: '3 года', emoji: '👩', grad: 'linear-gradient(135deg,#C5F0E4,#72C8B0)', cats: ['Брови', 'Губы', 'Глаза'],    fav: false, avail: true,  availText: '● Есть окна сегодня' },
+  { id: 'm1', ycId: '5443758', name: 'Мария Соколова',  short: 'Мария С.',  role: 'Мастер ПМ и бровей', exp: '7 лет',  emoji: '👩', grad: 'linear-gradient(135deg,#F4B8CF,#E8729A)', cats: ['Брови', 'Губы', 'Глаза'],    fav: true,  avail: true,  availText: '● Есть окна сегодня' },
+  { id: 'm2', ycId: '5443764', name: 'Ольга Климова',   short: 'Ольга К.',  role: 'Мастер эпиляции',    exp: '5 лет',  emoji: '👩', grad: 'linear-gradient(135deg,#B8EFE0,#6DC9AF)', cats: ['Эпиляция'],                  fav: false, avail: false, availText: 'Ближайшее окно — 27 мая' },
+  { id: 'm3', ycId: '5443767', name: 'Мила Романова',   short: 'Мила Р.',   role: 'Мастер ресниц',      exp: '4 года', emoji: '👩', grad: 'linear-gradient(135deg,#EDACC3,#C8547F)', cats: ['Глаза'],                     fav: false, avail: true,  availText: '● Есть окна сегодня' },
+  { id: 'm4', ycId: null,      name: 'Дарья Михайлова', short: 'Дарья М.',  role: 'Мастер ПМ',          exp: '3 года', emoji: '👩', grad: 'linear-gradient(135deg,#C5F0E4,#72C8B0)', cats: ['Брови', 'Губы', 'Глаза'],    fav: false, avail: true,  availText: '● Есть окна сегодня' },
 ];
 
 export function setServicesData(data) { SERVICES_DATA = data; }
@@ -33,6 +33,8 @@ export const state = {
   dateISO: '',
   slot: '14:00',
   _bookAfterLogin: false,
+  _bookOtherName: '',
+  _bookOtherPhone: '',
   _cancelId: null,
   _cancelHash: null,
   _rescheduleId: null,

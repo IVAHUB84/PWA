@@ -54,7 +54,11 @@ export function updateConfirmScreen() {
     <div class="confirm-row">
       <div class="confirm-row-icon">💰</div>
       <div><div class="confirm-row-val">${esc(svc.priceStr)}</div><div class="confirm-row-lbl">Стоимость</div></div>
-    </div>`;
+    </div>
+    ${state._bookOtherName ? `<div class="confirm-row">
+      <div class="confirm-row-icon">👤</div>
+      <div><div class="confirm-row-val">${esc(state._bookOtherName)}</div><div class="confirm-row-lbl">Запись для</div></div>
+    </div>` : ''}`;
 }
 
 // ── DATE SELECTION ──

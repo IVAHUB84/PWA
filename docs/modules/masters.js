@@ -98,11 +98,21 @@ export async function openMasterCard(id) {
   const content = document.getElementById('masterCardContent');
   content.innerHTML = '<div style="padding:48px 20px;text-align:center;color:var(--text-2);font-size:14px;">Загрузка…</div>';
 
+  const localMaster = MASTERS_DATA.find(m => m.id === id);
+  const ycId = localMaster?.ycId || id;
+
+  if (!ycId) {
+    const lm = localMaster || {};
+    const avHtml = `<div style="width:100px;height:100px;border-radius:50%;background:${lm.grad||'var(--accent)'};display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:800;color:#fff;">${getInitials(lm.name||'')}</div>`;
+    content.innerHTML = `<div style="padding:24px 20px 16px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;">${avHtml}<div><div style="font-size:22px;font-weight:800;">${esc(lm.name||'')}</div><div style="font-size:14px;color:var(--text-2);margin-top:4px;">${esc(lm.role||'')}</div></div></div><div style="padding:0 20px 20px;"><button class="btn-primary" data-mid="${esc(String(id))}" onclick="bookFromMaster(this.dataset.mid)">Записаться к этому мастеру</button></div>`;
+    return;
+  }
+
   const [profileRes, servicesRes, commentsRes, datesRes] = await Promise.all([
-    YC.get(`/staff/${YC.company}/${id}`),
-    YC.get(`/book_services/${YC.company}`, { staff_id: id }),
-    YC.get(`/comments/${YC.company}`, { staff_id: id }),
-    YC.get(`/book_dates/${YC.company}`, { staff_id: id }),
+    YC.get(`/staff/${YC.company}/${ycId}`),
+    YC.get(`/book_services/${YC.company}`, { staff_id: ycId }),
+    YC.get(`/comments/${YC.company}`, { staff_id: ycId }),
+    YC.get(`/book_dates/${YC.company}`, { staff_id: ycId }),
   ]);
 
   const m = profileRes.data || {};

@@ -2,9 +2,9 @@ import { go } from './navigation.js';
 import { state, getService, getMaster, SERVICES_DATA, MASTERS_DATA } from './state.js';
 import { getSession } from './storage.js';
 import { setAuthContext } from './storage.js';
-import { YC } from './api.js';
+import { YC, _findClientByPhone } from './api.js';
 import { _loadStoredRecords } from './storage.js';
-import { getInitials, esc, _fmtDatetime } from './utils.js';
+import { getInitials, esc, _fmtDatetime, _normalizePhone } from './utils.js';
 
 // Callback for renderHomeHero — registered by app.js once profile.js is loaded
 let _renderHomeHeroFn = () => {};
@@ -43,16 +43,31 @@ async function _bookWithSession(session) {
     const svc = getService();
     const m = getMaster();
     const datetime = `${state.dateISO || new Date().toISOString().slice(0, 10)} ${state.slot || '10:00'}:00`;
+    const isForOther = !!(state._bookOtherName);
+    let bookPhone = isForOther ? _normalizePhone(state._bookOtherPhone || '') : (session.phone || '');
+    let bookName  = isForOther ? state._bookOtherName : (session.name || '');
+    let bookEmail = isForOther ? '' : (session.email || '');
+    if (isForOther) {
+      try {
+        const other = bookPhone.length === 11 ? await _findClientByPhone(bookPhone) : null;
+        if (other) {
+          bookEmail = other.email || '';
+        } else if (bookPhone.length === 11) {
+          await YC.post(`/clients/${YC.company}`, { name: bookName, phone: bookPhone });
+        }
+      } catch { /* proceed with booking even if client lookup/create fails */ }
+    }
     const body = {
-      phone: session.phone || '',
-      fullname: session.name || '',
-      email: session.email || '',
+      phone: bookPhone,
+      fullname: bookName,
+      email: bookEmail,
       appointments: [{ id: 1, services: [parseInt(svc.id) || 0], staff_id: m ? parseInt(m.id) : 0, datetime }],
       notify_by_sms: 1,
     };
     const r = await YC.post(`/book_record/${YC.company}`, body);
     if (r.success) {
       _saveBookedRecord(r.data && r.data[0]);
+      if (isForOther) { state._bookOtherName = ''; state._bookOtherPhone = ''; }
       go('s-confirm');
     } else {
       alert((r.meta?.message || 'Не удалось создать запись. Попробуйте снова.').slice(0, 200));
