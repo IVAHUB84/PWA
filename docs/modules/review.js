@@ -33,11 +33,13 @@ export function renderReviewScreen() {
     }
   }
   if (ta) ta.value = '';
-  setStar(4);
+  document.querySelectorAll('#s-review .tip-btn').forEach(b => b.classList.remove('sel'));
+  setStar(0);
 }
 
 export function openRateVisit(recordId, masterId, masterName, svcName, datetime) {
   state._reviewMasterId = masterId;
+  state._reviewRecordId = recordId;
   state._reviewMasterName = masterName;
   state._reviewSvcName = svcName;
   const d = new Date(datetime.replace(' ', 'T'));
@@ -48,14 +50,18 @@ export function openRateVisit(recordId, masterId, masterName, svcName, datetime)
 export function submitReview() {
   const stars = document.querySelectorAll('#starsRow .star.on').length;
   const text = (document.getElementById('reviewTextarea')?.value || '').trim();
+  const tipBtn = document.querySelector('#s-review .tip-btn.sel');
+  const tips = tipBtn ? tipBtn.textContent.trim() : '';
   const reviews = JSON.parse(localStorage.getItem('yc_reviews') || '[]');
   reviews.push({
+    recordId: state._reviewRecordId || null,
     masterId: state._reviewMasterId,
     masterName: state._reviewMasterName,
     svcName: state._reviewSvcName,
     date: state._reviewRecordDate,
     stars,
     text,
+    tips,
     saved: new Date().toISOString(),
   });
   try {

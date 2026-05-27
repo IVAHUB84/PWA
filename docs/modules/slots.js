@@ -72,9 +72,13 @@ export async function loadDates() {
   if (m) params.staff_id = m.id;
   try {
     const r = await YC.get(`/book_dates/${YC.company}`, params);
-    const dates = r.success && r.data && r.data.booking_dates ? r.data.booking_dates : null;
-    if (dates && dates.length) {
-      _renderDates(el, dates);
+    if (r.success) {
+      const dates = r.data && r.data.booking_dates ? r.data.booking_dates : [];
+      if (dates.length) {
+        _renderDates(el, dates);
+      } else {
+        el.innerHTML = '<div style="padding:12px;color:var(--text-2);font-size:13px;">Нет доступных дат на ближайший месяц</div>';
+      }
     } else {
       _renderDatesFallback(el);
     }

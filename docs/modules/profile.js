@@ -62,7 +62,7 @@ export function renderHomeHero() {
   const ml = document.getElementById('homeMastersList');
   if (ml && MASTERS_DATA.length) {
     ml.innerHTML = MASTERS_DATA.slice(0, 4).map(m => `
-      <div class="master-card-sm" data-mid="${esc(m.id)}" onclick="openMasterCard(this.dataset.mid)">
+      <div class="master-card-sm" data-mid="${esc(m.id)}" onclick="bookWithMaster(this.dataset.mid)">
         <div class="master-av-sm" style="background:${m.grad};overflow:hidden;">${_hasRealAvatar(m) ? `<img src="${esc(m.avatar_big || m.avatar)}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">` : `<div class="av-initials">${getInitials(m.name)}</div>`}</div>
         <div class="master-name-sm">${esc(m.short || m.name)}</div>
         <div class="master-role-sm">${esc(m.role)}</div>
@@ -79,6 +79,23 @@ export function renderHomeHero() {
   _renderHomeFeedPreview();
 
   if (!next) {
+    const reviews = JSON.parse(localStorage.getItem('yc_reviews') || '[]');
+    const reviewedIds = new Set(reviews.map(r => r.recordId).filter(Boolean));
+    const sevenDaysAgo = new Date(now - 7 * 86400000);
+    const lastUnreviewed = records
+      .filter(r => r.status !== 'cancelled')
+      .filter(r => { const dt = new Date(r.datetime.replace(' ', 'T')); return dt <= now && dt >= sevenDaysAgo; })
+      .filter(r => !reviewedIds.has(String(r.id)))
+      .sort((a, b) => new Date(b.datetime) - new Date(a.datetime))[0] || null;
+    if (lastUnreviewed) {
+      el.innerHTML = `<div style="margin:0 20px 16px;padding:16px;background:var(--surface);border-radius:18px;box-shadow:0 2px 12px rgba(0,0,0,0.09);border:1px solid var(--border);">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-2);margin-bottom:10px;">Оцените прошлый визит</div>
+        <div style="font-size:14px;font-weight:700;margin-bottom:2px;">${esc(lastUnreviewed.svcName)}</div>
+        <div style="font-size:12px;color:var(--text-2);margin-bottom:12px;">${esc(lastUnreviewed.masterName)} · ${_fmtDatetime(lastUnreviewed.datetime)}</div>
+        <button class="btn-ghost" style="width:100%;font-size:14px;" data-rid="${esc(String(lastUnreviewed.id))}" data-mid="${esc(String(lastUnreviewed.masterId))}" data-mname="${esc(lastUnreviewed.masterName)}" data-sname="${esc(lastUnreviewed.svcName)}" data-dt="${esc(lastUnreviewed.datetime)}" onclick="openRateVisit(this.dataset.rid,this.dataset.mid,this.dataset.mname,this.dataset.sname,this.dataset.dt)">Оставить отзыв →</button>
+      </div>`;
+      return;
+    }
     el.innerHTML = `<div style="margin:0 20px 16px;padding:20px;background:var(--surface);border-radius:18px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.09);border:1px solid var(--border);">
       <div style="font-size:28px;margin-bottom:8px;">📅</div>
       <div style="font-size:15px;font-weight:700;">Нет предстоящих записей</div>

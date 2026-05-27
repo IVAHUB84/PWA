@@ -50,6 +50,18 @@ registerOnEnter('s-profile',  () => { renderProfileScreen(); renderLoyaltyBlock(
 registerOnEnter('s-feed',           () => renderClientFeed());
 registerOnEnter('s-review',         () => renderReviewScreen());
 registerOnEnter('s-offer',          () => _initOfferUrgency());
+registerOnEnter('s-crosssell', () => {
+  const el = document.getElementById('csSub');
+  if (!el) return;
+  try {
+    const records = JSON.parse(localStorage.getItem('yc_records') || '[]');
+    const now = new Date();
+    const next = records
+      .filter(r => r.status !== 'cancelled' && new Date((r.datetime || '').replace(' ', 'T')) > now)
+      .sort((a, b) => new Date(a.datetime) - new Date(b.datetime))[0];
+    if (next) el.textContent = `К записи: ${next.svcName}`;
+  } catch {}
+});
 registerOnEnter('s-admin',          () => renderAdminDashboard());
 registerOnEnter('s-admin-feed',     () => renderAdminFeed());
 registerOnEnter('s-admin-post',     () => _clearPostImage());

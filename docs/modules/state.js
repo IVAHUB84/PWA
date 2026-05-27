@@ -39,6 +39,7 @@ export const state = {
   _cancelHash: null,
   _rescheduleId: null,
   _reviewMasterId: null,
+  _reviewRecordId: null,
   _reviewMasterName: '',
   _reviewSvcName: '',
   _reviewRecordDate: '',

@@ -114,7 +114,7 @@ export async function sendCodeByPhone() {
   if (!email) {
     localStorage.setItem('yc_reg_phone', phone);
     localStorage.setItem('yc_reg_client_id', String(client.id));
-    if (errEl) { errEl.textContent = 'Email не найден. Введите email для получения кода.'; errEl.style.display = 'block'; }
+    if (errEl) errEl.style.display = 'none';
     _showPhoneEmailInput(phone, client);
     _sendingCode = false;
     return;
@@ -162,7 +162,8 @@ function _showPhoneEmailInput(phone, client) {
   const div = document.createElement('div');
   div.id = 'loginEmailFallback';
   div.innerHTML = `
-    <div class="login-lbl" style="margin-top:12px;">Email для кода</div>
+    <div style="padding:10px 0 4px;font-size:13px;color:var(--text-2);">В вашем профиле нет email. Укажите его — отправим код для входа.</div>
+    <div class="login-lbl" style="margin-top:8px;">Email</div>
     <div class="login-field">
       <input type="email" inputmode="email" id="loginEmailFb" placeholder="your@email.com"
         style="background:none;border:none;outline:none;font-size:17px;font-weight:500;font-family:inherit;flex:1;color:var(--text);">
@@ -172,6 +173,7 @@ function _showPhoneEmailInput(phone, client) {
   if (btn) btn.parentNode.insertBefore(div, btn.nextSibling);
   const fbBtn = document.getElementById('sendCodeFbBtn');
   if (fbBtn) fbBtn.addEventListener('click', () => _sendCodeToFallbackEmail(phone, client.id, client.name || ''));
+  setTimeout(() => document.getElementById('loginEmailFb')?.focus(), 100);
 }
 
 async function _sendCodeToFallbackEmail(phone, clientId, clientName) {

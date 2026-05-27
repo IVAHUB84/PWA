@@ -70,7 +70,7 @@ export function _paintFeed(el, posts) {
       <div class="feed-body">
         <div class="feed-body-top">
           <div class="feed-tag">${esc(p.cat)}</div>
-          <button class="feed-book" onclick="go('s-services')">Записаться →</button>
+          <button class="feed-book" data-cat="${esc(p.cat || '')}" onclick="_feedGoBook(this.dataset.cat)">Записаться →</button>
         </div>
         <div class="feed-caption">${esc(p.text)}</div>
         <div class="feed-meta">${esc(p.date)}</div>
@@ -103,4 +103,9 @@ export function _feedFilterCat(cat) {
   _paintFeed(el, filtered);
 }
 
-Object.assign(window, { renderClientFeed, _paintFeed, _renderFeedCats, _feedFilterCat, go });
+function _feedGoBook(cat) {
+  if (cat && typeof window.filterCategory === 'function') window.filterCategory(cat);
+  go('s-services');
+}
+
+Object.assign(window, { renderClientFeed, _paintFeed, _renderFeedCats, _feedFilterCat, _feedGoBook, go });
