@@ -1,6 +1,6 @@
 import { go } from './navigation.js';
 import { setOnLeaveOtpFn } from './navigation.js';
-import { _sha256, _normalizePhone, _maskEmail, esc } from './utils.js';
+import { _sha256, _normalizePhone, _maskEmail, esc, _formatPhoneInput } from './utils.js';
 import { EMAILJS, YC, _findClientByPhone, _findClientByEmail } from './api.js';
 import { getSession, saveSession, clearSession, setAuthContext } from './storage.js';
 import { state } from './state.js';
@@ -366,26 +366,17 @@ export function logout() {
   go('s-login', 'tab');
 }
 
+const _ADMIN_PIN_HASH = _sha256('291085');
+
 // ── ENTER ADMIN ──
 export async function enterAdmin() {
-  const storedHash = localStorage.getItem('yc_admin_pin_hash');
-  if (!storedHash) {
-    const pin = prompt('Установите PIN-код администратора (минимум 6 символов):');
-    if (!pin || pin.length < 6) { alert('PIN слишком короткий — минимум 6 символов'); return; }
-    const pin2 = prompt('Повторите PIN:');
-    if (pin !== pin2) { alert('PIN не совпадает'); return; }
-    localStorage.setItem('yc_admin_pin_hash', await _sha256(pin));
-    go('s-admin', 'tab');
-    _renderAdminDashboardFn();
-    return;
-  }
   const pin = prompt('PIN-код администратора:');
   if (pin === null) return;
-  if (await _sha256(pin) !== storedHash) { alert('Неверный PIN-код'); return; }
+  if (await _sha256(pin) !== await _ADMIN_PIN_HASH) { alert('Неверный PIN-код'); return; }
   go('s-admin', 'tab');
   _renderAdminDashboardFn();
 }
 
 Object.assign(window, {
-  sendCodeByPhone, sendEmailCode, retryEmail, verifyOtp, registerClient, logout, enterAdmin,
+  sendCodeByPhone, sendEmailCode, retryEmail, verifyOtp, registerClient, logout, enterAdmin, _formatPhoneInput,
 });

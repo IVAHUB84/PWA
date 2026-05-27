@@ -329,8 +329,9 @@
       <div class="login-logo"><img src="./logo.png" alt="Реснички, сестрички"></div>
       <div class="login-lbl">Номер телефона</div>
       <div class="login-field">
-        <input type="tel" inputmode="tel" class="login-phone" id="loginPhone"
-          placeholder="+7 (999) 000-00-00" value=""
+        <input type="tel" inputmode="numeric" class="login-phone" id="loginPhone"
+          placeholder="+7 (___) ___-__-__" maxlength="18" autocomplete="tel"
+          oninput="_formatPhoneInput(this)" onkeydown="if(event.key==='Enter')sendCodeByPhone()"
           style="background:none;border:none;outline:none;font-size:17px;font-weight:500;font-family:inherit;flex:1;color:var(--text);">
       </div>
       <div id="loginError" style="color:var(--red);font-size:13px;padding:0 0 8px;display:none;"></div>

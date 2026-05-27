@@ -37,6 +37,20 @@ export function _normalizePhone(raw) {
   return d.slice(-11);
 }
 
+export function _formatPhoneInput(input) {
+  let d = input.value.replace(/\D/g, '');
+  if (d.length === 0) { input.value = ''; return; }
+  if (d[0] === '8') d = '7' + d.slice(1);
+  if (d[0] !== '7') d = '7' + d;
+  d = d.slice(0, 11);
+  let v = '+7';
+  if (d.length > 1) v += ' (' + d.slice(1, 4);
+  if (d.length >= 4) v += ') ' + d.slice(4, 7);
+  if (d.length >= 7) v += '-' + d.slice(7, 9);
+  if (d.length >= 9) v += '-' + d.slice(9, 11);
+  input.value = v;
+}
+
 export function _maskEmail(email) {
   const [local, domain] = email.split('@');
   if (!local || !domain) return email;
