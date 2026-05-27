@@ -252,6 +252,8 @@ body {
 }
 .search-bar input { background: none; border: none; outline: none; font-size: 15px; color: var(--text); flex: 1; font-family: inherit; }
 .search-bar input::placeholder { color: var(--text-2); }
+#homeSearchBar input { color: #fff; }
+#homeSearchBar input::placeholder { color: rgba(255,255,255,0.6); }
 
 .svc-card {
   display: flex; align-items: center; margin: 0 20px 10px;
