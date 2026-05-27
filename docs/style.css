@@ -4,6 +4,8 @@ a, button, [onclick], .tab, .chip, .svc-card, .master-card, .slot, .hero-card {
   -webkit-tap-highlight-color: transparent;
   cursor: pointer;
 }
+/* Prevent iOS Safari auto-zoom on input focus (triggers when font-size < 16px) */
+input, textarea, select { font-size: max(16px, 1em); }
 
 :root {
   --bg: #FAF7F3;

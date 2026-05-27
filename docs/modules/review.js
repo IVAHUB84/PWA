@@ -62,7 +62,7 @@ export function _selectCustomTip(btn) {
     inp.inputMode = 'numeric';
     inp.min = '1';
     inp.placeholder = 'Введите сумму ₽';
-    inp.style.cssText = 'width:100%;box-sizing:border-box;height:44px;border:1.5px solid var(--border);border-radius:12px;padding:0 14px;font-size:15px;font-family:inherit;background:var(--surface);color:var(--text);margin-top:8px;display:block;';
+    inp.style.cssText = 'width:100%;box-sizing:border-box;height:44px;border:1.5px solid var(--border);border-radius:12px;padding:0 14px;font-size:16px;font-family:inherit;background:var(--surface);color:var(--text);margin-top:8px;display:block;';
     section.appendChild(inp);
     setTimeout(() => inp.focus(), 50);
   }
