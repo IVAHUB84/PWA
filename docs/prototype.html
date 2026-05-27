@@ -54,8 +54,9 @@
         <div id="homeSearchResults" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:14px;margin-top:4px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.1);"></div>
       </div>
 
-      <div style="margin:0 20px 6px;display:flex;justify-content:flex-end;">
-        <button onclick="showBookForOtherModal()" style="background:none;border:none;font-size:13px;color:var(--text-2);font-family:inherit;cursor:pointer;padding:4px 0;">👩‍👧 Записать подругу или маму →</button>
+      <div style="margin:0 20px 14px;display:flex;gap:10px;">
+        <button onclick="go('s-services','tab')" style="flex:1;height:48px;background:var(--accent);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">Записать себя</button>
+        <button onclick="showBookForOtherModal()" style="flex:1;height:48px;background:var(--surface);color:var(--text);border:1.5px solid var(--border);border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">Записать другого</button>
       </div>
 
       <div id="homeHero"></div>
