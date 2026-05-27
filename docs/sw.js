@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v8';
+const CACHE_VERSION = 'v9';
 const STATIC_CACHE  = `studio-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `studio-runtime-${CACHE_VERSION}`;
 
@@ -28,6 +28,7 @@ const APP_SHELL = [
   './modules/scenarios.js',
   './modules/search.js',
   './manifest.json',
+  './logo.png',
   './icon-192.png',
   './icon-512.png',
   './icon-180.png',
