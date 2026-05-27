@@ -1,8 +1,7 @@
 import { state, MASTERS_DATA, getService } from './state.js';
 import { go } from './navigation.js';
 import { YC } from './api.js';
-import { _GRADS } from './constants.js';
-import { _makeShort, _hasRealAvatar, getInitials, esc } from './utils.js';
+import { _hasRealAvatar, getInitials, esc } from './utils.js';
 import { bookWithMaster } from './booking.js';
 
 function _avgRating(masterId) {
@@ -44,7 +43,7 @@ export function _browseAllMasters() {
   go('s-masters');
 }
 
-export async function renderMasters() {
+export function renderMasters() {
   const browseAll = state._mastersAll;
   state._mastersAll = false;
   const sub = document.getElementById('mastersSub');
@@ -65,35 +64,12 @@ export async function renderMasters() {
   if (masterLabelEl) masterLabelEl.style.display = '';
   const svc = getService();
   if (sub) sub.textContent = `${svc.name} · ${svc.dur} мин`;
-  list.innerHTML = '<div style="padding:32px 20px;text-align:center;color:var(--text-2);font-size:14px;">Загрузка мастеров…</div>';
-  let masters = [];
-  try {
-    const r = await YC.get(`/book_staff/${YC.company}`, { service_ids: svc.id });
-    if (r.success && r.data && r.data.length) {
-      const favs = JSON.parse(localStorage.getItem('yc_favs') || '[]');
-      const staticById = Object.fromEntries(MASTERS_DATA.map(m => [m.id, m]));
-      masters = r.data.map((m, i) => {
-        const sm = staticById[String(m.id)];
-        return sm
-          ? { ...sm, fav: favs.includes(String(m.id)) }
-          : {
-              id: String(m.id), name: m.name, short: _makeShort(m.name),
-              role: m.specialization || 'Мастер', exp: '',
-              avatar: m.avatar_big || m.avatar || '',
-              grad: _GRADS[i % _GRADS.length],
-              fav: favs.includes(String(m.id)),
-              avail: true, availText: '● Есть окна сегодня',
-            };
-      });
-    }
-  } catch {}
-  if (!masters.length) {
-    masters = MASTERS_DATA;
-    const svcCat = svc.cat;
-    if (svcCat) {
-      const bycat = masters.filter(m => m.cats && m.cats.includes(svcCat));
-      if (bycat.length) masters = bycat;
-    }
+  const favs = JSON.parse(localStorage.getItem('yc_favs') || '[]');
+  let masters = MASTERS_DATA.map(m => ({ ...m, fav: favs.includes(String(m.id)) }));
+  const svcCat = svc.cat;
+  if (svcCat) {
+    const bycat = masters.filter(m => m.cats && m.cats.includes(svcCat));
+    if (bycat.length) masters = bycat;
   }
   masters.sort((a, b) => (b.fav ? 1 : 0) - (a.fav ? 1 : 0));
   const fp = masters.map(m => `${m.id}|${m.fav ? 1 : 0}|${m.avatar_big || m.avatar || ''}`).join(',');
