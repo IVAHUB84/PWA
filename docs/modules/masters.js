@@ -5,7 +5,8 @@ import { _GRADS } from './constants.js';
 import { _makeShort, _hasRealAvatar, getInitials, esc } from './utils.js';
 
 function _avgRating(masterId) {
-  const reviews = JSON.parse(localStorage.getItem('yc_reviews') || '[]');
+  let reviews;
+  try { reviews = JSON.parse(localStorage.getItem('yc_reviews') || '[]'); } catch { reviews = []; }
   const rel = reviews.filter(r => r.masterId === masterId && r.stars > 0);
   if (!rel.length) return '';
   const avg = rel.reduce((s, r) => s + r.stars, 0) / rel.length;
@@ -22,7 +23,7 @@ function _masterCardHtml(m, i, total) {
   const click = m.avail ? ` onclick="selectMaster(${JSON.stringify(m.id)})"` : '';
   const rating = _avgRating(m.id);
   const avatarInner = _hasRealAvatar(m)
-    ? `<img src="${m.avatar_big || m.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.style.display='none'">`
+    ? `<img src="${esc(m.avatar_big || m.avatar)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.style.display='none'">`
     : `<div class="av-initials">${getInitials(m.name)}</div>`;
   return `<div class="master-card${m.fav ? ' fav' : ''}"${styleAttr}${click}>
     <div class="master-av" style="background:${m.grad};">${avatarInner}${favBadge}</div>

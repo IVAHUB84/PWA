@@ -103,7 +103,7 @@ export function renderHomeHero() {
   if (ml && MASTERS_DATA.length) {
     ml.innerHTML = MASTERS_DATA.slice(0, 4).map(m => `
       <div class="master-card-sm" onclick="bookWithMaster(${JSON.stringify(m.id)})">
-        <div class="master-av-sm" style="background:${m.grad};overflow:hidden;">${_hasRealAvatar(m) ? `<img src="${m.avatar_big || m.avatar}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">` : `<div class="av-initials">${getInitials(m.name)}</div>`}</div>
+        <div class="master-av-sm" style="background:${m.grad};overflow:hidden;">${_hasRealAvatar(m) ? `<img src="${esc(m.avatar_big || m.avatar)}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">` : `<div class="av-initials">${getInitials(m.name)}</div>`}</div>
         <div class="master-name-sm">${esc(m.short || m.name)}</div>
         <div class="master-role-sm">${esc(m.role)}</div>
       </div>`).join('');
@@ -178,7 +178,8 @@ export async function renderLoyaltyBlock() {
   const imp = data?.importance ?? null;
   const lvl = _importanceLabel(imp);
   const badge = document.getElementById('importanceBadge');
-  if (badge) badge.innerHTML = `Важность: <span style="font-weight:700;color:${lvl.color};">${lvl.label}</span>`;
+  const safeColor = /^(#[0-9a-fA-F]{3,8}|var\(--[\w-]+\))$/.test(lvl.color) ? lvl.color : 'inherit';
+  if (badge) badge.innerHTML = `Важность: <span style="font-weight:700;color:${safeColor};">${esc(lvl.label)}</span>`;
 }
 
 export function _onProfilePhotoPicked(input) {

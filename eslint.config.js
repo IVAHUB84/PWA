@@ -40,6 +40,8 @@ export default [
         requestAnimationFrame: 'readonly',
         Image: 'readonly',
         URLSearchParams: 'readonly',
+        AbortController: 'readonly',
+        Uint32Array: 'readonly',
       },
     },
     rules: {

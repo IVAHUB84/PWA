@@ -29,7 +29,7 @@ export const state = {
   searchQ: '',
   serviceId: 'svc1',
   masterId: 'm1',
-  dateFull: 'Пятница, 24 мая',
+  dateFull: new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' }),
   dateISO: '',
   slot: '14:00',
   _bookAfterLogin: false,

@@ -20,22 +20,28 @@ export const YC = {
     };
   },
   async get(path, params = {}) {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 15000);
     try {
       const url = new URL(this.base + path);
       Object.entries(params).forEach(([k, v]) => url.searchParams.append(k, v));
-      const r = await fetch(url.toString(), { headers: this._h() });
+      const r = await fetch(url.toString(), { headers: this._h(), signal: ctrl.signal });
       if (!r.ok) return { success: false, _status: r.status };
       return r.json();
-    } catch { return { success: false }; }
+    } catch(e) { console.error('YC.get', path, e); return { success: false }; }
+    finally { clearTimeout(tid); }
   },
   async post(path, body, method = 'POST') {
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 15000);
     try {
       const r = await fetch(this.base + path, {
-        method, headers: this._h(), body: JSON.stringify(body),
+        method, headers: this._h(), body: JSON.stringify(body), signal: ctrl.signal,
       });
       if (!r.ok) return { success: false, _status: r.status };
       return r.json();
-    } catch { return { success: false }; }
+    } catch(e) { console.error('YC.post', path, e); return { success: false }; }
+    finally { clearTimeout(tid); }
   },
 };
 
@@ -94,7 +100,7 @@ export async function _fetchAndMergeServerRecords(clientId) {
     });
     const merged = [...filteredServer, ...localOnly];
     merged.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
-    localStorage.setItem('yc_records', JSON.stringify(merged));
+    try { localStorage.setItem('yc_records', JSON.stringify(merged)); } catch {}
     return merged;
   } catch {}
 }

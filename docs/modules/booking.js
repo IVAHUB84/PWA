@@ -55,7 +55,7 @@ async function _bookWithSession(session) {
       _saveBookedRecord(r.data && r.data[0]);
       go('s-confirm');
     } else {
-      alert(r.meta?.message || 'Не удалось создать запись. Попробуйте снова.');
+      alert((r.meta?.message || 'Не удалось создать запись. Попробуйте снова.').slice(0, 200));
     }
   } finally {
     _bookInProgress = false;
@@ -96,7 +96,7 @@ async function _rescheduleWithSession(session) {
   try {
     const r = await YC.post(`/record/${YC.company}/${id}`, body, 'PUT');
     if (!r.success) {
-      alert(`Не удалось перенести запись: ${r.meta?.message || 'ошибка сервера'}. Позвоните в студию.`);
+      alert(`Не удалось перенести запись: ${(r.meta?.message || 'ошибка сервера').slice(0, 200)}. Позвоните в студию.`);
       return;
     }
     const records = _loadStoredRecords();
@@ -188,7 +188,7 @@ export async function confirmCancel() {
 
     if (res.status >= 400) {
       if (btn) { btn.disabled = false; btn.textContent = 'Да, отменить запись'; }
-      const msg = data?.meta?.message || `Ошибка ${res.status}`;
+      const msg = (data?.meta?.message || `Ошибка ${res.status}`).slice(0, 200);
       alert(`Не удалось отменить: ${msg}. Позвоните в студию.`);
       _cancelInProgress = false;
       return;

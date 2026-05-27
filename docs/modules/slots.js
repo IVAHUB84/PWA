@@ -9,7 +9,7 @@ export function updateSlotsScreen() {
   if (strip) {
     if (m) {
       const avatarHtml = _hasRealAvatar(m)
-        ? `<img src="${m.avatar_big || m.avatar}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">`
+        ? `<img src="${esc(m.avatar_big || m.avatar)}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">`
         : `<div class="av-initials" style="font-size:17px;">${getInitials(m.name)}</div>`;
       strip.innerHTML = `
         <div style="width:48px;height:48px;border-radius:50%;background:${m.grad};overflow:hidden;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:center;">${avatarHtml}</div>
