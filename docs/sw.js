@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v32';
+const CACHE_VERSION = 'v33';
 const STATIC_CACHE  = `studio-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `studio-runtime-${CACHE_VERSION}`;
 
@@ -140,6 +140,7 @@ self.addEventListener('push', event => {
     body: data.body || '',
     icon: data.icon || './icon-192.png',
     badge: './icon-192.png',
+    vibrate: [300, 100, 300],
     data: { url: './' },
   };
   event.waitUntil(self.registration.showNotification(title, opts));
