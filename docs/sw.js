@@ -1,4 +1,6 @@
-const CACHE_VERSION = 'v10';
+importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");
+
+const CACHE_VERSION = 'v11';
 const STATIC_CACHE  = `studio-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `studio-runtime-${CACHE_VERSION}`;
 
@@ -129,37 +131,3 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// ── PUSH NOTIFICATIONS ───────────────────────────────────────────────────────
-self.addEventListener('push', event => {
-  let payload = {
-    title: 'Реснички, сестрички',
-    body: 'Новое сообщение от студии',
-  };
-  try {
-    if (event.data) Object.assign(payload, event.data.json());
-  } catch {}
-
-  event.waitUntil(
-    self.registration.showNotification(payload.title, {
-      body:    payload.body,
-      icon:    './icon-192.png',
-      badge:   './icon-192.png',
-      vibrate: [200, 100, 200],
-      tag:     'studio',
-      data:    payload.url || null,
-    })
-  );
-});
-
-// ── NOTIFICATION CLICK: открываем или фокусируем приложение ─────────────────
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true })
-      .then(list => {
-        const existing = list.find(c => c.url.includes('prototype.html'));
-        if (existing) return existing.focus();
-        return clients.openWindow('./prototype.html');
-      })
-  );
-});

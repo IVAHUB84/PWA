@@ -192,3 +192,14 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});
   });
 }
+
+// ── ONESIGNAL ──
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+window.OneSignalDeferred.push(async function(OneSignal) {
+  await OneSignal.init({
+    appId: '88345dbd-e9db-4866-80ce-bf28b3c7af94',
+    serviceWorkerPath: 'sw.js',
+    serviceWorkerParam: { scope: './' },
+    notifyButton: { enable: false },
+  });
+});
