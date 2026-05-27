@@ -124,10 +124,15 @@ export async function openMasterCard(id) {
   const localMaster = MASTERS_DATA.find(m => m.id === id);
   const ycId = (localMaster?.ycId != null ? String(localMaster.ycId) : null) || (String(id).match(/^\d+$/) ? id : null);
 
+  const _favBtnHtml = (mid) => {
+    const isFav = MASTERS_DATA.find(x => x.id === mid)?.fav;
+    return `<button id="masterFavBtn" data-mid="${esc(String(mid))}" onclick="toggleFavFromCard(this.dataset.mid)" style="width:100%;height:48px;background:none;border:1.5px solid var(--border);border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--text);margin-top:8px;">${isFav ? '❤️ В избранном' : '🤍 В избранное'}</button>`;
+  };
+
   const _renderLocalFallback = (lm) => {
     lm = lm || {};
     const avHtml = `<div style="width:100px;height:100px;border-radius:50%;background:${lm.grad||'var(--accent)'};display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:800;color:#fff;">${getInitials(lm.name||'')}</div>`;
-    content.innerHTML = `<div style="padding:24px 20px 16px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;">${avHtml}<div><div style="font-size:22px;font-weight:800;">${esc(lm.name||'')}</div><div style="font-size:14px;color:var(--text-2);margin-top:4px;">${esc(lm.role||'')}</div></div></div><div style="padding:0 20px 20px;"><button class="btn-primary" data-mid="${esc(String(id))}" onclick="bookFromMaster(this.dataset.mid)">Записаться к этому мастеру</button></div>`;
+    content.innerHTML = `<div style="padding:24px 20px 16px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;">${avHtml}<div><div style="font-size:22px;font-weight:800;">${esc(lm.name||'')}</div><div style="font-size:14px;color:var(--text-2);margin-top:4px;">${esc(lm.role||'')}</div></div></div><div style="padding:0 20px 20px;"><button class="btn-primary" data-mid="${esc(String(id))}" onclick="bookFromMaster(this.dataset.mid)">Записаться к этому мастеру</button>${_favBtnHtml(id)}</div>`;
   };
 
   if (!ycId) {
@@ -197,6 +202,7 @@ export async function openMasterCard(id) {
     </div>
     <div style="padding:0 20px 20px;">
       <button class="btn-primary" data-mid="${esc(String(id))}" onclick="bookFromMaster(this.dataset.mid)">Записаться к этому мастеру</button>
+      ${_favBtnHtml(id)}
     </div>
 <div class="section-header"><span class="section-title">Услуги</span></div>
     <div style="padding:0 20px;">${svcsHtml}</div>
@@ -204,6 +210,14 @@ export async function openMasterCard(id) {
       <div class="section-header" style="margin-top:8px;"><span class="section-title">Отзывы</span></div>
       <div style="padding:0 20px 40px;">${commentsHtml}</div>` : '<div style="height:32px;"></div>'}
   `;
+}
+
+export function toggleFavFromCard(masterId) {
+  toggleFav(masterId);
+  const btn = document.getElementById('masterFavBtn');
+  if (!btn) return;
+  const isFav = MASTERS_DATA.find(x => x.id === masterId)?.fav;
+  btn.textContent = isFav ? '❤️ В избранном' : '🤍 В избранное';
 }
 
 export function bookFromMaster(id) {
@@ -226,4 +240,4 @@ export function selectAnyMaster() {
   go('s-slots');
 }
 
-Object.assign(window, { renderMasters, toggleFav, selectMaster, selectAnyMaster, openMasterCard, bookFromMaster, bookServiceFromMaster, _browseAllMasters });
+Object.assign(window, { renderMasters, toggleFav, toggleFavFromCard, selectMaster, selectAnyMaster, openMasterCard, bookFromMaster, bookServiceFromMaster, _browseAllMasters });
