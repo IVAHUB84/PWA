@@ -430,13 +430,11 @@ async function adminSubscribeSelf() {
   await initPush();
   const { getSession } = await import('./storage.js');
   const sess = getSession();
-  if (!sess?.client_id) {
-    if (statusEl) statusEl.textContent = 'Нет сессии — войдите в приложение';
-    return;
-  }
-  await subscribePush(sess.client_id, sess.phone || '');
+  const clientId = sess?.client_id || 'admin';
+  const phone = sess?.phone || '';
+  await subscribePush(clientId, phone);
   const sub = localStorage.getItem('yc_push_subscribed');
-  if (statusEl) statusEl.textContent = sub ? 'Подписан ✓' : 'Ошибка — проверьте консоль (F12)';
+  if (statusEl) statusEl.textContent = sub ? `Подписан ✓ (id: ${clientId})` : 'Ошибка — проверьте консоль (F12)';
 }
 
 Object.assign(window, {
