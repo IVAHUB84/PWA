@@ -23,7 +23,7 @@ function _saveBookedRecord(rec) {
   const ycSvcId = (rec.services && rec.services[0] && rec.services[0].id) ||
     (rec.appointments && rec.appointments[0] && rec.appointments[0].services && rec.appointments[0].services[0]) || null;
   records.unshift({
-    id: rec.id, hash: rec.record_hash || '',
+    id: rec.record_id || rec.id, hash: rec.record_hash || '',
     svcName: svc.name, svcId: svc.id,
     masterName: m ? m.name : 'Любой мастер', masterId: m ? m.id : 0,
     ycStaffId, ycSvcId,

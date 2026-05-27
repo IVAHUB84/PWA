@@ -178,19 +178,15 @@ export async function renderAdminClients() {
   const listEl  = document.getElementById('adminClientsList');
   const countEl = document.getElementById('adminClientsCount');
   if (listEl) listEl.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--text-2);font-size:14px;">Загрузка…</div>';
-  const r = await YC.get(`/records/${YC.company}`, { count: 200 });
+  const r = await YC.get(`/clients/${YC.company}`, { count: 200 });
   if (!r.success || !r.data) {
     if (listEl) listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-2);">Не удалось загрузить</div>';
     return;
   }
-  const seen = new Map();
-  r.data.forEach(rec => {
-    const c = rec.client;
-    if (!c || !c.id) return;
-    if (!seen.has(c.id)) seen.set(c.id, { id: c.id, name: c.name || '—', phone: c.phone || '', visits: 0 });
-    seen.get(c.id).visits++;
-  });
-  _adminAllClients = [...seen.values()].sort((a, b) => b.visits - a.visits);
+  _adminAllClients = r.data
+    .filter(c => c && c.id)
+    .map(c => ({ id: c.id, name: c.name || '—', phone: c.phone || '', visits: c.visits_count || 0 }))
+    .sort((a, b) => b.visits - a.visits);
   if (countEl) countEl.textContent = _adminAllClients.length + ' клиентов';
   _renderClientRows(_adminAllClients);
 }

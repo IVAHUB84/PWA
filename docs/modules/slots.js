@@ -142,7 +142,7 @@ export async function loadTimes(iso) {
   let firstTime = '';
   el.innerHTML = r.data.map(t => {
     // Sanitize: allow only HH:MM chars to prevent onclick injection
-    const time = (t.time || (t.datetime || '').slice(11, 16)).replace(/[^0-9:]/g, '');
+    const time = (t.time || String(t.datetime || '').slice(11, 16)).replace(/[^0-9:]/g, '');
     if (!time) return '';
     if (!firstTime) firstTime = time;
     return `<button class="slot${time === firstTime ? ' sel' : ''}" onclick="selectSlot(this,'${time}')">${time}</button>`;
