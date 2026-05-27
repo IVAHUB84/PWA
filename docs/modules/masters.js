@@ -22,9 +22,10 @@ function _masterCardHtml(m, i, total) {
   const styleAttr = styles.length ? ` style="${styles.join(';')}"` : '';
   const click = m.avail ? ` data-mid="${esc(m.id)}" onclick="openMasterCard(this.dataset.mid)"` : '';
   const rating = _avgRating(m.id);
+  const initStr = getInitials(m.name);
   const avatarInner = _hasRealAvatar(m)
-    ? `<img src="${esc(m.avatar_big || m.avatar)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.style.display='none'">`
-    : `<div class="av-initials">${getInitials(m.name)}</div>`;
+    ? `<img src="${esc(m.avatar_big || m.avatar)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.outerHTML='<div class=\\"av-initials\\">${initStr}</div>'">`
+    : `<div class="av-initials">${initStr}</div>`;
   return `<div class="master-card${m.fav ? ' fav' : ''}"${styleAttr}${click}>
     <div class="master-av" style="background:${m.grad};">${avatarInner}${favBadge}</div>
     <div class="master-info">

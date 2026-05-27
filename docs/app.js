@@ -152,6 +152,7 @@ async function initApp() {
           fav: storedFavs.has(String(m.id)), avail: true, availText: '● Есть окна сегодня',
         };
       }));
+      renderHomeHero();
     }
     renderServices();
   } catch(e) { console.error('initApp failed', e); }
