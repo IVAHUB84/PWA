@@ -7,7 +7,7 @@ export function _updateCatChips() {
   const el = document.getElementById('catChips');
   if (!el) return;
   el.innerHTML = `<span class="chip active" onclick="filterCategory('Все')">Все</span>`
-    + cats.map(c => `<span class="chip" onclick="filterCategory(${JSON.stringify(c)})">${esc(c)}</span>`).join('');
+    + cats.map(c => `<span class="chip" data-cat="${esc(c)}" onclick="filterCategory(this.dataset.cat)">${esc(c)}</span>`).join('');
 }
 
 export function filterCategory(cat) {
@@ -48,7 +48,7 @@ export function renderServices() {
   }
   list.innerHTML = data.map((s, i) => {
     const last = i === data.length - 1 ? ' style="margin-bottom:24px;"' : '';
-    return `<div class="svc-card"${last} onclick="selectService(${JSON.stringify(s.id)})">
+    return `<div class="svc-card"${last} data-sid="${esc(s.id)}" onclick="selectService(this.dataset.sid)">
       <div class="svc-line"></div>
       <div class="svc-body"><div class="svc-name">${esc(s.name)}</div><div class="svc-meta">${s.dur} мин · ${esc(s.cat)}</div></div>
       <div class="svc-right"><div class="svc-price">${esc(s.priceStr)}</div><div class="svc-cta">Записаться →</div></div>

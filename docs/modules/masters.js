@@ -20,7 +20,7 @@ function _masterCardHtml(m, i, total) {
   const availCls = m.avail ? 'avail-yes' : 'avail-no';
   const styles = [...(m.avail ? [] : ['opacity:0.55']), ...(last ? ['margin-bottom:24px'] : [])];
   const styleAttr = styles.length ? ` style="${styles.join(';')}"` : '';
-  const click = m.avail ? ` onclick="selectMaster(${JSON.stringify(m.id)})"` : '';
+  const click = m.avail ? ` data-mid="${esc(m.id)}" onclick="selectMaster(this.dataset.mid)"` : '';
   const rating = _avgRating(m.id);
   const avatarInner = _hasRealAvatar(m)
     ? `<img src="${esc(m.avatar_big || m.avatar)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.style.display='none'">`
@@ -32,7 +32,7 @@ function _masterCardHtml(m, i, total) {
       <div class="master-role">${esc(m.role)}${m.exp ? ' · стаж ' + esc(m.exp) : ''}${rating}</div>
       <div class="master-avail ${availCls}">${esc(m.availText)}</div>
     </div>
-    <button onclick="event.stopPropagation();toggleFav(${JSON.stringify(m.id)})" style="background:none;border:none;cursor:pointer;font-size:20px;padding:4px 6px;flex-shrink:0;" title="В избранное">${m.fav ? '❤️' : '🤍'}</button>
+    <button data-mid="${esc(m.id)}" onclick="event.stopPropagation();toggleFav(this.dataset.mid)" style="background:none;border:none;cursor:pointer;font-size:20px;padding:4px 6px;flex-shrink:0;" title="В избранное">${m.fav ? '❤️' : '🤍'}</button>
     <div class="chevron">›</div>
   </div>`;
 }

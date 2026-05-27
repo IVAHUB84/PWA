@@ -82,7 +82,7 @@ export function renderProfileScreen() {
       .slice(0, 2);
     if (past.length) {
       recentEl.innerHTML = past.map(r => `
-        <div class="s-row" onclick="rebook(${JSON.stringify(String(r.svcId))})">
+        <div class="s-row" data-sid="${esc(String(r.svcId))}" onclick="rebook(this.dataset.sid)">
           <div style="width:36px;height:36px;border-radius:10px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:16px;">✨</div>
           <div style="flex:1;"><div style="font-size:14px;font-weight:600;">${esc(r.svcName)}</div><div style="font-size:12px;color:var(--text-2);">${esc(r.masterName)} · ${_fmtDatetime(r.datetime)}</div></div>
           <button class="btn-ghost" style="font-size:13px;">Повторить</button>
@@ -103,7 +103,7 @@ export function renderHomeHero() {
   const ml = document.getElementById('homeMastersList');
   if (ml && MASTERS_DATA.length) {
     ml.innerHTML = MASTERS_DATA.slice(0, 4).map(m => `
-      <div class="master-card-sm" onclick="bookWithMaster(${JSON.stringify(m.id)})">
+      <div class="master-card-sm" data-mid="${esc(m.id)}" onclick="bookWithMaster(this.dataset.mid)">
         <div class="master-av-sm" style="background:${m.grad};overflow:hidden;">${_hasRealAvatar(m) ? `<img src="${esc(m.avatar_big || m.avatar)}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">` : `<div class="av-initials">${getInitials(m.name)}</div>`}</div>
         <div class="master-name-sm">${esc(m.short || m.name)}</div>
         <div class="master-role-sm">${esc(m.role)}</div>
@@ -132,7 +132,7 @@ export function renderHomeHero() {
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
       <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.5);">Ближайший визит</span>
       <div style="display:flex;gap:6px;">
-        <button class="hero-btn" style="flex:none;padding:0 10px;height:26px;font-size:12px;" onclick="event.stopPropagation();rescheduleRecord(${JSON.stringify(next.id)})">Перенести</button>
+        <button class="hero-btn" style="flex:none;padding:0 10px;height:26px;font-size:12px;" data-rid="${esc(String(next.id))}" onclick="event.stopPropagation();rescheduleRecord(this.dataset.rid)">Перенести</button>
         <button class="hero-btn" style="flex:none;padding:0 10px;height:26px;font-size:12px;" data-cid="${next.id}" data-chash="${next.hash || ''}" onclick="event.stopPropagation();cancelRecord(this.dataset.cid,this.dataset.chash)">Отменить</button>
       </div>
     </div>

@@ -37,7 +37,7 @@ export function _renderHistoryFromCache() {
           </div>
           <div style="font-size:16px;font-weight:800;margin-bottom:12px;">${esc(r.svcName)}</div>
           <div style="display:flex;gap:8px;">
-            <button class="hero-btn" style="font-size:13px;" onclick="rescheduleRecord(${JSON.stringify(r.id)})">Перенести</button>
+            <button class="hero-btn" style="font-size:13px;" data-rid="${esc(String(r.id))}" onclick="rescheduleRecord(this.dataset.rid)">Перенести</button>
             <button class="hero-btn" style="font-size:13px;" data-cid="${r.id}" data-chash="${r.hash || ''}" onclick="cancelRecord(this.dataset.cid,this.dataset.chash)">Отменить</button>
           </div>
         </div>`).join('');
@@ -65,7 +65,7 @@ export function _renderHistoryFromCache() {
         <div class="hist-visit"${i === past.length - 1 ? ' style="margin-bottom:24px;"' : ''}>
           <div class="hist-emoji" style="background:var(--accent-light);">✨</div>
           <div style="flex:1;"><div style="font-size:14px;font-weight:700;margin-bottom:2px;">${esc(r.svcName)}</div><div style="font-size:12px;color:var(--text-2);">${esc(r.masterName)} · ${_fmtDatetime(r.datetime)}</div></div>
-          <div style="text-align:right;"><div style="font-size:14px;font-weight:700;margin-bottom:2px;">${esc(String(r.price || ''))}</div><button class="btn-ghost" style="font-size:12px;display:block;margin-bottom:4px;" onclick="rebook(${JSON.stringify(String(r.svcId))})">Повторить</button><button class="btn-ghost" style="font-size:12px;color:var(--accent);" onclick="openRateVisit(${JSON.stringify(r.id)},${JSON.stringify(r.masterId)},${JSON.stringify(r.masterName)},${JSON.stringify(r.svcName)},${JSON.stringify(r.datetime)})">Оценить</button></div>
+          <div style="text-align:right;"><div style="font-size:14px;font-weight:700;margin-bottom:2px;">${esc(String(r.price || ''))}</div><button class="btn-ghost" style="font-size:12px;display:block;margin-bottom:4px;" data-sid="${esc(String(r.svcId))}" onclick="rebook(this.dataset.sid)">Повторить</button><button class="btn-ghost" style="font-size:12px;color:var(--accent);" data-rid="${esc(String(r.id))}" data-mid="${esc(String(r.masterId))}" data-mname="${esc(r.masterName)}" data-sname="${esc(r.svcName)}" data-dt="${esc(r.datetime)}" onclick="openRateVisit(this.dataset.rid,this.dataset.mid,this.dataset.mname,this.dataset.sname,this.dataset.dt)">Оценить</button></div>
         </div>`).join('');
     }
   }
