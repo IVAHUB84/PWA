@@ -253,7 +253,7 @@ body {
   margin: 0 20px 16px; background: var(--surface); border-radius: 12px;
   height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 14px;
 }
-.search-bar input { background: none; border: none; outline: none; font-size: 15px; color: var(--text); flex: 1; font-family: inherit; }
+.search-bar input { background: none; border: none; outline: none; font-size: 16px; color: var(--text); flex: 1; font-family: inherit; }
 .search-bar input::placeholder { color: var(--text-2); }
 #homeSearchBar input { color: #fff; }
 #homeSearchBar input::placeholder { color: rgba(255,255,255,0.6); }
@@ -498,7 +498,7 @@ body {
 .stars-row      { display:flex; gap:8px; justify-content:center; padding:4px 0 24px; }
 .star           { font-size:38px; cursor:pointer; transition:transform .15s; filter:grayscale(1) opacity(.35); }
 .star.on        { filter:none; transform:scale(1.08); }
-.review-textarea { margin:0 20px; width:calc(100% - 40px); min-height:100px; background:var(--surface); border:1.5px solid var(--border); border-radius:14px; padding:14px; font-size:15px; font-family:inherit; color:var(--text); resize:none; outline:none; margin-bottom:6px; }
+.review-textarea { margin:0 20px; width:calc(100% - 40px); min-height:100px; background:var(--surface); border:1.5px solid var(--border); border-radius:14px; padding:14px; font-size:16px; font-family:inherit; color:var(--text); resize:none; outline:none; margin-bottom:6px; }
 .review-textarea::placeholder { color:var(--text-2); }
 .char-count { margin:0 20px 16px; font-size:11px; color:var(--text-2); text-align:right; width:calc(100% - 40px); }
 
@@ -710,7 +710,7 @@ body {
 .push-t-ttl  { font-size:14px; font-weight:700; margin-bottom:3px; }
 .push-t-body { font-size:12px; color:var(--text-2); line-height:1.4; }
 .upload-area { margin:0 20px 16px; height:110px; border-radius:14px; border:2px dashed var(--border); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; cursor:pointer; background:var(--surface); }
-.admin-textarea { display:block; margin:0 20px 14px; width:calc(100% - 40px); min-height:90px; background:var(--surface); border:1.5px solid var(--border); border-radius:12px; padding:12px 14px; font-size:15px; font-family:inherit; color:var(--text); resize:none; outline:none; }
+.admin-textarea { display:block; margin:0 20px 14px; width:calc(100% - 40px); min-height:90px; background:var(--surface); border:1.5px solid var(--border); border-radius:12px; padding:12px 14px; font-size:16px; font-family:inherit; color:var(--text); resize:none; outline:none; }
 .admin-textarea::placeholder { color:var(--text-2); }
 .push-preview { margin:0 20px 16px; background:rgba(28,28,30,0.92); border-radius:16px; padding:12px 14px; display:flex; align-items:center; gap:10px; }
 .push-p-icon  { width:32px; height:32px; border-radius:8px; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }

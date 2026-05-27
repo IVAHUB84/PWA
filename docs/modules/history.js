@@ -43,11 +43,11 @@ export function _openHistPeriod() {
     <div style="display:flex;gap:12px;margin-bottom:20px;">
       <div style="flex:1;">
         <div class="label" style="margin-bottom:6px;">С</div>
-        <input id="_hFrom" type="date" value="${toIso(_histFrom)}" style="width:100%;height:44px;border:1.5px solid var(--border);border-radius:12px;padding:0 12px;font-size:14px;font-family:inherit;background:var(--surface);color:var(--text);box-sizing:border-box;">
+        <input id="_hFrom" type="date" value="${toIso(_histFrom)}" style="width:100%;height:44px;border:1.5px solid var(--border);border-radius:12px;padding:0 12px;font-size:16px;font-family:inherit;background:var(--surface);color:var(--text);box-sizing:border-box;">
       </div>
       <div style="flex:1;">
         <div class="label" style="margin-bottom:6px;">По</div>
-        <input id="_hTo" type="date" value="${toIso(_histTo)}" style="width:100%;height:44px;border:1.5px solid var(--border);border-radius:12px;padding:0 12px;font-size:14px;font-family:inherit;background:var(--surface);color:var(--text);box-sizing:border-box;">
+        <input id="_hTo" type="date" value="${toIso(_histTo)}" style="width:100%;height:44px;border:1.5px solid var(--border);border-radius:12px;padding:0 12px;font-size:16px;font-family:inherit;background:var(--surface);color:var(--text);box-sizing:border-box;">
       </div>
     </div>
     <button class="btn-primary" onclick="_applyHistPeriod()">Применить</button>

@@ -37,9 +37,9 @@ export function showBookForOtherModal() {
   overlay.innerHTML = `<div style="background:var(--bg);width:100%;border-radius:24px;padding:24px 20px 32px;max-width:393px;margin:auto 0 16px;">
     <div style="font-size:17px;font-weight:800;margin-bottom:16px;">Кого записываем?</div>
     <div style="margin-bottom:12px;"><div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:6px;">ИМЯ</div>
-      <input id="_oName" placeholder="Имя" style="width:100%;box-sizing:border-box;height:48px;border:1.5px solid var(--border);border-radius:12px;padding:0 14px;font-size:15px;font-family:inherit;background:var(--surface);"></div>
+      <input id="_oName" placeholder="Имя" style="width:100%;box-sizing:border-box;height:48px;border:1.5px solid var(--border);border-radius:12px;padding:0 14px;font-size:16px;font-family:inherit;background:var(--surface);"></div>
     <div style="margin-bottom:20px;"><div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:6px;">ТЕЛЕФОН</div>
-      <input id="_oPhone" placeholder="+7 (___) ___-__-__" type="tel" inputmode="numeric" maxlength="18" oninput="_formatPhoneInput(this)" style="width:100%;box-sizing:border-box;height:48px;border:1.5px solid var(--border);border-radius:12px;padding:0 14px;font-size:15px;font-family:inherit;background:var(--surface);"></div>
+      <input id="_oPhone" placeholder="+7 (___) ___-__-__" type="tel" inputmode="numeric" maxlength="18" oninput="_formatPhoneInput(this)" style="width:100%;box-sizing:border-box;height:48px;border:1.5px solid var(--border);border-radius:12px;padding:0 14px;font-size:16px;font-family:inherit;background:var(--surface);"></div>
     <button style="width:100%;height:52px;background:var(--accent);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;" onclick="_confirmBookOther()">Записать →</button>
     <button style="width:100%;margin-top:10px;height:44px;background:none;border:none;color:var(--text-2);font-size:15px;cursor:pointer;font-family:inherit;" onclick="this.closest('[data-overlay]').remove()">Отмена</button>
   </div>`;
