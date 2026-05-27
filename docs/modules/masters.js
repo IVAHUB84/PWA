@@ -57,7 +57,8 @@ export async function renderMasters() {
     if (anyMasterEl) anyMasterEl.style.display = 'none';
     if (masterLabelEl) masterLabelEl.style.display = 'none';
     const masters = [...MASTERS_DATA].sort((a, b) => (b.fav ? 1 : 0) - (a.fav ? 1 : 0));
-    list.innerHTML = masters.map((m, i) => _masterCardHtml(m, i, masters.length)).join('');
+    const fp = masters.map(m => `${m.id}|${m.fav ? 1 : 0}|${m.avatar_big || m.avatar || ''}`).join(',');
+    if (list.dataset.fp !== fp) { list.dataset.fp = fp; list.innerHTML = masters.map((m, i) => _masterCardHtml(m, i, masters.length)).join(''); }
     return;
   }
   if (anyMasterEl) anyMasterEl.style.display = '';
@@ -95,6 +96,9 @@ export async function renderMasters() {
     }
   }
   masters.sort((a, b) => (b.fav ? 1 : 0) - (a.fav ? 1 : 0));
+  const fp = masters.map(m => `${m.id}|${m.fav ? 1 : 0}|${m.avatar_big || m.avatar || ''}`).join(',');
+  if (list.dataset.fp === fp) return;
+  list.dataset.fp = fp;
   list.innerHTML = masters.map((m, i) => _masterCardHtml(m, i, masters.length)).join('');
 }
 

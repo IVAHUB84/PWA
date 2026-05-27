@@ -66,12 +66,16 @@ export function renderHomeHero() {
 
   const ml = document.getElementById('homeMastersList');
   if (ml && MASTERS_DATA.length) {
-    ml.innerHTML = MASTERS_DATA.slice(0, 4).map(m => `
-      <div class="master-card-sm" data-mid="${esc(m.id)}" onclick="openMasterCard(this.dataset.mid)">
-        <div class="master-av-sm" style="background:${m.grad};overflow:hidden;">${_hasRealAvatar(m) ? `<img src="${esc(m.avatar_big || m.avatar)}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">` : `<div class="av-initials">${getInitials(m.name)}</div>`}</div>
-        <div class="master-name-sm">${esc(m.short || m.name)}</div>
-        <div class="master-role-sm">${esc(m.role)}</div>
-      </div>`).join('');
+    const fp = MASTERS_DATA.slice(0, 4).map(m => `${m.id}|${m.avatar_big || m.avatar || ''}`).join(',');
+    if (ml.dataset.fp !== fp) {
+      ml.dataset.fp = fp;
+      ml.innerHTML = MASTERS_DATA.slice(0, 4).map(m => `
+        <div class="master-card-sm" data-mid="${esc(m.id)}" onclick="openMasterCard(this.dataset.mid)">
+          <div class="master-av-sm" style="background:${m.grad};overflow:hidden;">${_hasRealAvatar(m) ? `<img src="${esc(m.avatar_big || m.avatar)}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">` : `<div class="av-initials">${getInitials(m.name)}</div>`}</div>
+          <div class="master-name-sm">${esc(m.short || m.name)}</div>
+          <div class="master-role-sm">${esc(m.role)}</div>
+        </div>`).join('');
+    }
   }
 
   const records = _loadStoredRecords();
