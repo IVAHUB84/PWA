@@ -34,7 +34,7 @@
 
   <!-- ══ HOME ══ -->
   <div class="screen active" id="s-home">
-    <div class="home-header" style="background:linear-gradient(135deg,#8B3558 0%,#C9956C 100%);flex-shrink:0;box-shadow:0 4px 20px rgba(139,53,88,0.28);position:relative;">
+    <div style="background:linear-gradient(135deg,#8B3558 0%,#C9956C 100%);flex-shrink:0;box-shadow:0 4px 20px rgba(139,53,88,0.28);">
       <div class="status-bar"><span class="time">9:41</span><div class="dynamic-island"></div></div>
       <div style="padding:4px 16px 10px;display:flex;align-items:center;gap:12px;">
         <img src="./logobest.png" alt="Реснички, сестрички" style="height:50px;width:50px;object-fit:contain;display:block;flex-shrink:0;border-radius:8px;">
@@ -51,6 +51,10 @@
         <div id="homeSearchResults" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:14px;margin-top:4px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.1);"></div>
       </div>
     </div>
+    <svg style="display:block;width:100%;height:28px;flex-shrink:0;margin-top:-1px;" viewBox="0 0 393 28" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="hdrWave" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#8B3558"/><stop offset="100%" stop-color="#C9956C"/></linearGradient></defs>
+      <path d="M0,28 L393,28 Q296,0 196,0 Q96,0 0,28 Z" fill="url(#hdrWave)"/>
+    </svg>
     <div class="scroll">
       <div style="height:8px;"></div>
 
