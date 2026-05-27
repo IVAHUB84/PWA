@@ -122,6 +122,7 @@ body {
   display: flex; align-items: flex-start; justify-content: space-around;
   border-top: 1px solid var(--border); flex-shrink: 0;
   background: var(--tab-bg);
+  position: relative; z-index: 20;
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   overflow: visible;
