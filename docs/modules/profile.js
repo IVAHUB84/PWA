@@ -194,11 +194,11 @@ export async function renderLoyaltyBlock() {
   el.innerHTML = `
     <div style="display:flex;gap:8px;">
       <div style="flex:1;background:${impGrad};border-radius:10px;padding:10px 12px;">
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:${impId >= 3 ? 'rgba(100,70,0,0.6)' : 'rgba(255,255,255,0.65)'};margin-bottom:3px;">Уровень</div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:${impId >= 3 ? 'rgba(100,70,0,0.55)' : 'rgba(255,255,255,0.65)'};margin-bottom:4px;">Уровень</div>
         <div style="font-size:15px;font-weight:800;color:${impTextColor};">${esc(impLabel)}</div>
       </div>
-      <div style="flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;">
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:3px;">Скидка</div>
+      <div style="flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:4px;">Скидка</div>
         <div style="font-size:20px;font-weight:800;color:${discount > 0 ? 'var(--accent)' : 'var(--text-2)'};">${discount}%</div>
       </div>
     </div>`;
