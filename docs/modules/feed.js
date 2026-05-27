@@ -22,6 +22,7 @@ export async function renderClientFeed() {
 
   const cached = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => !p.draft);
   if (cached.length) {
+    _renderFeedCats(cached);
     _paintFeed(el, cached);
   } else {
     el.innerHTML = '<div style="padding:60px 20px;text-align:center;color:var(--text-2);font-size:14px;">Загрузка…</div>';
@@ -31,9 +32,11 @@ export async function renderClientFeed() {
   if (gh && gh.sha !== null && gh.posts.length) {
     const published = gh.posts.filter(p => !p.draft);
     localStorage.setItem('yc_feed_posts', JSON.stringify(gh.posts.filter(p => !p.draft)));
+    _renderFeedCats(published);
     _paintFeed(el, published);
   } else if (gh && gh.sha !== null && !gh.posts.length) {
     localStorage.setItem('yc_feed_posts', '[]');
+    _renderFeedCats([]);
     _paintFeed(el, []);
   } else if (!cached.length) {
     el.innerHTML = '<div style="padding:60px 20px;text-align:center;color:var(--text-2);font-size:14px;">Публикаций пока нет.<br>Следите за обновлениями!</div>';
@@ -70,34 +73,23 @@ export function _paintFeed(el, posts) {
   }).join('');
 }
 
-export function _toggleFeedFilter() {
-  const drop = document.getElementById('feedFilterDrop');
-  if (!drop) return;
-  const visible = drop.style.display !== 'none';
-  drop.style.display = visible ? 'none' : 'block';
-  if (!visible) {
-    const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => !p.draft);
-    const cats = ['Все', ...new Set(posts.map(p => p.cat).filter(Boolean))];
-    const list = document.getElementById('feedFilterList');
-    if (list) list.innerHTML = cats.map(c => {
-      const val = c === 'Все' ? '' : c;
-      return `<div style="padding:11px 16px;font-size:14px;cursor:pointer;${_feedActiveCat === val ? 'font-weight:700;color:var(--accent);' : ''}" data-cat="${esc(val)}" onclick="_feedFilterCat(this.dataset.cat)">${esc(c)}</div>`;
-    }).join('');
-    setTimeout(() => document.addEventListener('click', _closeFeedFilter, { once: true }), 10);
-  }
-}
-
-export function _closeFeedFilter(e) {
-  const drop = document.getElementById('feedFilterDrop');
-  if (drop && !drop.contains(e.target)) drop.style.display = 'none';
+export function _renderFeedCats(posts) {
+  const bar = document.getElementById('feedCatBar');
+  if (!bar) return;
+  const cats = ['Все', ...new Set(posts.map(p => p.cat).filter(Boolean))];
+  bar.innerHTML = cats.map(c => {
+    const val = c === 'Все' ? '' : c;
+    const active = _feedActiveCat === val ? ' active' : '';
+    return `<button class="feed-cat-chip${active}" data-cat="${esc(val)}" onclick="_feedFilterCat(this.dataset.cat)">${esc(c)}</button>`;
+  }).join('');
 }
 
 export function _feedFilterCat(cat) {
   _feedActiveCat = cat;
-  const drop = document.getElementById('feedFilterDrop');
-  if (drop) drop.style.display = 'none';
-  const btn = document.querySelector('#s-feed .btn-ghost');
-  if (btn) btn.textContent = cat ? cat + ' ▾' : 'Фильтр ▾';
+  const bar = document.getElementById('feedCatBar');
+  if (bar) bar.querySelectorAll('.feed-cat-chip').forEach(ch => {
+    ch.classList.toggle('active', ch.dataset.cat === cat);
+  });
   const el = document.getElementById('feedList');
   if (!el) return;
   const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => !p.draft);
@@ -114,4 +106,4 @@ export function likeFeed(btn) {
   btn.style.color = btn.classList.contains('liked') ? 'var(--accent)' : 'var(--text-2)';
 }
 
-Object.assign(window, { renderClientFeed, _paintFeed, _toggleFeedFilter, _closeFeedFilter, _feedFilterCat, likeFeed, go });
+Object.assign(window, { renderClientFeed, _paintFeed, _renderFeedCats, _feedFilterCat, likeFeed, go });
