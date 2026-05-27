@@ -118,12 +118,16 @@ export async function openMasterCard(id) {
   content.innerHTML = '<div style="padding:48px 20px;text-align:center;color:var(--text-2);font-size:14px;">Загрузка…</div>';
 
   const localMaster = MASTERS_DATA.find(m => m.id === id);
-  const ycId = localMaster?.ycId || id;
+  const ycId = (localMaster?.ycId != null ? String(localMaster.ycId) : null) || (String(id).match(/^\d+$/) ? id : null);
 
-  if (!ycId) {
-    const lm = localMaster || {};
+  const _renderLocalFallback = (lm) => {
+    lm = lm || {};
     const avHtml = `<div style="width:100px;height:100px;border-radius:50%;background:${lm.grad||'var(--accent)'};display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:800;color:#fff;">${getInitials(lm.name||'')}</div>`;
     content.innerHTML = `<div style="padding:24px 20px 16px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;">${avHtml}<div><div style="font-size:22px;font-weight:800;">${esc(lm.name||'')}</div><div style="font-size:14px;color:var(--text-2);margin-top:4px;">${esc(lm.role||'')}</div></div></div><div style="padding:0 20px 20px;"><button class="btn-primary" data-mid="${esc(String(id))}" onclick="bookFromMaster(this.dataset.mid)">Записаться к этому мастеру</button></div>`;
+  };
+
+  if (!ycId) {
+    _renderLocalFallback(localMaster);
     return;
   }
 
@@ -133,9 +137,15 @@ export async function openMasterCard(id) {
     YC.get(`/comments/${YC.company}`, { staff_id: ycId }),
   ]);
 
+  if (!profileRes.success && !profileRes.data) {
+    console.warn('staff profile API failed', ycId, profileRes);
+    _renderLocalFallback(localMaster);
+    return;
+  }
   const m = profileRes.data || {};
+  if (!m.name && localMaster) { m.name = localMaster.name; m.specialization = m.specialization || localMaster.role; }
   const services = servicesRes.data?.services || [];
-  const comments = (commentsRes.data || []).slice(0, 5);
+  const comments = (Array.isArray(commentsRes.data) ? commentsRes.data : []).slice(0, 5);
 
   const avatarSrc = m.image_group?.images?.norm?.path || m.avatar_big || m.avatar || '';
   const avatarHtml = avatarSrc

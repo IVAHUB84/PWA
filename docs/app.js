@@ -178,8 +178,10 @@ async function initApp() {
           fav: storedFavs.has(String(m.id)), avail: true, availText: '● Есть окна сегодня',
         };
       }));
-      renderHomeHero();
+    } else {
+      console.warn('book_staff API failed or empty:', staffRes);
     }
+    renderHomeHero();
     renderServices();
   } catch(e) { console.error('initApp failed', e); }
 }
