@@ -55,17 +55,8 @@
         <div id="homeSearchResults" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:14px;margin-top:4px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.1);"></div>
       </div>
 
-      <div style="display:flex;gap:10px;margin:0 20px 14px;">
-        <div style="flex:1;padding:14px 12px;background:var(--accent);border-radius:16px;color:#fff;cursor:pointer;text-align:center;" onclick="go('s-services','tab')">
-          <div style="font-size:22px;margin-bottom:5px;">✂️</div>
-          <div style="font-size:13px;font-weight:700;">Записаться</div>
-          <div style="font-size:10px;opacity:0.75;margin-top:2px;">для себя</div>
-        </div>
-        <div style="flex:1;padding:14px 12px;background:var(--surface);border-radius:16px;cursor:pointer;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,0.09);border:1px solid var(--border);" onclick="showBookForOtherModal()">
-          <div style="font-size:22px;margin-bottom:5px;">👩‍👧</div>
-          <div style="font-size:13px;font-weight:700;">Записать другого</div>
-          <div style="font-size:10px;color:var(--text-2);margin-top:2px;">подругу, маму...</div>
-        </div>
+      <div style="margin:0 20px 6px;display:flex;justify-content:flex-end;">
+        <button onclick="showBookForOtherModal()" style="background:none;border:none;font-size:13px;color:var(--text-2);font-family:inherit;cursor:pointer;padding:4px 0;">👩‍👧 Записать подругу или маму →</button>
       </div>
 
       <div id="homeHero"></div>
