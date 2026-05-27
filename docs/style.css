@@ -740,6 +740,6 @@ body {
 .pin-key:active { transform:scale(.91); }
 .pin-key-ghost { background:none; font-size:13px; color:var(--text-2); font-weight:600; }
 
-#sw-update-banner { position:fixed; bottom:calc(83px + 12px); left:16px; right:16px; background:var(--primary); color:#fff; border-radius:14px; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; font-size:13px; font-weight:600; z-index:9999; box-shadow:0 4px 20px rgba(0,0,0,0.25); animation:slideUpBanner .3s ease; }
+#sw-update-banner { position:fixed; bottom:calc(83px + 12px); left:16px; right:16px; background:var(--surface); color:var(--text); border:1.5px solid var(--border); border-radius:14px; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; font-size:13px; font-weight:600; z-index:9999; box-shadow:0 4px 20px rgba(0,0,0,0.25); animation:slideUpBanner .3s ease; }
 #sw-update-banner button { background:var(--accent); color:#fff; border:none; border-radius:8px; padding:6px 14px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; }
 @keyframes slideUpBanner { from { transform:translateY(20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
