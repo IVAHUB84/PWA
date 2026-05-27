@@ -194,6 +194,16 @@ async function initApp() {
   initPush();
 }
 
+async function _trySubscribeExistingSession() {
+  if (localStorage.getItem('yc_push_subscribed')) return;
+  const url = localStorage.getItem('yc_worker_url');
+  if (!url) return;
+  const sess = getSession();
+  if (!sess?.client_id) return;
+  await initPush();
+  window.subscribePush?.(sess.client_id, sess.phone || '');
+}
+
 // ── BOOT ──
 renderServices();
 (function checkSession() {
@@ -212,6 +222,7 @@ renderServices();
         _renderHomeFeedPreview();
       }
     });
+    setTimeout(_trySubscribeExistingSession, 3000);
   }
 })();
 initApp();

@@ -29,7 +29,9 @@ function _urlB64ToUint8(b64) {
 
 export async function subscribePush(clientId, phone) {
   const url = _workerUrl();
-  if (!url || !_vapidKey) return;
+  if (!url) return;
+  if (!_vapidKey) await initPush();
+  if (!_vapidKey) return;
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
   try {
     const perm = await Notification.requestPermission();
