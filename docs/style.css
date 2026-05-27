@@ -91,7 +91,7 @@ body {
   display: flex; align-items: center; justify-content: space-between;
   flex-shrink: 0; position: relative;
 }
-.status-bar .time { font-size: 15px; font-weight: 700; color: var(--text); }
+.status-bar .time { display: none; }
 .status-bar .icons { display: none; }
 .dynamic-island {
   position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
