@@ -61,13 +61,12 @@ export function _paintFeed(el, posts) {
         ${photoContent}
       </div>
       <div class="feed-body">
-        <div class="feed-tag">${esc(p.cat)}</div>
+        <div class="feed-body-top">
+          <div class="feed-tag">${esc(p.cat)}</div>
+          <button class="feed-book" onclick="go('s-services')">Записаться →</button>
+        </div>
         <div class="feed-caption">${esc(p.text)}</div>
         <div class="feed-meta">${esc(p.date)}</div>
-      </div>
-      <div class="feed-actions">
-        <button class="feed-like" onclick="likeFeed(this)">❤ 0</button>
-        <button class="feed-book" onclick="go('s-services')">Записаться →</button>
       </div>
     </div>`;
   }).join('');
@@ -97,13 +96,4 @@ export function _feedFilterCat(cat) {
   _paintFeed(el, filtered);
 }
 
-export function likeFeed(btn) {
-  const raw = parseInt(btn.textContent.replace(/\D/g, ''));
-  const n = isNaN(raw) ? 0 : raw;
-  const liked = btn.classList.contains('liked');
-  btn.textContent = liked ? `❤ ${Math.max(0, n - 1)}` : `❤ ${n + 1}`;
-  btn.classList.toggle('liked');
-  btn.style.color = btn.classList.contains('liked') ? 'var(--accent)' : 'var(--text-2)';
-}
-
-Object.assign(window, { renderClientFeed, _paintFeed, _renderFeedCats, _feedFilterCat, likeFeed, go });
+Object.assign(window, { renderClientFeed, _paintFeed, _renderFeedCats, _feedFilterCat, go });
