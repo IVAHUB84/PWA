@@ -218,6 +218,15 @@ window.adminCat = function(el) {
   el.classList.add('active');
 };
 
+// ── BUILD INFO ──
+fetch('./version.json?_=' + Date.now())
+  .then(r => r.ok ? r.json() : null)
+  .then(v => {
+    if (!v) return;
+    const el = document.getElementById('buildInfo');
+    if (el) el.textContent = v.date + '\n' + v.sha;
+  }).catch(() => {});
+
 // ── SERVICE WORKER ──
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
