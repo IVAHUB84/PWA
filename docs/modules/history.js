@@ -75,7 +75,6 @@ export function _histPreset(days) {
 }
 
 export function _applyHistPeriod(reset) {
-  document.querySelector('[data-hist-overlay]')?.remove();
   if (reset) {
     _histFrom = null;
     _histTo = null;
@@ -86,6 +85,7 @@ export function _applyHistPeriod(reset) {
     if (tVal) { _histTo = new Date(tVal); _histTo.setHours(23, 59, 59, 0); }
     else _histTo = null;
   }
+  document.querySelector('[data-hist-overlay]')?.remove();
   _updatePeriodBtn();
   _renderHistoryFromCache();
 }
