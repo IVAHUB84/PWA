@@ -16,6 +16,7 @@ import { hasPinSet, openPinEnter, refreshPinScreen } from './modules/pin.js';
 import { renderReviewScreen } from './modules/review.js';
 import { renderAdminDashboard, renderAdminFeed, _clearPostImage, renderAdminClients, renderAdminPush, updatePushAudience } from './modules/admin.js';
 import { _ghRead } from './modules/github.js';
+import { initPush } from './modules/push.js';
 
 // side-effect-only imports (registers window.* bindings)
 import './modules/consent.js';
@@ -80,7 +81,13 @@ registerOnEnter('s-admin',          () => renderAdminDashboard());
 registerOnEnter('s-admin-feed',     () => renderAdminFeed());
 registerOnEnter('s-admin-post',     () => _clearPostImage());
 registerOnEnter('s-admin-clients',  () => renderAdminClients());
-registerOnEnter('s-admin-push',     () => renderAdminPush());
+registerOnEnter('s-admin-push', () => {
+  renderAdminPush();
+  const wu = document.getElementById('workerUrlInput');
+  const ps = document.getElementById('pushSecretInput');
+  if (wu) wu.value = localStorage.getItem('yc_worker_url') || '';
+  if (ps) ps.value = localStorage.getItem('yc_push_secret') || '';
+});
 registerOnEnter('s-admin-push-new', () => updatePushAudience());
 registerOnEnter('s-register', () => {
   const phone = localStorage.getItem('yc_reg_phone') || '';
@@ -184,6 +191,7 @@ async function initApp() {
     renderHomeHero();
     renderServices();
   } catch(e) { console.error('initApp failed', e); }
+  initPush();
 }
 
 // ── BOOT ──
@@ -242,6 +250,10 @@ if ('serviceWorker' in navigator) {
       if (reg.waiting && navigator.serviceWorker.controller) {
         _showUpdateBanner(reg);
       }
+      setInterval(() => reg.update(), 60 * 60 * 1000);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') reg.update();
+      });
     }).catch(() => {});
 
     navigator.serviceWorker.addEventListener('controllerchange', () => {
@@ -262,13 +274,3 @@ function _showUpdateBanner(reg) {
   });
 }
 
-// ── ONESIGNAL ──
-window.OneSignalDeferred = window.OneSignalDeferred || [];
-window.OneSignalDeferred.push(async function(OneSignal) {
-  await OneSignal.init({
-    appId: '88345dbd-e9db-4866-80ce-bf28b3c7af94',
-    serviceWorkerPath: 'sw.js',
-    serviceWorkerParam: { scope: './' },
-    notifyButton: { enable: false },
-  });
-});
