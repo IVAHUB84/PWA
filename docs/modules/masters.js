@@ -24,7 +24,7 @@ function _masterCardHtml(m, i, total) {
   const rating = _avgRating(m.id);
   const initStr = getInitials(m.name);
   const avatarInner = _hasRealAvatar(m)
-    ? `<img src="${esc(m.avatar_big || m.avatar)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.outerHTML='<div class=\\"av-initials\\">${initStr}</div>'">`
+    ? `<img src="${esc(m.avatar_big || m.avatar)}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<div class=&quot;av-initials&quot;>${initStr}</div>')">`
     : `<div class="av-initials">${initStr}</div>`;
   return `<div class="master-card${m.fav ? ' fav' : ''}"${styleAttr}${click}>
     <div class="master-av" style="background:${m.grad};">${avatarInner}${favBadge}</div>

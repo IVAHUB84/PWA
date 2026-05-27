@@ -4,7 +4,7 @@ try {
   console.warn('OneSignal SW load failed', e);
 }
 
-const CACHE_VERSION = 'v21';
+const CACHE_VERSION = 'v22';
 const STATIC_CACHE  = `studio-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `studio-runtime-${CACHE_VERSION}`;
 
