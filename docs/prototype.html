@@ -12,6 +12,7 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="stylesheet" href="style.css">
+<script>(function(){var t=localStorage.getItem('yc_theme')||'system';if(t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.setAttribute('data-theme','dark');})()</script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 </head>
@@ -306,6 +307,21 @@
           <div class="s-ico">📄</div>
           <div class="s-lbl">Оферта и конфиденциальность</div>
           <div style="color:var(--border);font-size:18px;">›</div>
+        </div>
+      </div>
+
+      <div style="padding:16px 20px 6px;"><div class="label">Оформление</div></div>
+      <div class="settings-group">
+        <div class="s-row" style="flex-direction:column;align-items:stretch;gap:10px;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="s-ico">🎨</div>
+            <div class="s-lbl">Тема оформления</div>
+          </div>
+          <div id="themeSegment" style="display:flex;border-radius:10px;overflow:hidden;border:1px solid var(--border);">
+            <button data-theme-val="light" onclick="_setTheme('light')" style="flex:1;padding:9px 4px;font-size:12px;font-weight:600;border:none;background:var(--surface);color:var(--text-2);cursor:pointer;font-family:inherit;">Светлая</button>
+            <button data-theme-val="dark" onclick="_setTheme('dark')" style="flex:1;padding:9px 4px;font-size:12px;font-weight:600;border:none;border-left:1px solid var(--border);background:var(--surface);color:var(--text-2);cursor:pointer;font-family:inherit;">Тёмная</button>
+            <button data-theme-val="system" onclick="_setTheme('system')" style="flex:1;padding:9px 4px;font-size:12px;font-weight:600;border:none;border-left:1px solid var(--border);background:var(--surface);color:var(--text-2);cursor:pointer;font-family:inherit;">Как в системе</button>
+          </div>
         </div>
       </div>
 

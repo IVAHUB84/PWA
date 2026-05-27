@@ -21,6 +21,19 @@ a, button, [onclick], .tab, .chip, .svc-card, .master-card, .slot, .hero-card, .
   --red: #FF3B30;
   --green: #34C759;
   --shadow: 0 2px 12px rgba(0,0,0,0.07);
+  --tab-bg: rgba(250,247,243,0.94);
+}
+
+[data-theme="dark"] {
+  --bg: #1C1C1E;
+  --surface: #2C2C2E;
+  --primary: #F5F5F7;
+  --accent-light: #3A1F2E;
+  --mint-light: #1A3A30;
+  --text: #F5F5F7;
+  --border: #3A3A3C;
+  --shadow: 0 2px 12px rgba(0,0,0,0.35);
+  --tab-bg: rgba(28,28,30,0.94);
 }
 
 body {
@@ -107,7 +120,7 @@ body {
   height: 83px; padding: 0 0 34px;
   display: flex; align-items: flex-start; justify-content: space-around;
   border-top: 1px solid var(--border); flex-shrink: 0;
-  background: rgba(250,247,243,0.94);
+  background: var(--tab-bg);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   overflow: visible;

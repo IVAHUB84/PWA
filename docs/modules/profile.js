@@ -49,6 +49,7 @@ export function renderProfileScreen() {
     }
   }
 
+  _initThemeUI();
 }
 
 export function renderHomeHero() {
@@ -168,6 +169,26 @@ export async function renderLoyaltyBlock() {
   }
 }
 
+export function _setTheme(theme) {
+  localStorage.setItem('yc_theme', theme);
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (theme === 'dark' || (theme === 'system' && prefersDark)) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+  _initThemeUI();
+}
+
+export function _initThemeUI() {
+  const t = localStorage.getItem('yc_theme') || 'system';
+  document.querySelectorAll('#themeSegment button').forEach(btn => {
+    const active = btn.dataset.themeVal === t;
+    btn.style.background = active ? 'var(--accent)' : 'var(--surface)';
+    btn.style.color = active ? '#fff' : 'var(--text-2)';
+  });
+}
+
 export function _toggleNotifSettings() {
   const g  = document.getElementById('notifSettingsGroup');
   const ch = document.getElementById('notifSettingsChevron');
@@ -177,4 +198,8 @@ export function _toggleNotifSettings() {
   if (ch) ch.style.transform = open ? '' : 'rotate(90deg)';
 }
 
-Object.assign(window, { renderProfileScreen, renderHomeHero, _renderHomeFeedPreview, renderLoyaltyBlock, _toggleNotifSettings });
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+  if ((localStorage.getItem('yc_theme') || 'system') === 'system') _setTheme('system');
+});
+
+Object.assign(window, { renderProfileScreen, renderHomeHero, _renderHomeFeedPreview, renderLoyaltyBlock, _toggleNotifSettings, _setTheme, _initThemeUI });
