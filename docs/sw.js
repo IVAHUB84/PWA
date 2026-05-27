@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v30';
+const CACHE_VERSION = 'v31';
 const STATIC_CACHE  = `studio-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `studio-runtime-${CACHE_VERSION}`;
 
@@ -110,9 +110,7 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       caches.match(request).then(cached =>
         cached || fetch(request).then(res => {
-          if (res.ok) {
-            caches.open(RUNTIME_CACHE).then(c => c.put(request, res.clone()));
-          }
+          if (res.ok) { const c2 = res.clone(); caches.open(RUNTIME_CACHE).then(c => c.put(request, c2)); }
           return res;
         }).catch(() => cached)
       )
@@ -124,9 +122,7 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     fetch(request)
       .then(res => {
-        if (res.ok) {
-          caches.open(RUNTIME_CACHE).then(c => c.put(request, res.clone()));
-        }
+        if (res.ok) { const c2 = res.clone(); caches.open(RUNTIME_CACHE).then(c => c.put(request, c2)); }
         return res;
       })
       .catch(() => caches.match(request).then(cached =>
