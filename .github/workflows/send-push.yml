@@ -1,0 +1,44 @@
+name: Send Push Notification
+on:
+  workflow_dispatch:
+    inputs:
+      title:
+        description: 'Notification title'
+        required: true
+      body:
+        description: 'Notification body'
+        required: true
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send OneSignal Push
+        env:
+          ONESIGNAL_REST_KEY: ${{ secrets.ONESIGNAL_REST_KEY }}
+          ONESIGNAL_APP_ID: ${{ secrets.ONESIGNAL_APP_ID }}
+          TITLE: ${{ inputs.title }}
+          BODY: ${{ inputs.body }}
+        run: |
+          python3 -c "
+          import os, json, urllib.request
+          data = {
+            'app_id': os.environ['ONESIGNAL_APP_ID'],
+            'included_segments': ['All'],
+            'headings': {'en': os.environ['TITLE'], 'ru': os.environ['TITLE']},
+            'contents': {'en': os.environ['BODY'],  'ru': os.environ['BODY']},
+            'url': 'https://ivahub84.github.io/PWA/prototype.html',
+            'chrome_web_icon': 'https://ivahub84.github.io/PWA/icon-192.png',
+          }
+          req = urllib.request.Request(
+            'https://api.onesignal.com/api/v1/notifications',
+            data=json.dumps(data).encode(),
+            headers={'Authorization': 'Key ' + os.environ['ONESIGNAL_REST_KEY'], 'Content-Type': 'application/json'},
+            method='POST'
+          )
+          try:
+            with urllib.request.urlopen(req) as r:
+              print('OK:', r.read().decode())
+          except urllib.error.HTTPError as e:
+            print('Error:', e.read().decode())
+            exit(1)
+          "
