@@ -426,49 +426,401 @@
 </table>
 
 <h2 style="margin-top:32px;">Примеры запросов и ответов</h2>
+<p style="color:var(--text2);margin-bottom:20px;font-size:13px;">Источник структуры ответов: <a href="https://yclients.docs.apiary.io/" target="_blank">yclients.docs.apiary.io</a> · <a href="https://github.com/CoolmixZero/yclients-api-python" target="_blank">yclients-api-python</a></p>
 
 <table>
   <thead><tr>
     <th style="width:50%">Запрос</th>
-    <th style="width:50%">Ответ (упрощённо)</th>
+    <th style="width:50%">Ответ</th>
   </tr></thead>
   <tbody>
+
+    <!-- ── 1. Категории услуг ── -->
     <tr>
       <td>
-        <strong>Бронирование записи</strong><br>
-        <span class="method post">POST</span> <code>/book_record/1940850</code>
+        <strong>Категории услуг</strong><br>
+        <span class="method get">GET</span> <code>/service_categories/1940850</code><br>
+        <span style="color:var(--text2);font-size:12px;">Вызов: initApp при старте приложения</span>
+      </td>
+      <td>
         <pre>{
-  <span class="key">"phone"</span>:        <span class="str">"79161234567"</span>,
-  <span class="key">"fullname"</span>:     <span class="str">"Анна Петрова"</span>,
-  <span class="key">"email"</span>:        <span class="str">"anna@mail.ru"</span>,
-  <span class="key">"appointments"</span>: [{
-    <span class="key">"id"</span>:       <span class="num">1</span>,
-    <span class="key">"services"</span>: [<span class="num">4521083</span>],
-    <span class="key">"staff_id"</span>: <span class="num">2074619</span>,
-    <span class="key">"datetime"</span>: <span class="str">"2026-06-01 14:00:00"</span>
-  }],
-  <span class="key">"notify_by_sms"</span>: <span class="num">1</span>
+  <span class="key">"success"</span>: <span class="num">true</span>,
+  <span class="key">"data"</span>: [
+    {
+      <span class="key">"id"</span>:     <span class="num">318421</span>,
+      <span class="key">"title"</span>: <span class="str">"Брови"</span>,
+      <span class="key">"sex"</span>:   <span class="num">0</span>,
+      <span class="key">"api_id"</span>: <span class="num">0</span>,
+      <span class="key">"weight"</span>: <span class="num">10</span>
+    },
+    {
+      <span class="key">"id"</span>:     <span class="num">318422</span>,
+      <span class="key">"title"</span>: <span class="str">"Эпиляция"</span>,
+      <span class="key">"sex"</span>:   <span class="num">0</span>,
+      <span class="key">"api_id"</span>: <span class="num">0</span>,
+      <span class="key">"weight"</span>: <span class="num">20</span>
+    }
+  ],
+  <span class="key">"meta"</span>: []
+}</pre>
+      </td>
+    </tr>
+
+    <!-- ── 2. Услуги ── -->
+    <tr>
+      <td>
+        <strong>Список услуг</strong><br>
+        <span class="method get">GET</span> <code>/services/1940850</code><br>
+        <span style="color:var(--text2);font-size:12px;">Вызов: initApp, setServicesData</span>
+      </td>
+      <td>
+        <pre>{
+  <span class="key">"success"</span>: <span class="num">true</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"services"</span>: [
+      {
+        <span class="key">"id"</span>:           <span class="num">4521083</span>,
+        <span class="key">"title"</span>:        <span class="str">"Перманентный макияж бровей"</span>,
+        <span class="key">"category_id"</span>:  <span class="num">318421</span>,
+        <span class="key">"price_min"</span>:    <span class="num">8000</span>,
+        <span class="key">"price_max"</span>:    <span class="num">12000</span>,
+        <span class="key">"duration"</span>:     <span class="num">120</span>,
+        <span class="key">"discount"</span>:     <span class="num">0</span>,
+        <span class="key">"active"</span>:       <span class="num">1</span>,
+        <span class="key">"sex"</span>:          <span class="num">0</span>,
+        <span class="key">"seance_length"</span>: <span class="num">7200</span>,
+        <span class="key">"prepaid"</span>:      <span class="str">"forbidden"</span>,
+        <span class="key">"comment"</span>:      <span class="str">""</span>,
+        <span class="key">"image"</span>:        <span class="str">""</span>
+      }
+    ],
+    <span class="key">"category"</span>: [
+      {
+        <span class="key">"id"</span>:     <span class="num">318421</span>,
+        <span class="key">"title"</span>: <span class="str">"Брови"</span>,
+        <span class="key">"sex"</span>:   <span class="num">0</span>,
+        <span class="key">"weight"</span>: <span class="num">10</span>
+      }
+    ]
+  },
+  <span class="key">"meta"</span>: []
+}</pre>
+      </td>
+    </tr>
+
+    <!-- ── 3. Мастера ── -->
+    <tr>
+      <td>
+        <strong>Список мастеров (с фильтром по услуге)</strong><br>
+        <span class="method get">GET</span> <code>/book_staff/1940850?service_ids=4521083</code><br>
+        <span style="color:var(--text2);font-size:12px;">Вызов: initApp + renderMasters</span>
+      </td>
+      <td>
+        <pre>{
+  <span class="key">"success"</span>: <span class="num">true</span>,
+  <span class="key">"data"</span>: [
+    {
+      <span class="key">"id"</span>:             <span class="num">2074619</span>,
+      <span class="key">"name"</span>:           <span class="str">"Мария Соколова"</span>,
+      <span class="key">"specialization"</span>: <span class="str">"Мастер ПМ и бровей"</span>,
+      <span class="key">"bookable"</span>:       <span class="num">true</span>,
+      <span class="key">"avatar"</span>:         <span class="str">"https://cdn.yclients.com/…"</span>,
+      <span class="key">"avatar_big"</span>:     <span class="str">"https://cdn.yclients.com/…"</span>,
+      <span class="key">"rating"</span>:         <span class="str">"4.8"</span>,
+      <span class="key">"votes_count"</span>:    <span class="str">"37"</span>,
+      <span class="key">"comments_count"</span>: <span class="str">"12"</span>,
+      <span class="key">"show_rating"</span>:    <span class="str">"1"</span>,
+      <span class="key">"weight"</span>:         <span class="str">"10"</span>,
+      <span class="key">"position"</span>: {
+        <span class="key">"id"</span>:    <span class="num">1</span>,
+        <span class="key">"title"</span>: <span class="str">"Мастер"</span>
+      },
+      <span class="key">"seances"</span>:    [],
+      <span class="key">"information"</span>: <span class="str">"Стаж 7 лет"</span>
+    }
+  ],
+  <span class="key">"meta"</span>: []
+}</pre>
+      </td>
+    </tr>
+
+    <!-- ── 4. Доступные даты ── -->
+    <tr>
+      <td>
+        <strong>Доступные даты для записи</strong><br>
+        <span class="method get">GET</span> <code>/book_dates/1940850?service_ids=4521083&amp;staff_id=2074619</code><br>
+        <span style="color:var(--text2);font-size:12px;">Вызов: loadDates при входе на экран слотов</span>
+      </td>
+      <td>
+        <pre>{
+  <span class="key">"success"</span>: <span class="num">true</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"booking_dates"</span>: [
+      <span class="str">"2026-06-01"</span>,
+      <span class="str">"2026-06-02"</span>,
+      <span class="str">"2026-06-04"</span>,
+      <span class="str">"2026-06-07"</span>
+    ],
+    <span class="key">"booking_days"</span>: {
+      <span class="str">"6"</span>: [<span class="str">"1"</span>, <span class="str">"2"</span>, <span class="str">"4"</span>, <span class="str">"7"</span>]
+    },
+    <span class="key">"working_days"</span>: {
+      <span class="str">"6"</span>: [<span class="str">"1"</span>, <span class="str">"2"</span>, <span class="str">"3"</span>,
+           <span class="str">"4"</span>, <span class="str">"5"</span>, <span class="str">"7"</span>]
+    },
+    <span class="key">"working_dates"</span>: [
+      <span class="str">"2026-06-01"</span>, <span class="str">"2026-06-02"</span>
+    ]
+  },
+  <span class="key">"meta"</span>: []
+}</pre>
+      </td>
+    </tr>
+
+    <!-- ── 5. Доступное время ── -->
+    <tr>
+      <td>
+        <strong>Доступное время на выбранную дату</strong><br>
+        <span class="method get">GET</span> <code>/book_times/1940850/2074619/2026-06-01?service_ids=4521083</code><br>
+        <span style="color:var(--text2);font-size:12px;">Вызов: loadTimes при выборе даты</span>
+      </td>
+      <td>
+        <pre>{
+  <span class="key">"success"</span>: <span class="num">true</span>,
+  <span class="key">"data"</span>: [
+    {
+      <span class="key">"time"</span>:          <span class="str">"10:00"</span>,
+      <span class="key">"seance_length"</span>: <span class="num">7200</span>,
+      <span class="key">"datetime"</span>:      <span class="num">1748772000</span>
+    },
+    {
+      <span class="key">"time"</span>:          <span class="str">"12:00"</span>,
+      <span class="key">"seance_length"</span>: <span class="num">7200</span>,
+      <span class="key">"datetime"</span>:      <span class="num">1748779200</span>
+    },
+    {
+      <span class="key">"time"</span>:          <span class="str">"14:00"</span>,
+      <span class="key">"seance_length"</span>: <span class="num">7200</span>,
+      <span class="key">"datetime"</span>:      <span class="num">1748786400</span>
+    }
+  ],
+  <span class="key">"meta"</span>: []
+}</pre>
+      </td>
+    </tr>
+
+    <!-- ── 6. Поиск клиента ── -->
+    <tr>
+      <td>
+        <strong>Поиск клиента по телефону</strong><br>
+        <span class="method get">GET</span> <code>/clients/1940850?phone=79161234567</code><br>
+        <span style="color:var(--text2);font-size:12px;">Вызов: sendCodeByPhone при входе</span>
+      </td>
+      <td>
+        <pre>{
+  <span class="key">"success"</span>: <span class="num">true</span>,
+  <span class="key">"data"</span>: [
+    {
+      <span class="key">"id"</span>:           <span class="num">11223344</span>,
+      <span class="key">"name"</span>:         <span class="str">"Анна Петрова"</span>,
+      <span class="key">"phone"</span>:        <span class="str">"79161234567"</span>,
+      <span class="key">"email"</span>:        <span class="str">"anna@mail.ru"</span>,
+      <span class="key">"comment"</span>:      <span class="str">""</span>,
+      <span class="key">"discount"</span>:     <span class="num">0</span>,
+      <span class="key">"card"</span>:         <span class="str">""</span>,
+      <span class="key">"importance"</span>:   <span class="num">0</span>,
+      <span class="key">"visits"</span>:       <span class="num">8</span>,
+      <span class="key">"sex"</span>:          <span class="num">1</span>,
+      <span class="key">"avatar"</span>:       <span class="str">""</span>,
+      <span class="key">"born"</span>:         <span class="str">"1990-05-15"</span>,
+      <span class="key">"instagram"</span>:    <span class="str">""</span>
+    }
+  ],
+  <span class="key">"meta"</span>: { <span class="key">"total_count"</span>: <span class="num">1</span> }
+}</pre>
+      </td>
+    </tr>
+
+    <!-- ── 7. Создать клиента ── -->
+    <tr>
+      <td>
+        <strong>Регистрация нового клиента</strong><br>
+        <span class="method post">POST</span> <code>/clients/1940850</code><br>
+        <span style="color:var(--text2);font-size:12px;">Вызов: registerClient при первом входе</span>
+        <pre>{
+  <span class="key">"name"</span>:  <span class="str">"Анна Петрова"</span>,
+  <span class="key">"phone"</span>: <span class="str">"79161234567"</span>,
+  <span class="key">"email"</span>: <span class="str">"anna@mail.ru"</span>
 }</pre>
       </td>
       <td>
         <pre>{
   <span class="key">"success"</span>: <span class="num">true</span>,
-  <span class="key">"data"</span>: [{
-    <span class="key">"id"</span>:          <span class="num">98765432</span>,
-    <span class="key">"record_hash"</span>: <span class="str">"abc123def456"</span>,
-    <span class="key">"staff_id"</span>:    <span class="num">2074619</span>,
-    <span class="key">"services"</span>: [{
-      <span class="key">"id"</span>:   <span class="num">4521083</span>,
-      <span class="key">"cost"</span>: <span class="num">8000</span>
-    }]
-  }]
+  <span class="key">"data"</span>: {
+    <span class="key">"id"</span>:    <span class="num">11223344</span>,
+    <span class="key">"name"</span>:  <span class="str">"Анна Петрова"</span>,
+    <span class="key">"phone"</span>: <span class="str">"79161234567"</span>,
+    <span class="key">"email"</span>: <span class="str">"anna@mail.ru"</span>
+  },
+  <span class="key">"meta"</span>: []
 }</pre>
       </td>
     </tr>
+
+    <!-- ── 8. Профиль клиента (лояльность) ── -->
+    <tr>
+      <td>
+        <strong>Профиль клиента / уровень важности</strong><br>
+        <span class="method get">GET</span> <code>/clients/1940850/11223344</code><br>
+        <span style="color:var(--text2);font-size:12px;">Вызов: renderLoyaltyBlock в профиле</span>
+      </td>
+      <td>
+        <pre>{
+  <span class="key">"success"</span>: <span class="num">true</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"id"</span>:           <span class="num">11223344</span>,
+    <span class="key">"name"</span>:         <span class="str">"Анна Петрова"</span>,
+    <span class="key">"phone"</span>:        <span class="str">"79161234567"</span>,
+    <span class="key">"email"</span>:        <span class="str">"anna@mail.ru"</span>,
+    <span class="key">"importance"</span>:   <span class="num">1</span>,
+    <span class="cmt">/* 0=обычный, 1=важный,
+       2=очень важный, 3=VIP */</span>
+    <span class="key">"visits"</span>:       <span class="num">8</span>,
+    <span class="key">"discount"</span>:     <span class="num">10</span>,
+    <span class="key">"balance"</span>:      <span class="num">500</span>,
+    <span class="key">"born"</span>:         <span class="str">"1990-05-15"</span>,
+    <span class="key">"sex"</span>:          <span class="num">1</span>
+  },
+  <span class="key">"meta"</span>: []
+}</pre>
+      </td>
+    </tr>
+
+    <!-- ── 9. Бронирование ── -->
+    <tr>
+      <td>
+        <strong>Создание записи</strong><br>
+        <span class="method post">POST</span> <code>/book_record/1940850</code><br>
+        <span style="color:var(--text2);font-size:12px;">Вызов: _bookWithSession при подтверждении</span>
+        <pre>{
+  <span class="key">"phone"</span>:           <span class="str">"79161234567"</span>,
+  <span class="key">"fullname"</span>:        <span class="str">"Анна Петрова"</span>,
+  <span class="key">"email"</span>:           <span class="str">"anna@mail.ru"</span>,
+  <span class="key">"comment"</span>:         <span class="str">""</span>,
+  <span class="key">"type"</span>:            <span class="str">"mobile"</span>,
+  <span class="key">"notify_by_sms"</span>:   <span class="num">1</span>,
+  <span class="key">"notify_by_email"</span>: <span class="num">24</span>,
+  <span class="key">"appointments"</span>: [{
+    <span class="key">"id"</span>:       <span class="num">1</span>,
+    <span class="key">"services"</span>: [<span class="num">4521083</span>],
+    <span class="key">"staff_id"</span>: <span class="num">2074619</span>,
+    <span class="key">"datetime"</span>: <span class="str">"2026-06-01 14:00:00"</span>
+  }]
+}</pre>
+      </td>
+      <td>
+        <pre>{
+  <span class="key">"success"</span>: <span class="num">true</span>,
+  <span class="key">"data"</span>: [
+    {
+      <span class="key">"id"</span>:          <span class="num">1</span>,
+      <span class="key">"record_id"</span>:  <span class="num">98765432</span>,
+      <span class="key">"record_hash"</span>: <span class="str">"567df655304da9b984877694"</span>
+    }
+  ],
+  <span class="key">"meta"</span>: []
+}</pre>
+      </td>
+    </tr>
+
+    <!-- ── 10. История записей клиента ── -->
+    <tr>
+      <td>
+        <strong>История записей клиента</strong><br>
+        <span class="method get">GET</span> <code>/records/1940850?client_id=11223344&amp;count=50</code><br>
+        <span style="color:var(--text2);font-size:12px;">Вызов: _fetchAndMergeServerRecords при открытии главной</span>
+      </td>
+      <td>
+        <pre>{
+  <span class="key">"success"</span>: <span class="num">true</span>,
+  <span class="key">"data"</span>: [
+    {
+      <span class="key">"id"</span>:             <span class="num">98765432</span>,
+      <span class="key">"company_id"</span>:     <span class="num">1940850</span>,
+      <span class="key">"staff_id"</span>:       <span class="num">2074619</span>,
+      <span class="key">"date"</span>:           <span class="str">"2026-06-01T14:00:00+0300"</span>,
+      <span class="key">"datetime"</span>:       <span class="num">1748772000</span>,
+      <span class="key">"seance_length"</span>:  <span class="num">7200</span>,
+      <span class="key">"deleted"</span>:        <span class="num">false</span>,
+      <span class="key">"online"</span>:         <span class="num">true</span>,
+      <span class="key">"confirmed"</span>:      <span class="num">1</span>,
+      <span class="key">"attendance"</span>:     <span class="num">0</span>,
+      <span class="key">"record_hash"</span>:    <span class="str">"567df655304da9b984877694"</span>,
+      <span class="key">"services"</span>: [{
+        <span class="key">"id"</span>:          <span class="num">4521083</span>,
+        <span class="key">"title"</span>:       <span class="str">"Перманентный макияж бровей"</span>,
+        <span class="key">"cost"</span>:        <span class="num">8000</span>,
+        <span class="key">"manual_cost"</span>: <span class="num">8000</span>,
+        <span class="key">"amount"</span>:      <span class="num">1</span>,
+        <span class="key">"discount"</span>:    <span class="num">0</span>
+      }],
+      <span class="key">"staff"</span>: {
+        <span class="key">"id"</span>:             <span class="num">2074619</span>,
+        <span class="key">"name"</span>:           <span class="str">"Мария Соколова"</span>,
+        <span class="key">"specialization"</span>: <span class="str">"Мастер ПМ и бровей"</span>,
+        <span class="key">"avatar"</span>:         <span class="str">"https://cdn.yclients.com/…"</span>,
+        <span class="key">"rating"</span>:         <span class="num">0</span>,
+        <span class="key">"votes_count"</span>:    <span class="num">0</span>
+      },
+      <span class="key">"client"</span>: {
+        <span class="key">"id"</span>:    <span class="num">11223344</span>,
+        <span class="key">"name"</span>:  <span class="str">"Анна Петрова"</span>,
+        <span class="key">"phone"</span>: <span class="str">"79161234567"</span>
+      },
+      <span class="key">"create_date"</span>: <span class="str">"2026-05-27T10:15:00+0300"</span>,
+      <span class="key">"comment"</span>:    <span class="str">""</span>,
+      <span class="key">"paid_full"</span>:  <span class="num">0</span>
+    }
+  ],
+  <span class="key">"meta"</span>: { <span class="key">"total_count"</span>: <span class="num">8</span> }
+}</pre>
+      </td>
+    </tr>
+
+    <!-- ── 11. Одна запись ── -->
+    <tr>
+      <td>
+        <strong>Получить запись (для переноса)</strong><br>
+        <span class="method get">GET</span> <code>/record/1940850/98765432</code><br>
+        <span style="color:var(--text2);font-size:12px;">Вызов: _rescheduleWithSession — нужны актуальные staff_id и svc_id</span>
+      </td>
+      <td>
+        <pre>{
+  <span class="key">"success"</span>: <span class="num">true</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"id"</span>:            <span class="num">98765432</span>,
+    <span class="key">"staff_id"</span>:      <span class="num">2074619</span>,
+    <span class="key">"seance_length"</span>: <span class="num">7200</span>,
+    <span class="key">"date"</span>:          <span class="str">"2026-06-01T14:00:00+0300"</span>,
+    <span class="key">"deleted"</span>:       <span class="num">false</span>,
+    <span class="key">"services"</span>: [{
+      <span class="key">"id"</span>:    <span class="num">4521083</span>,
+      <span class="key">"title"</span>: <span class="str">"Перманентный макияж бровей"</span>,
+      <span class="key">"cost"</span>:  <span class="num">8000</span>
+    }],
+    <span class="key">"record_hash"</span>: <span class="str">"567df655304da9b984877694"</span>
+  },
+  <span class="key">"meta"</span>: []
+}</pre>
+      </td>
+    </tr>
+
+    <!-- ── 12. Перенос записи ── -->
     <tr>
       <td>
         <strong>Перенос записи</strong><br>
-        <span class="method put">PUT</span> <code>/record/1940850/98765432</code>
+        <span class="method put">PUT</span> <code>/record/1940850/98765432</code><br>
+        <span style="color:var(--text2);font-size:12px;">Вызов: _rescheduleWithSession</span>
         <pre>{
   <span class="key">"datetime"</span>:      <span class="str">"2026-06-03 11:00:00"</span>,
   <span class="key">"seance_length"</span>: <span class="num">7200</span>,
@@ -487,96 +839,107 @@
         <pre>{
   <span class="key">"success"</span>: <span class="num">true</span>,
   <span class="key">"data"</span>: {
-    <span class="key">"id"</span>:       <span class="num">98765432</span>,
-    <span class="key">"date"</span>:     <span class="str">"2026-06-03T11:00:00"</span>,
-    <span class="key">"staff_id"</span>: <span class="num">2074619</span>
-  }
+    <span class="key">"id"</span>:            <span class="num">98765432</span>,
+    <span class="key">"date"</span>:          <span class="str">"2026-06-03T11:00:00+0300"</span>,
+    <span class="key">"staff_id"</span>:      <span class="num">2074619</span>,
+    <span class="key">"seance_length"</span>: <span class="num">7200</span>,
+    <span class="key">"confirmed"</span>:     <span class="num">1</span>
+  },
+  <span class="key">"meta"</span>: []
 }</pre>
       </td>
     </tr>
+
+    <!-- ── 13. Отмена записи ── -->
     <tr>
       <td>
-        <strong>Доступные даты</strong><br>
-        <span class="method get">GET</span> <code>/book_dates/1940850?service_ids=4521083&staff_id=2074619</code>
+        <strong>Отмена записи</strong><br>
+        <span class="method delete">DELETE</span> <code>/record/1940850/98765432</code><br>
+        <span style="color:var(--text2);font-size:12px;">Вызов: confirmCancel, таймаут 15 с (AbortController)</span><br>
+        <span style="color:var(--text2);font-size:12px;">Тело запроса не требуется</span>
       </td>
       <td>
         <pre>{
   <span class="key">"success"</span>: <span class="num">true</span>,
-  <span class="key">"data"</span>: {
-    <span class="key">"booking_dates"</span>: [
-      <span class="str">"2026-06-01"</span>,
-      <span class="str">"2026-06-02"</span>,
-      <span class="str">"2026-06-04"</span>
-    ]
+  <span class="key">"data"</span>: <span class="num">true</span>,
+  <span class="key">"meta"</span>: []
+}
+
+<span class="cmt">// Ошибка (запись уже отменена)</span>
+{
+  <span class="key">"success"</span>: <span class="num">false</span>,
+  <span class="key">"meta"</span>: {
+    <span class="key">"message"</span>: <span class="str">"Запись не найдена"</span>,
+    <span class="key">"code"</span>: <span class="num">1</span>
   }
 }</pre>
       </td>
     </tr>
+
+    <!-- ── 14. Дашборд (записи за день) ── -->
     <tr>
       <td>
-        <strong>Доступное время</strong><br>
-        <span class="method get">GET</span> <code>/book_times/1940850/2074619/2026-06-01?service_ids=4521083</code>
+        <strong>Записи за сегодня (дашборд админа)</strong><br>
+        <span class="method get">GET</span> <code>/records/1940850?start_date=2026-06-01&amp;end_date=2026-06-01&amp;count=50</code><br>
+        <span style="color:var(--text2);font-size:12px;">Вызов: renderAdminDashboard</span>
       </td>
       <td>
         <pre>{
   <span class="key">"success"</span>: <span class="num">true</span>,
   <span class="key">"data"</span>: [
-    { <span class="key">"time"</span>: <span class="str">"10:00"</span>, <span class="key">"seance_length"</span>: <span class="num">7200</span> },
-    { <span class="key">"time"</span>: <span class="str">"12:00"</span>, <span class="key">"seance_length"</span>: <span class="num">7200</span> },
-    { <span class="key">"time"</span>: <span class="str">"14:00"</span>, <span class="key">"seance_length"</span>: <span class="num">7200</span> }
-  ]
+    {
+      <span class="key">"id"</span>:       <span class="num">98765432</span>,
+      <span class="key">"date"</span>:     <span class="str">"2026-06-01T10:00:00+0300"</span>,
+      <span class="key">"deleted"</span>:  <span class="num">false</span>,
+      <span class="key">"staff"</span>:    { <span class="key">"name"</span>: <span class="str">"Мария С."</span> },
+      <span class="key">"client"</span>:  {
+        <span class="key">"id"</span>:   <span class="num">11223344</span>,
+        <span class="key">"name"</span>: <span class="str">"Анна Петрова"</span>
+      },
+      <span class="key">"services"</span>: [{
+        <span class="key">"title"</span>: <span class="str">"ПМ бровей"</span>,
+        <span class="key">"cost"</span>:  <span class="num">8000</span>
+      }]
+    }
+  ],
+  <span class="key">"meta"</span>: { <span class="key">"total_count"</span>: <span class="num">6</span> }
 }</pre>
       </td>
     </tr>
+
+    <!-- ── 15. Список всех клиентов ── -->
     <tr>
       <td>
-        <strong>Поиск клиента по телефону</strong><br>
-        <span class="method get">GET</span> <code>/clients/1940850?phone=79161234567</code>
+        <strong>Список всех клиентов (экран Admin Clients)</strong><br>
+        <span class="method get">GET</span> <code>/clients/1940850?count=200</code><br>
+        <span style="color:var(--text2);font-size:12px;">Вызов: renderAdminClients</span>
       </td>
       <td>
         <pre>{
   <span class="key">"success"</span>: <span class="num">true</span>,
-  <span class="key">"data"</span>: [{
-    <span class="key">"id"</span>:    <span class="num">11223344</span>,
-    <span class="key">"name"</span>:  <span class="str">"Анна Петрова"</span>,
-    <span class="key">"phone"</span>: <span class="str">"79161234567"</span>,
-    <span class="key">"email"</span>: <span class="str">"anna@mail.ru"</span>
-  }]
+  <span class="key">"data"</span>: [
+    {
+      <span class="key">"id"</span>:         <span class="num">11223344</span>,
+      <span class="key">"name"</span>:       <span class="str">"Анна Петрова"</span>,
+      <span class="key">"phone"</span>:      <span class="str">"79161234567"</span>,
+      <span class="key">"email"</span>:      <span class="str">"anna@mail.ru"</span>,
+      <span class="key">"visits"</span>:     <span class="num">8</span>,
+      <span class="key">"importance"</span>: <span class="num">1</span>
+    },
+    {
+      <span class="key">"id"</span>:         <span class="num">22334455</span>,
+      <span class="key">"name"</span>:       <span class="str">"Ольга Сидорова"</span>,
+      <span class="key">"phone"</span>:      <span class="str">"79031234567"</span>,
+      <span class="key">"email"</span>:      <span class="str">"olga@mail.ru"</span>,
+      <span class="key">"visits"</span>:     <span class="num">3</span>,
+      <span class="key">"importance"</span>: <span class="num">0</span>
+    }
+  ],
+  <span class="key">"meta"</span>: { <span class="key">"total_count"</span>: <span class="num">248</span> }
 }</pre>
       </td>
     </tr>
-    <tr>
-      <td>
-        <strong>Записи клиента (история)</strong><br>
-        <span class="method get">GET</span> <code>/records/1940850?client_id=11223344&count=50</code>
-      </td>
-      <td>
-        <pre>{
-  <span class="key">"success"</span>: <span class="num">true</span>,
-  <span class="key">"data"</span>: [{
-    <span class="key">"id"</span>:            <span class="num">98765432</span>,
-    <span class="key">"date"</span>:          <span class="str">"2026-06-01T14:00:00"</span>,
-    <span class="key">"deleted"</span>:       <span class="num">false</span>,
-    <span class="key">"seance_length"</span>: <span class="num">7200</span>,
-    <span class="key">"services"</span>: [{ <span class="key">"title"</span>: <span class="str">"ПМ бровей"</span>, <span class="key">"cost"</span>: <span class="num">8000</span> }],
-    <span class="key">"staff"</span>:         { <span class="key">"id"</span>: <span class="num">2074619</span>, <span class="key">"name"</span>: <span class="str">"Мария С."</span> },
-    <span class="key">"record_hash"</span>:   <span class="str">"abc123def456"</span>
-  }]
-}</pre>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <strong>Отмена записи</strong><br>
-        <span class="method delete">DELETE</span> <code>/record/1940850/98765432</code>
-      </td>
-      <td>
-        <pre>{
-  <span class="key">"success"</span>: <span class="num">true</span>,
-  <span class="key">"data"</span>: <span class="num">true</span>
-}</pre>
-      </td>
-    </tr>
+
   </tbody>
 </table>
 
