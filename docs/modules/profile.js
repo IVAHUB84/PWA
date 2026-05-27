@@ -188,6 +188,15 @@ export function _initThemeUI() {
   });
 }
 
+export function _toggleThemeSettings() {
+  const g  = document.getElementById('themeSettingsGroup');
+  const ch = document.getElementById('themeSettingsChevron');
+  if (!g) return;
+  const open = g.style.display !== 'none';
+  g.style.display = open ? 'none' : '';
+  if (ch) ch.style.transform = open ? '' : 'rotate(90deg)';
+}
+
 export function _toggleNotifSettings() {
   const g  = document.getElementById('notifSettingsGroup');
   const ch = document.getElementById('notifSettingsChevron');
@@ -201,4 +210,4 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () 
   if ((localStorage.getItem('yc_theme') || 'system') === 'system') _setTheme('system');
 });
 
-Object.assign(window, { renderProfileScreen, renderHomeHero, _renderHomeFeedPreview, renderLoyaltyBlock, _toggleNotifSettings, _setTheme, _initThemeUI });
+Object.assign(window, { renderProfileScreen, renderHomeHero, _renderHomeFeedPreview, renderLoyaltyBlock, _toggleNotifSettings, _toggleThemeSettings, _setTheme, _initThemeUI });
