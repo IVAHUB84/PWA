@@ -382,6 +382,39 @@
     <div id="otpTimer" style="text-align:center;color:var(--text-2);font-size:13px;margin-top:4px;">Повторный код через <b id="otpCountdown">3:00</b></div>
   </div>
 
+  <!-- ══ PIN ══ -->
+  <div class="screen" id="s-pin">
+    <div class="status-bar"><span class="time">9:41</span><div class="dynamic-island"></div><div class="icons"><svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".7"/><rect x="4.5" y="5.5" width="3" height="6.5" rx=".7"/><rect x="9" y="3" width="3" height="9" rx=".7"/><rect x="13.5" y="0" width="3" height="12" rx=".7"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="8" cy="11" r="1.2" fill="currentColor" stroke="none"/><path d="M4.8 7.8a4.5 4.5 0 016.4 0" stroke-width="1.5"/><path d="M2 5a8 8 0 0112 0" stroke-width="1.5"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="20" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".4"/><path d="M22 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/><rect x="2" y="2" width="15" height="8" rx="2.5" fill="currentColor"/></svg></div></div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 24px 16px;">
+      <div style="font-size:26px;font-weight:800;margin-bottom:8px;text-align:center;" id="pinTitle">Введите PIN</div>
+      <div style="font-size:14px;color:var(--text-2);text-align:center;margin-bottom:40px;" id="pinSub">Быстрый вход в приложение</div>
+      <div style="display:flex;gap:20px;margin-bottom:12px;">
+        <div class="pin-dot" id="pinDot0"></div>
+        <div class="pin-dot" id="pinDot1"></div>
+        <div class="pin-dot" id="pinDot2"></div>
+        <div class="pin-dot" id="pinDot3"></div>
+      </div>
+      <div id="pinError" style="display:none;color:var(--red);font-size:13px;text-align:center;min-height:20px;margin-top:8px;"></div>
+    </div>
+    <div class="pin-numpad">
+      <button class="pin-key" onclick="_pinKey(1)">1</button>
+      <button class="pin-key" onclick="_pinKey(2)">2</button>
+      <button class="pin-key" onclick="_pinKey(3)">3</button>
+      <button class="pin-key" onclick="_pinKey(4)">4</button>
+      <button class="pin-key" onclick="_pinKey(5)">5</button>
+      <button class="pin-key" onclick="_pinKey(6)">6</button>
+      <button class="pin-key" onclick="_pinKey(7)">7</button>
+      <button class="pin-key" onclick="_pinKey(8)">8</button>
+      <button class="pin-key" onclick="_pinKey(9)">9</button>
+      <button class="pin-key pin-key-ghost" id="pinSkipBtn" onclick="_pinSkip()" style="visibility:hidden;font-size:13px;">Пропустить</button>
+      <button class="pin-key" onclick="_pinKey(0)">0</button>
+      <button class="pin-key pin-key-ghost" onclick="_pinBackspace()" style="font-size:20px;">⌫</button>
+    </div>
+    <div style="text-align:center;padding:12px 24px 40px;">
+      <button id="pinAltBtn" onclick="_pinAlt()" style="background:none;border:none;color:var(--text-2);font-size:14px;cursor:pointer;font-family:inherit;padding:8px 16px;">Войти по коду</button>
+    </div>
+  </div>
+
   <!-- ══ REGISTER ══ -->
   <div class="screen" id="s-register">
     <div class="status-bar"><span class="time">9:41</span><div class="dynamic-island"></div><div class="icons"><svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".7"/><rect x="4.5" y="5.5" width="3" height="6.5" rx=".7"/><rect x="9" y="3" width="3" height="9" rx=".7"/><rect x="13.5" y="0" width="3" height="12" rx=".7"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="8" cy="11" r="1.2" fill="currentColor" stroke="none"/><path d="M4.8 7.8a4.5 4.5 0 016.4 0" stroke-width="1.5"/><path d="M2 5a8 8 0 0112 0" stroke-width="1.5"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="20" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".4"/><path d="M22 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/><rect x="2" y="2" width="15" height="8" rx="2.5" fill="currentColor"/></svg></div></div>

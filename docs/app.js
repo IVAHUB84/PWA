@@ -12,6 +12,7 @@ import { renderMasters } from './modules/masters.js';
 import { updateSlotsScreen, loadDates, updateConfirmScreen } from './modules/slots.js';
 import { renderHistoryScreen } from './modules/history.js';
 import { renderHomeHero, renderProfileScreen, renderLoyaltyBlock, _renderHomeFeedPreview, _initOfferUrgency } from './modules/profile.js';
+import { hasPinSet, openPinEnter, refreshPinScreen } from './modules/pin.js';
 import { renderReviewScreen } from './modules/review.js';
 import { renderAdminDashboard, renderAdminFeed, _clearPostImage, renderAdminClients, renderAdminPush, updatePushAudience } from './modules/admin.js';
 import { _ghRead } from './modules/github.js';
@@ -61,6 +62,7 @@ registerOnEnter('s-home', () => {
 registerOnEnter('s-profile',  () => { renderProfileScreen(); renderLoyaltyBlock(); });
 registerOnEnter('s-feed',           () => renderClientFeed());
 registerOnEnter('s-review',         () => renderReviewScreen());
+registerOnEnter('s-pin',            () => refreshPinScreen());
 registerOnEnter('s-offer',          () => _initOfferUrgency());
 registerOnEnter('s-crosssell', () => {
   const el = document.getElementById('csSub');
@@ -188,6 +190,8 @@ renderServices();
   const sess = getSession();
   if (!sess) {
     window.go('s-login');
+  } else if (hasPinSet()) {
+    openPinEnter();
   } else {
     renderHomeHero();
     renderProfileScreen();

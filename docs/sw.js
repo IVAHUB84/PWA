@@ -4,7 +4,7 @@ try {
   console.warn('OneSignal SW load failed', e);
 }
 
-const CACHE_VERSION = 'v24';
+const CACHE_VERSION = 'v25';
 const STATIC_CACHE  = `studio-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `studio-runtime-${CACHE_VERSION}`;
 
@@ -33,6 +33,7 @@ const APP_SHELL = [
   './modules/notifications.js',
   './modules/scenarios.js',
   './modules/search.js',
+  './modules/pin.js',
   './manifest.json',
   './logo.png',
   './logobest.png',

@@ -731,6 +731,13 @@ body {
 .seg-btn { flex:1; height:34px; border-radius:8px; border:none; background:none; font-size:13px; font-weight:600; color:var(--text-2); cursor:pointer; font-family:inherit; transition:all .15s; }
 .seg-btn.active { background:var(--bg); color:var(--text); box-shadow:0 1px 4px rgba(0,0,0,0.1); }
 
+.pin-dot { width:16px; height:16px; border-radius:50%; border:2.5px solid var(--border); background:transparent; transition:all .12s; }
+.pin-dot.filled { background:var(--accent); border-color:var(--accent); transform:scale(1.1); }
+.pin-numpad { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding:0 24px 8px; }
+.pin-key { height:68px; border-radius:16px; border:none; background:var(--surface); font-size:22px; font-weight:600; color:var(--text); cursor:pointer; font-family:inherit; transition:transform .08s; -webkit-tap-highlight-color:transparent; user-select:none; }
+.pin-key:active { transform:scale(.91); }
+.pin-key-ghost { background:none; font-size:13px; color:var(--text-2); font-weight:600; }
+
 #sw-update-banner { position:fixed; bottom:calc(83px + 12px); left:16px; right:16px; background:var(--primary); color:#fff; border-radius:14px; padding:12px 16px; display:flex; align-items:center; justify-content:space-between; font-size:13px; font-weight:600; z-index:9999; box-shadow:0 4px 20px rgba(0,0,0,0.25); animation:slideUpBanner .3s ease; }
 #sw-update-banner button { background:var(--accent); color:#fff; border:none; border-radius:8px; padding:6px 14px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; }
 @keyframes slideUpBanner { from { transform:translateY(20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
