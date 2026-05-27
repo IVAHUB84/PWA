@@ -21,9 +21,14 @@ export function renderProfileScreen() {
   const favNameEl = document.getElementById('profFavName');
   const favRoleEl = document.getElementById('profFavRole');
   const favAvEl = document.getElementById('profFavAv');
+  const favBookBtn = favAvEl?.parentElement?.querySelector('button.btn-ghost');
   if (fav) {
     if (favNameEl) favNameEl.textContent = fav.name;
     if (favRoleEl) favRoleEl.textContent = fav.role;
+    if (favBookBtn) {
+      favBookBtn.setAttribute('data-mid', fav.id);
+      favBookBtn.setAttribute('onclick', `bookWithMaster(this.dataset.mid)`);
+    }
     if (favAvEl) {
       favAvEl.textContent = '';
       favAvEl.style.backgroundImage = '';

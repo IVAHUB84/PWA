@@ -39,18 +39,30 @@ function _masterCardHtml(m, i, total) {
   </div>`;
 }
 
+export function _browseAllMasters() {
+  state._mastersAll = true;
+  go('s-masters');
+}
+
 export async function renderMasters() {
-  const svc = getService();
+  const browseAll = state._mastersAll;
+  state._mastersAll = false;
   const sub = document.getElementById('mastersSub');
-  if (sub) sub.textContent = `${svc.name} · ${svc.dur} мин`;
   const list = document.getElementById('mastersList');
   if (!list) return;
+  if (browseAll) {
+    if (sub) sub.textContent = 'Все мастера студии';
+    const masters = [...MASTERS_DATA].sort((a, b) => (b.fav ? 1 : 0) - (a.fav ? 1 : 0));
+    list.innerHTML = masters.map((m, i) => _masterCardHtml(m, i, masters.length)).join('');
+    return;
+  }
+  const svc = getService();
+  if (sub) sub.textContent = `${svc.name} · ${svc.dur} мин`;
   list.innerHTML = '<div style="padding:32px 20px;text-align:center;color:var(--text-2);font-size:14px;">Загрузка мастеров…</div>';
   let masters = [];
   try {
     const r = await YC.get(`/book_staff/${YC.company}`, { service_ids: svc.id });
     if (r.success && r.data && r.data.length) {
-      const ids = new Set(r.data.map(s => String(s.id)));
       const favs = JSON.parse(localStorage.getItem('yc_favs') || '[]');
       const staticById = Object.fromEntries(MASTERS_DATA.map(m => [m.id, m]));
       masters = r.data.map((m, i) => {
@@ -194,4 +206,4 @@ export function selectAnyMaster() {
   go('s-slots');
 }
 
-Object.assign(window, { renderMasters, toggleFav, selectMaster, selectAnyMaster, openMasterCard, bookFromMaster, bookServiceFromMaster });
+Object.assign(window, { renderMasters, toggleFav, selectMaster, selectAnyMaster, openMasterCard, bookFromMaster, bookServiceFromMaster, _browseAllMasters });

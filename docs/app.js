@@ -33,6 +33,10 @@ registerOnEnter('s-services', () => {
     state.masterPreSelected = false;
     state.masterId = null;
     state.masterName = null;
+    state.searchQ = '';
+    state.category = 'Все';
+    const si = document.getElementById('serviceSearch');
+    if (si) si.value = '';
   }
   state._masterJustSelected = false;
   renderServices();

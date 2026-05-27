@@ -103,6 +103,8 @@ export function renderHistoryScreen() {
 
 export function _renderHistoryFromCache() {
   const records = _loadStoredRecords().filter(r => r.status !== 'cancelled');
+  const reviews = JSON.parse(localStorage.getItem('yc_reviews') || '[]');
+  const reviewedIds = new Set(reviews.map(r => r.recordId).filter(Boolean));
   const now = new Date();
   const upcoming = records
     .filter(r => new Date(r.datetime.replace(' ', 'T')) > now)
@@ -167,7 +169,7 @@ export function _renderHistoryFromCache() {
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;padding-top:2px;">
             <button class="btn-ghost" style="font-size:12px;" data-sid="${esc(String(r.svcId))}" onclick="event.stopPropagation();rebook(this.dataset.sid)">Повторить</button>
-            <button class="btn-ghost" style="font-size:12px;color:var(--accent);" data-rid="${esc(String(r.id))}" data-mid="${esc(String(r.masterId))}" data-mname="${esc(r.masterName)}" data-sname="${esc(r.svcName)}" data-dt="${esc(r.datetime)}" onclick="event.stopPropagation();openRateVisit(this.dataset.rid,this.dataset.mid,this.dataset.mname,this.dataset.sname,this.dataset.dt)">Оценить</button>
+            ${reviewedIds.has(String(r.id)) ? '' : `<button class="btn-ghost" style="font-size:12px;color:var(--accent);" data-rid="${esc(String(r.id))}" data-mid="${esc(String(r.masterId))}" data-mname="${esc(r.masterName)}" data-sname="${esc(r.svcName)}" data-dt="${esc(r.datetime)}" onclick="event.stopPropagation();openRateVisit(this.dataset.rid,this.dataset.mid,this.dataset.mname,this.dataset.sname,this.dataset.dt)">Оценить</button>`}
           </div>
         </div>`).join('')}
     </div>`;
