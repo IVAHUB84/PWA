@@ -34,7 +34,7 @@ export function _homeSearch(q) {
 export function showBookForOtherModal() {
   const overlay = document.createElement('div');
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:flex-end;';
-  overlay.innerHTML = `<div style="background:var(--bg);width:100%;border-radius:24px 24px 0 0;padding:24px 20px 40px;max-width:393px;margin:auto;">
+  overlay.innerHTML = `<div style="background:var(--bg);width:100%;border-radius:24px;padding:24px 20px 32px;max-width:393px;margin:auto 0 16px;">
     <div style="font-size:17px;font-weight:800;margin-bottom:16px;">Кого записываем?</div>
     <div style="margin-bottom:12px;"><div style="font-size:12px;font-weight:600;color:var(--text-2);margin-bottom:6px;">ИМЯ</div>
       <input id="_oName" placeholder="Имя" style="width:100%;box-sizing:border-box;height:48px;border:1.5px solid var(--border);border-radius:12px;padding:0 14px;font-size:15px;font-family:inherit;background:var(--surface);"></div>
