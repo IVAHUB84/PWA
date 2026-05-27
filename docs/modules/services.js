@@ -1,10 +1,30 @@
 import { state, SERVICES_DATA } from './state.js';
 import { go } from './navigation.js';
 import { esc } from './utils.js';
+import { YC } from './api.js';
 
 function _updateCatFilterBtn() {
   const lbl = document.getElementById('catFilterLabel');
   if (lbl) lbl.textContent = (state.category && state.category !== 'Все') ? state.category : 'Все категории';
+}
+
+function _updateMasterBanner() {
+  const banner = document.getElementById('masterBanner');
+  if (!banner) return;
+  if (state.masterPreSelected && state.masterId) {
+    document.getElementById('masterBannerName').textContent = state.masterName || '';
+    banner.style.display = 'flex';
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+export function _clearMasterFilter() {
+  state.masterPreSelected = false;
+  state.masterId = null;
+  state.masterName = null;
+  _updateMasterBanner();
+  renderServices();
 }
 
 export function _openCatFilter() {
@@ -53,17 +73,11 @@ export function filterSearch(q) {
   renderServices();
 }
 
-export function renderServices() {
+function _renderList(data) {
   const list = document.getElementById('serviceList');
   if (!list) return;
-  let data = SERVICES_DATA;
-  if (state.category && state.category !== 'Все') {
-    data = data.filter(s => s.cat === state.category);
-  }
-  if (state.searchQ) {
-    const q = state.searchQ.toLowerCase();
-    data = data.filter(s => s.name.toLowerCase().includes(q) || s.cat.toLowerCase().includes(q));
-  }
+  _updateCatFilterBtn();
+  _updateMasterBanner();
   if (data.length === 0) {
     list.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--text-2);">Ничего не найдено</div>';
     return;
@@ -76,13 +90,55 @@ export function renderServices() {
       <div class="svc-right"><div class="svc-price">${esc(s.priceStr)}</div><div class="svc-cta">Записаться →</div></div>
     </div>`;
   }).join('');
-  _updateCatFilterBtn();
+}
+
+export async function renderServices() {
+  const list = document.getElementById('serviceList');
+  if (!list) return;
+
+  if (state.masterPreSelected && state.masterId) {
+    list.innerHTML = '<div style="padding:32px 20px;text-align:center;color:var(--text-2);font-size:14px;">Загрузка услуг мастера…</div>';
+    _updateMasterBanner();
+    let data = [];
+    try {
+      const r = await YC.get(`/book_services/${YC.company}`, { staff_id: state.masterId });
+      const masterSvcIds = new Set((r.data?.services || []).map(s => String(s.id)));
+      data = SERVICES_DATA.filter(s => masterSvcIds.has(s.id));
+      if (!data.length && r.data?.services?.length) {
+        data = r.data.services.map(s => ({
+          id: String(s.id), name: s.title, cat: '',
+          dur: s.duration || 60,
+          priceStr: s.price_min ? `от ${s.price_min} ₽` : 'По запросу',
+        }));
+      }
+    } catch {}
+    if (state.category && state.category !== 'Все') data = data.filter(s => s.cat === state.category);
+    if (state.searchQ) {
+      const q = state.searchQ.toLowerCase();
+      data = data.filter(s => s.name.toLowerCase().includes(q));
+    }
+    _renderList(data);
+    return;
+  }
+
+  let data = SERVICES_DATA;
+  if (state.category && state.category !== 'Все') data = data.filter(s => s.cat === state.category);
+  if (state.searchQ) {
+    const q = state.searchQ.toLowerCase();
+    data = data.filter(s => s.name.toLowerCase().includes(q) || s.cat.toLowerCase().includes(q));
+  }
+  _renderList(data);
 }
 
 export function selectService(id) {
   state.serviceId = id;
-  state.masterId = null;
-  go('s-masters');
+  if (state.masterPreSelected) {
+    go('s-slots');
+  } else {
+    state.masterId = null;
+    state.masterName = null;
+    go('s-masters');
+  }
 }
 
-Object.assign(window, { filterCategory, filterSearch, renderServices, selectService, _openCatFilter, _pickCat });
+Object.assign(window, { filterCategory, filterSearch, renderServices, selectService, _openCatFilter, _pickCat, _clearMasterFilter });

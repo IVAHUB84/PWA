@@ -1,6 +1,6 @@
 import { EMAILJS, YC, _fetchAndMergeServerRecords } from './modules/api.js';
 import { getSession } from './modules/storage.js';
-import { MASTERS_DATA, setMastersData, setServicesData } from './modules/state.js';
+import { state, MASTERS_DATA, setMastersData, setServicesData } from './modules/state.js';
 import { _GRADS } from './modules/constants.js';
 import { _fmtPrice, _makeShort } from './modules/utils.js';
 import { registerOnEnter } from './modules/navigation.js';
@@ -28,7 +28,15 @@ setBookingRenderFns({ renderHomeHero });
 setGhReadFn(_ghRead);
 
 // ── ON-ENTER HANDLERS ──
-registerOnEnter('s-services', () => renderServices());
+registerOnEnter('s-services', () => {
+  if (!state._masterJustSelected) {
+    state.masterPreSelected = false;
+    state.masterId = null;
+    state.masterName = null;
+  }
+  state._masterJustSelected = false;
+  renderServices();
+});
 registerOnEnter('s-masters',  () => renderMasters());
 registerOnEnter('s-slots',    () => { updateSlotsScreen(); loadDates(); });
 registerOnEnter('s-confirm',  () => updateConfirmScreen());

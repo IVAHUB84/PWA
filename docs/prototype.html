@@ -100,6 +100,13 @@
       <span class="time">9:41</span><div class="dynamic-island"></div>    </div>
     <div class="nav-bar"><button class="back-btn" onclick="back()">‹ Назад</button></div>
     <div class="page-title">Выберите услугу</div>
+    <div id="masterBanner" style="display:none;margin:0 20px 10px;background:var(--accent-light);border-radius:12px;padding:10px 14px;align-items:center;justify-content:space-between;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:18px;">👤</span>
+        <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-2);">Мастер</div><div id="masterBannerName" style="font-size:14px;font-weight:700;color:var(--accent);"></div></div>
+      </div>
+      <button onclick="_clearMasterFilter()" style="background:none;border:none;font-size:13px;color:var(--text-2);font-weight:600;cursor:pointer;font-family:inherit;">Все услуги ×</button>
+    </div>
     <div class="search-bar">
       <span style="color:var(--text-2);">🔍</span>
       <input type="text" id="serviceSearch" placeholder="Поиск услуг…" oninput="filterSearch(this.value)">

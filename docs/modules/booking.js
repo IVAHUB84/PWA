@@ -251,10 +251,8 @@ export function bookWithMaster(masterId) {
   state.masterName = m.name;
   state.masterAvatar = m.avatar_big || m.avatar || '';
   state.masterGrad = m.grad;
-  if (m.cats && m.cats.length) {
-    const svc = SERVICES_DATA.find(s => s.cat === m.cats[0]);
-    if (svc) { state.serviceId = svc.id; go('s-slots'); return; }
-  }
+  state.masterPreSelected = true;
+  state._masterJustSelected = true;
   go('s-services');
 }
 
