@@ -114,17 +114,24 @@ export function _renderHomeFeedPreview() {
     if (sec) sec.style.display = 'none';
     return;
   }
-  el.style.display = 'flex';
+  el.style.display = '';
   if (sec) sec.style.display = '';
-  const p = posts[0];
   const _ICONS = { 'Брови': '✨', 'Ногти': '💅', 'Лицо': '🌿', 'Волосы': '💆', 'Тело': '🧖', 'Акции': '🎁' };
-  const icon = _ICONS[p.cat] || '📝';
-  const safeSrc = p.image && /^data:image\/|^https?:\/\//.test(p.image) ? p.image : null;
-  const thumb = safeSrc
-    ? `<img src="${esc(safeSrc)}" style="width:44px;height:44px;object-fit:cover;border-radius:10px;flex-shrink:0;">`
-    : `<div style="font-size:36px;flex-shrink:0;">${icon}</div>`;
-  const preview = p.text.length > 60 ? p.text.slice(0, 60) + '…' : p.text;
-  el.innerHTML = `${thumb}<div style="flex:1;"><div style="font-size:14px;font-weight:700;margin-bottom:3px;">${esc(preview)}</div><div style="font-size:12px;color:var(--text-2);">${esc(p.date)} · ${esc(p.cat)}</div></div>`;
+  const inner = el.querySelector('.hscroll');
+  if (!inner) return;
+  inner.innerHTML = posts.slice(0, 6).map(p => {
+    const icon = _ICONS[p.cat] || '📝';
+    const safeSrc = p.image && /^data:image\/|^https?:\/\//.test(p.image) ? p.image : null;
+    const top = safeSrc
+      ? `<img src="${esc(safeSrc)}" style="width:100%;height:90px;object-fit:cover;border-radius:10px;margin-bottom:8px;">`
+      : `<div style="font-size:40px;text-align:center;margin-bottom:8px;">${icon}</div>`;
+    const preview = p.text.length > 50 ? p.text.slice(0, 50) + '…' : p.text;
+    return `<div style="width:140px;flex-shrink:0;background:var(--surface);border-radius:16px;padding:12px;box-shadow:var(--shadow);cursor:pointer;border:1px solid var(--border);" onclick="go('s-feed')">
+      ${top}
+      <div style="font-size:12px;font-weight:700;line-height:1.3;margin-bottom:4px;">${esc(preview)}</div>
+      <div style="font-size:11px;color:var(--text-2);">${esc(p.cat)}</div>
+    </div>`;
+  }).join('');
 }
 
 export async function renderLoyaltyBlock() {
