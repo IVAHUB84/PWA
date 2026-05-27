@@ -11,7 +11,9 @@ const sizes = [
 
 for (const { size, out } of sizes) {
   await sharp(src)
-    .resize(size, size, { fit: 'contain', background: { r: 255, g: 255, b: 255, alpha: 0 } })
+    .trim({ threshold: 40 })
+    .resize(size, size, { fit: 'contain', background: { r: 250, g: 247, b: 243, alpha: 1 } })
+    .flatten({ background: { r: 250, g: 247, b: 243 } })
     .png()
     .toFile(out);
   console.log(`✓ ${out}`);
