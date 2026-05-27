@@ -29,26 +29,39 @@ function _urlB64ToUint8(b64) {
 
 export async function subscribePush(clientId, phone) {
   const url = _workerUrl();
-  if (!url) return;
+  if (!url) { console.warn('[push] no worker URL'); return; }
   if (!_vapidKey) await initPush();
-  if (!_vapidKey) return;
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  if (!_vapidKey) { console.warn('[push] no VAPID key after initPush'); return; }
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    console.warn('[push] PushManager not supported');
+    return;
+  }
   try {
-    const perm = await Notification.requestPermission();
-    if (perm !== 'granted') return;
+    const perm = Notification.permission === 'granted'
+      ? 'granted'
+      : await Notification.requestPermission();
+    if (perm !== 'granted') { console.warn('[push] permission denied:', perm); return; }
     const reg = await navigator.serviceWorker.ready;
-    const sub = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: _urlB64ToUint8(_vapidKey),
-    });
-    await fetch(`${url}/subscribe`, {
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: _urlB64ToUint8(_vapidKey),
+      });
+    }
+    const r = await fetch(`${url}/subscribe`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ subscription: sub.toJSON(), clientId: String(clientId), phone: phone || '' }),
     });
-    localStorage.setItem(_KEY_SUB, '1');
+    if (r.ok) {
+      localStorage.setItem(_KEY_SUB, '1');
+      console.log('[push] subscribed OK for client', clientId);
+    } else {
+      console.warn('[push] worker /subscribe returned', r.status);
+    }
   } catch(e) {
-    console.warn('Push subscribe failed:', e);
+    console.error('[push] subscribe failed:', e);
   }
 }
 
@@ -72,7 +85,7 @@ export async function unsubscribePush() {
 export async function sendAdminPush(title, body, targetClientId) {
   const url = _workerUrl();
   const secret = localStorage.getItem(_KEY_SECRET);
-  if (!url || !secret) return false;
+  if (!url || !secret) return { ok: false, sent: 0, error: 'no_config' };
   try {
     const payload = { title, body };
     if (targetClientId) payload.targetClientId = String(targetClientId);
@@ -81,8 +94,9 @@ export async function sendAdminPush(title, body, targetClientId) {
       headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': secret },
       body: JSON.stringify(payload),
     });
-    return r.ok;
-  } catch { return false; }
+    if (!r.ok) return { ok: false, sent: 0, error: r.status };
+    return await r.json();
+  } catch(e) { return { ok: false, sent: 0, error: String(e) }; }
 }
 
 Object.assign(window, { subscribePush, unsubscribePush });

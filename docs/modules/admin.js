@@ -2,7 +2,7 @@ import { YC } from './api.js';
 import { go } from './navigation.js';
 import { esc } from './utils.js';
 import { PUSH_TEMPLATES } from './constants.js';
-import { sendAdminPush } from './push.js';
+import { sendAdminPush, subscribePush, initPush } from './push.js';
 import { _ghPullToLocal, _ghSyncPosts } from './github.js';
 
 function _ls(key) {
@@ -394,9 +394,13 @@ export function sendNewPush() {
     setTimeout(() => go('s-admin-push', 'tab'), 1800);
   } else {
     const title = document.getElementById('pushNewTitle')?.textContent || 'Реснички';
-    sendAdminPush(title, text).then(ok => {
-      _showAdminToast(screen, ok ? 'Уведомление отправлено ✓' : 'Ошибка: укажите Worker URL и Admin Secret в настройках');
-      setTimeout(() => go('s-admin-push', 'tab'), 2000);
+    sendAdminPush(title, text).then(res => {
+      let msg;
+      if (!res.ok) msg = 'Ошибка: укажите Worker URL и Admin Secret';
+      else if (res.sent === 0) msg = `Отправлено: 0 — нет подписчиков`;
+      else msg = `Отправлено ${res.sent} уведомл. ✓`;
+      _showAdminToast(screen, msg);
+      setTimeout(() => go('s-admin-push', 'tab'), 2500);
     });
   }
 }
@@ -420,6 +424,21 @@ function _showAdminToast(screen, msg) {
   screen.appendChild(toast);
 }
 
+async function adminSubscribeSelf() {
+  const statusEl = document.getElementById('pushSubStatus');
+  if (statusEl) statusEl.textContent = 'Подключаемся…';
+  await initPush();
+  const { getSession } = await import('./storage.js');
+  const sess = getSession();
+  if (!sess?.client_id) {
+    if (statusEl) statusEl.textContent = 'Нет сессии — войдите в приложение';
+    return;
+  }
+  await subscribePush(sess.client_id, sess.phone || '');
+  const sub = localStorage.getItem('yc_push_subscribed');
+  if (statusEl) statusEl.textContent = sub ? 'Подписан ✓' : 'Ошибка — проверьте консоль (F12)';
+}
+
 Object.assign(window, {
   renderAdminDashboard, renderAdminFeed, publishPost, deletePost,
   renderAdminClients, filterAdminClients,
@@ -428,4 +447,5 @@ Object.assign(window, {
   pushTplChip, pushPreviewUpdate, pushSchedToggle,
   updatePushAudience, sendNewPush, sendPush,
   _onPostImagePicked, _clearPostImage, _togglePushSentCollapsed,
+  adminSubscribeSelf,
 });
