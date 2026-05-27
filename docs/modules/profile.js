@@ -8,7 +8,6 @@ export function renderProfileScreen() {
   const s = getSession();
   const nameEl = document.getElementById('profName');
   const phoneEl = document.getElementById('profPhone');
-  const homeAv = document.getElementById('homeAv');
   if (!s) return;
   const initials = getInitials(s.name || s.email || '?');
   if (nameEl) nameEl.textContent = s.name || '—';
@@ -17,10 +16,6 @@ export function renderProfileScreen() {
   if (emailEl) emailEl.textContent = s.email || '';
   const inner = document.getElementById('profAvInner');
   if (inner) inner.textContent = initials;
-  if (homeAv) {
-    homeAv.style.backgroundImage = '';
-    homeAv.textContent = initials;
-  }
 
   const fav = MASTERS_DATA.find(m => m.fav);
   const favNameEl = document.getElementById('profFavName');
@@ -66,7 +61,7 @@ export function renderHomeHero() {
   const ml = document.getElementById('homeMastersList');
   if (ml && MASTERS_DATA.length) {
     ml.innerHTML = MASTERS_DATA.slice(0, 4).map(m => `
-      <div class="master-card-sm" data-mid="${esc(m.id)}" onclick="bookWithMaster(this.dataset.mid)">
+      <div class="master-card-sm" data-mid="${esc(m.id)}" onclick="openMasterCard(this.dataset.mid)">
         <div class="master-av-sm" style="background:${m.grad};overflow:hidden;">${_hasRealAvatar(m) ? `<img src="${esc(m.avatar_big || m.avatar)}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">` : `<div class="av-initials">${getInitials(m.name)}</div>`}</div>
         <div class="master-name-sm">${esc(m.short || m.name)}</div>
         <div class="master-role-sm">${esc(m.role)}</div>
