@@ -20,7 +20,7 @@ function _masterCardHtml(m, i, total) {
   const availCls = m.avail ? 'avail-yes' : 'avail-no';
   const styles = [...(m.avail ? [] : ['opacity:0.55']), ...(last ? ['margin-bottom:24px'] : [])];
   const styleAttr = styles.length ? ` style="${styles.join(';')}"` : '';
-  const click = m.avail ? ` data-mid="${esc(m.id)}" onclick="selectMaster(this.dataset.mid)"` : '';
+  const click = m.avail ? ` data-mid="${esc(m.id)}" onclick="openMasterCard(this.dataset.mid)"` : '';
   const rating = _avgRating(m.id);
   const avatarInner = _hasRealAvatar(m)
     ? `<img src="${esc(m.avatar_big || m.avatar)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.style.display='none'">`
@@ -93,9 +93,87 @@ export function selectMaster(id) {
   go('s-slots');
 }
 
+export async function openMasterCard(id) {
+  go('s-master');
+  const content = document.getElementById('masterCardContent');
+  content.innerHTML = '<div style="padding:48px 20px;text-align:center;color:var(--text-2);font-size:14px;">Загрузка…</div>';
+
+  const [profileRes, servicesRes, commentsRes, datesRes] = await Promise.all([
+    YC.get(`/staff/${YC.company}/${id}`),
+    YC.get(`/book_services/${YC.company}`, { staff_id: id }),
+    YC.get(`/comments/${YC.company}`, { staff_id: id }),
+    YC.get(`/book_dates/${YC.company}`, { staff_id: id }),
+  ]);
+
+  const m = profileRes.data || {};
+  const services = servicesRes.data?.services || [];
+  const comments = (commentsRes.data || []).slice(0, 5);
+  const dates = (datesRes.data?.booking_dates || []).slice(0, 7);
+
+  const avatarSrc = m.image_group?.images?.norm?.path || m.avatar_big || m.avatar || '';
+  const avatarHtml = avatarSrc
+    ? `<img src="${esc(avatarSrc)}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;">`
+    : `<div style="width:100px;height:100px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:38px;font-weight:800;color:#fff;">${getInitials(m.name || '')}</div>`;
+
+  const ratingStars = m.rating
+    ? `<span style="color:var(--gold);font-size:16px;">${'★'.repeat(Math.round(m.rating))}${'☆'.repeat(5 - Math.round(m.rating))}</span> <span style="font-size:13px;color:var(--text-2);">${Number(m.rating).toFixed(1)} · ${m.comments_count || 0} отз.</span>`
+    : '';
+
+  const svcsHtml = services.length
+    ? services.map(s => `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);">
+        <span style="font-size:14px;font-weight:600;">${esc(s.title)}</span>
+        <span style="font-size:13px;color:var(--text-2);">${s.price_min ? s.price_min + ' ₽' : ''}</span>
+      </div>`).join('')
+    : '<div style="font-size:13px;color:var(--text-2);padding:12px 0;">Нет данных</div>';
+
+  const commentsHtml = comments.length
+    ? comments.map(c => `<div style="padding:12px 0;border-bottom:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="color:var(--gold);font-size:14px;">${'★'.repeat(c.rating || 0)}</span>
+          <span style="font-size:13px;font-weight:600;">${esc(c.user_name || '')}</span>
+          <span style="font-size:12px;color:var(--text-2);margin-left:auto;">${(c.date || '').slice(0, 10)}</span>
+        </div>
+        ${c.text ? `<div style="font-size:13px;color:var(--text-2);line-height:1.5;">${esc(c.text)}</div>` : ''}
+      </div>`).join('')
+    : '';
+
+  const datesHtml = dates.map(d => {
+    const dt = new Date(d);
+    return `<span style="background:var(--mint-light);color:var(--mint);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;">${dt.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}</span>`;
+  }).join('');
+
+  content.innerHTML = `
+    <div style="padding:24px 20px 16px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;">
+      ${avatarHtml}
+      <div>
+        <div style="font-size:22px;font-weight:800;">${esc(m.name || '')}</div>
+        <div style="font-size:14px;color:var(--text-2);margin-top:4px;">${esc(m.specialization || '')}</div>
+        ${ratingStars ? `<div style="margin-top:8px;">${ratingStars}</div>` : ''}
+        ${m.information ? `<div style="font-size:13px;color:var(--text-2);margin-top:10px;line-height:1.5;text-align:left;">${esc(m.information)}</div>` : ''}
+      </div>
+    </div>
+    <div style="padding:0 20px 20px;">
+      <button class="btn-primary" data-mid="${esc(String(id))}" onclick="bookFromMaster(this.dataset.mid)">Записаться к этому мастеру</button>
+    </div>
+    ${dates.length ? `
+      <div class="section-header"><span class="section-title">Ближайшие окна</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;padding:0 20px 20px;">${datesHtml}</div>` : ''}
+    <div class="section-header"><span class="section-title">Услуги</span></div>
+    <div style="padding:0 20px;">${svcsHtml}</div>
+    ${commentsHtml ? `
+      <div class="section-header" style="margin-top:8px;"><span class="section-title">Отзывы</span></div>
+      <div style="padding:0 20px 40px;">${commentsHtml}</div>` : '<div style="height:32px;"></div>'}
+  `;
+}
+
+export function bookFromMaster(id) {
+  state.masterId = id;
+  go('s-slots');
+}
+
 export function selectAnyMaster() {
   state.masterId = null;
   go('s-slots');
 }
 
-Object.assign(window, { renderMasters, toggleFav, selectMaster, selectAnyMaster });
+Object.assign(window, { renderMasters, toggleFav, selectMaster, selectAnyMaster, openMasterCard, bookFromMaster });
