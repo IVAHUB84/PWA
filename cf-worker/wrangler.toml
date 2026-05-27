@@ -1,10 +1,11 @@
 name = "studio-push"
 main = "src/index.js"
 compatibility_date = "2025-01-01"
+account_id = "387c61cf09999ccfab2f413064cf14ac"
 
 [[kv_namespaces]]
 binding = "SUBSCRIPTIONS"
-id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+id = "db55a2dffd2f456bb5a6ca5578546c90"
 
 [triggers]
 crons = ["0 15 * * *"]
