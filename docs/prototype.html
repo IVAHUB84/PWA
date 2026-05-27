@@ -34,7 +34,7 @@
 
   <!-- ══ HOME ══ -->
   <div class="screen active" id="s-home">
-    <div style="background:linear-gradient(135deg,#8B3558 0%,#C9956C 100%);border-radius:0 0 22px 22px;flex-shrink:0;box-shadow:0 4px 20px rgba(139,53,88,0.28);">
+    <div style="background:linear-gradient(135deg,#8B3558 0%,#C9956C 100%);flex-shrink:0;box-shadow:0 4px 20px rgba(139,53,88,0.28);padding-bottom:36px;">
       <div class="status-bar"><span class="time">9:41</span><div class="dynamic-island"></div></div>
       <div style="padding:4px 16px 10px;display:flex;align-items:center;gap:12px;">
         <img src="./logobest.png" alt="Реснички, сестрички" style="height:50px;width:50px;object-fit:contain;display:block;flex-shrink:0;border-radius:8px;">
@@ -43,16 +43,16 @@
           <div style="font-size:12px;color:rgba(255,255,255,0.65);margin-top:3px;">Студия красоты</div>
         </div>
       </div>
-      <div style="padding:0 16px 16px;">
+      <div style="padding:0 16px 0;">
         <div class="search-bar" style="margin:0;background:rgba(255,255,255,0.18);border:1.5px solid rgba(255,255,255,0.3);" id="homeSearchBar">
           <span style="color:rgba(255,255,255,0.7);">🔍</span>
-          <input type="text" id="homeSearch" placeholder="Мастер или услуга…" oninput="_homeSearch(this.value)" autocomplete="off" style="color:#fff;" placeholder-color="rgba(255,255,255,0.6)">
+          <input type="text" id="homeSearch" placeholder="Мастер или услуга…" oninput="_homeSearch(this.value)" autocomplete="off" style="color:#fff;">
         </div>
         <div id="homeSearchResults" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:14px;margin-top:4px;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.1);"></div>
       </div>
     </div>
-    <div class="scroll">
-      <div style="height:8px;"></div>
+    <div class="scroll" style="border-radius:24px 24px 0 0;margin-top:-24px;background:var(--bg);position:relative;z-index:2;">
+      <div style="height:16px;"></div>
 
       <div style="margin:0 20px 14px;display:flex;gap:10px;">
         <button onclick="go('s-services','tab')" style="flex:1;height:48px;background:var(--accent);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">Записать себя</button>
@@ -434,7 +434,8 @@
       <span class="star on" onclick="setStar(4)">⭐</span>
       <span class="star" onclick="setStar(5)">⭐</span>
     </div>
-    <textarea class="review-textarea" id="reviewTextarea" placeholder="Поделитесь впечатлением — это помогает другим клиентам и мастеру…"></textarea>
+    <textarea class="review-textarea" id="reviewTextarea" placeholder="Поделитесь впечатлением — это помогает другим клиентам и мастеру…" oninput="_reviewCount(this)" maxlength="300"></textarea>
+    <div class="char-count" id="reviewCharCount">0 / 300</div>
     <div style="padding:8px 20px 0;font-size:12px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.5px;">Поделитесь отзывом на картах</div>
     <div style="padding:10px 20px 0;display:flex;flex-direction:column;gap:10px;">
       <button class="review-ext-platform" id="btn2gis" onclick="openReview('2gis')">
@@ -481,6 +482,7 @@
       <div class="offer-tag">Только для вас</div>
       <div class="offer-illo">💅</div>
       <div class="offer-name">Маникюр с покрытием</div>
+      <div class="offer-urgency" id="offerUrgency"></div>
       <div class="offer-expire">Предложение действует до 26 мая 2026</div>
       <div class="offer-price-row">
         <div><div class="offer-old">2 800 ₽</div><div class="offer-new">2 240 ₽</div></div>
@@ -502,19 +504,23 @@
     <div class="cs-card" style="margin-top:8px;">
       <div class="cs-icon" style="background:var(--accent-light);">✨</div>
       <div style="flex:1;"><div style="font-size:14px;font-weight:700;margin-bottom:2px;">Оформление формы бровей</div><div style="font-size:12px;color:var(--text-2);">+20 мин · 800 ₽</div></div>
-      <button class="cs-add" onclick="this.classList.toggle('sel');this.textContent=this.classList.contains('sel')?'✓':'+'">+</button>
+      <button class="cs-add" onclick="_csToggle(this,800)">+</button>
     </div>
     <div class="cs-card">
-      <div class="cs-icon" style="background:#F0EBF8;">🌿</div>
+      <div class="cs-icon" style="background:var(--accent-light);">🌿</div>
       <div style="flex:1;"><div style="font-size:14px;font-weight:700;margin-bottom:2px;">Окрашивание бровей хной</div><div style="font-size:12px;color:var(--text-2);">+30 мин · 1 200 ₽</div></div>
-      <button class="cs-add" onclick="this.classList.toggle('sel');this.textContent=this.classList.contains('sel')?'✓':'+'">+</button>
+      <button class="cs-add" onclick="_csToggle(this,1200)">+</button>
     </div>
-    <div class="cs-card" style="margin-bottom:24px;">
-      <div class="cs-icon" style="background:#E8F4F8;">💆</div>
+    <div class="cs-card">
+      <div class="cs-icon" style="background:var(--mint-light);">💆</div>
       <div style="flex:1;"><div style="font-size:14px;font-weight:700;margin-bottom:2px;">Уход за кожей вокруг глаз</div><div style="font-size:12px;color:var(--text-2);">+15 мин · 600 ₽</div></div>
-      <button class="cs-add" onclick="this.classList.toggle('sel');this.textContent=this.classList.contains('sel')?'✓':'+'">+</button>
+      <button class="cs-add" onclick="_csToggle(this,600)">+</button>
     </div>
-    <div style="padding:0 20px;">
+    <div class="cs-total" id="csTotal" style="display:none;">
+      <span>Дополнительно</span>
+      <span id="csTotalAmt"></span>
+    </div>
+    <div style="padding:0 20px 24px;">
       <button class="btn-primary" onclick="go('s-home','tab')" style="margin-bottom:12px;">Подтвердить запись</button>
       <div style="text-align:center;"><button class="btn-dim" onclick="go('s-home','tab')">Нет, спасибо</button></div>
     </div>
