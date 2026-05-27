@@ -81,11 +81,13 @@ export function go(id, mode) {
     setTx(toEl, 0, true);
     setTx(fromEl, -28, true);
 
+    const targetId = id;
     _animTimers.push(setTimeout(() => {
+      if (navHistory[navHistory.length - 1] !== targetId) return;
       if (fromEl) fromEl.classList.remove('active');
       _cleanEl(fromEl);
       _cleanEl(toEl);
-      onEnterScreen(id);
+      onEnterScreen(targetId);
     }, DUR + 20));
     navHistory.push(id);
   }
@@ -110,11 +112,13 @@ export function back() {
   setTx(toEl, 0, true);
   setTx(fromEl, 100, true);
 
+  const targetPrev = prev;
   _animTimers.push(setTimeout(() => {
+    if (navHistory[navHistory.length - 1] !== targetPrev) return;
     fromEl.classList.remove('active');
     _cleanEl(fromEl);
     _cleanEl(toEl);
-    onEnterScreen(prev);
+    onEnterScreen(targetPrev);
   }, DUR + 20));
 
   _updateDotsFn();

@@ -109,17 +109,23 @@ export async function publishPost(draft) {
     date: new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }),
     draft: !!draft,
   };
-  await _ghPullToLocal();
-  const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]');
-  posts.unshift(post);
-  localStorage.setItem('yc_feed_posts', JSON.stringify(posts));
-  if (ta) ta.value = '';
-  _clearPostImage();
-  _publishInProgress = false;
-  go('s-admin-feed', 'tab');
-  if (!draft) {
-    const published = posts.filter(p => !p.draft);
-    _ghSyncPosts(published);
+  try {
+    await _ghPullToLocal();
+    const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]');
+    posts.unshift(post);
+    localStorage.setItem('yc_feed_posts', JSON.stringify(posts));
+    if (ta) ta.value = '';
+    _clearPostImage();
+    go('s-admin-feed', 'tab');
+    if (!draft) {
+      const published = posts.filter(p => !p.draft);
+      _ghSyncPosts(published);
+    }
+  } catch(e) {
+    console.error('publishPost failed', e);
+    alert('Не удалось опубликовать. Попробуйте снова.');
+  } finally {
+    _publishInProgress = false;
   }
 }
 

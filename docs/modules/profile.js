@@ -81,7 +81,7 @@ export function renderProfileScreen() {
       .slice(0, 2);
     if (past.length) {
       recentEl.innerHTML = past.map(r => `
-        <div class="s-row" onclick="rebook('${esc(String(r.svcId))}')">
+        <div class="s-row" onclick="rebook(${JSON.stringify(String(r.svcId))})">
           <div style="width:36px;height:36px;border-radius:10px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:16px;">✨</div>
           <div style="flex:1;"><div style="font-size:14px;font-weight:600;">${esc(r.svcName)}</div><div style="font-size:12px;color:var(--text-2);">${esc(r.masterName)} · ${_fmtDatetime(r.datetime)}</div></div>
           <button class="btn-ghost" style="font-size:13px;">Повторить</button>

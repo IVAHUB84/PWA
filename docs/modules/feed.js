@@ -49,8 +49,9 @@ export function _paintFeed(el, posts) {
     const grad = _CAT_GRADS[p.cat] || 'linear-gradient(135deg,#eee,#ccc)';
     const icon = _CAT_ICONS2[p.cat] || '📝';
     const mb = i === posts.length - 1 ? ' style="margin-bottom:24px;"' : '';
-    const photoContent = p.image
-      ? `<img src="${esc(p.image)}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:0;">`
+    const safeSrc = p.image && /^data:image\/|^https?:\/\//.test(p.image) ? p.image : null;
+    const photoContent = safeSrc
+      ? `<img src="${esc(safeSrc)}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:0;">`
       : `<div class="feed-photo-inner"><div class="feed-photo-icon">${icon}</div></div><div class="feed-photo-overlay"></div>`;
     return `<div class="feed-card"${mb}>
       <div class="feed-photo" style="${p.image ? 'overflow:hidden;' : 'background:' + grad + ';'}">

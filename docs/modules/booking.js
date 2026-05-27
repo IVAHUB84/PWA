@@ -156,7 +156,7 @@ export function cancelRecord(id, hash) {
     if (rec) {
       cancelCard.innerHTML = `
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-          <div style="width:44px;height:44px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--accent);flex-shrink:0;">${getInitials(rec.masterName)}</div>
+          <div style="width:44px;height:44px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--accent);flex-shrink:0;">${esc(getInitials(rec.masterName))}</div>
           <div><div style="font-size:15px;font-weight:700;">${esc(rec.masterName)}</div><div style="font-size:12px;color:var(--text-2);">Мастер</div></div>
         </div>
         <div style="font-size:17px;font-weight:800;margin-bottom:6px;">${esc(rec.svcName)}</div>
