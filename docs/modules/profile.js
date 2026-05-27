@@ -123,12 +123,12 @@ export function _renderHomeFeedPreview() {
     const icon = _ICONS[p.cat] || '📝';
     const safeSrc = p.image && /^data:image\/|^https?:\/\//.test(p.image) ? p.image : null;
     const top = safeSrc
-      ? `<img src="${esc(safeSrc)}" style="width:100%;height:90px;object-fit:cover;border-radius:10px;margin-bottom:8px;">`
-      : `<div style="font-size:40px;text-align:center;margin-bottom:8px;">${icon}</div>`;
-    const preview = p.text.length > 50 ? p.text.slice(0, 50) + '…' : p.text;
-    return `<div style="width:140px;flex-shrink:0;background:var(--surface);border-radius:16px;padding:12px;box-shadow:var(--shadow);cursor:pointer;border:1px solid var(--border);" onclick="go('s-feed')">
+      ? `<img src="${esc(safeSrc)}" style="width:100%;height:90px;object-fit:cover;border-radius:10px;display:block;">`
+      : `<div style="width:100%;height:90px;border-radius:10px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:36px;">${icon}</div>`;
+    const preview = p.text.length > 45 ? p.text.slice(0, 45) + '…' : p.text;
+    return `<div style="width:140px;flex-shrink:0;background:var(--surface);border-radius:16px;padding:10px;box-shadow:var(--shadow);cursor:pointer;border:1px solid var(--border);display:flex;flex-direction:column;gap:6px;" onclick="go('s-feed')">
       ${top}
-      <div style="font-size:12px;font-weight:700;line-height:1.3;margin-bottom:4px;">${esc(preview)}</div>
+      <div style="font-size:12px;font-weight:700;line-height:1.3;flex:1;">${esc(preview)}</div>
       <div style="font-size:11px;color:var(--text-2);">${esc(p.cat)}</div>
     </div>`;
   }).join('');
