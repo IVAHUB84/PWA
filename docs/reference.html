@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Studio PWA — Reference</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f0f11;
+    --surface: #1a1a1f;
+    --surface2: #222228;
+    --border: #2e2e38;
+    --text: #f0f0f5;
+    --text2: #8888a0;
+    --accent: #b06070;
+    --green: #4caf82;
+    --blue: #5b8dee;
+    --yellow: #e8b84b;
+    --red: #e05555;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 40px 20px 80px;
+  }
+  .page { max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+  h1 span { color: var(--accent); }
+  .sub { color: var(--text2); font-size: 14px; margin-bottom: 48px; }
+  h2 { font-size: 18px; font-weight: 700; margin: 48px 0 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); letter-spacing: 0.02em; }
+  h2 .num { display: inline-block; background: var(--accent); color: #fff; font-size: 11px; font-weight: 800; border-radius: 5px; padding: 2px 7px; margin-right: 8px; vertical-align: middle; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+  th {
+    background: var(--surface2);
+    color: var(--text2);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .screen { display: inline-block; background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; font-family: monospace; font-size: 12px; padding: 1px 7px; color: var(--blue); white-space: nowrap; }
+  .method { display: inline-block; font-family: monospace; font-size: 11px; font-weight: 700; border-radius: 4px; padding: 2px 7px; white-space: nowrap; }
+  .get    { background: rgba(76,175,130,0.15); color: var(--green); border: 1px solid rgba(76,175,130,0.3); }
+  .post   { background: rgba(91,141,238,0.15); color: var(--blue); border: 1px solid rgba(91,141,238,0.3); }
+  .put    { background: rgba(232,184,75,0.15); color: var(--yellow); border: 1px solid rgba(232,184,75,0.3); }
+  .delete { background: rgba(224,85,85,0.15); color: var(--red); border: 1px solid rgba(224,85,85,0.3); }
+  .ext    { background: rgba(176,96,112,0.15); color: var(--accent); border: 1px solid rgba(176,96,112,0.3); }
+  code {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    padding: 1px 6px;
+    color: #d4a8b8;
+    word-break: break-all;
+  }
+  pre {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    color: #c8d8f0;
+    line-height: 1.7;
+    margin: 4px 0;
+  }
+  pre .key   { color: #8bb8e8; }
+  pre .str   { color: #a8d8a8; }
+  pre .num   { color: #e8c87a; }
+  pre .cmt   { color: #606080; font-style: italic; }
+  .badge { display: inline-block; font-size: 10px; font-weight: 700; border-radius: 4px; padding: 1px 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .badge-ls  { background: rgba(91,141,238,0.15); color: var(--blue); border: 1px solid rgba(91,141,238,0.25); }
+  .badge-api { background: rgba(76,175,130,0.15); color: var(--green); border: 1px solid rgba(76,175,130,0.25); }
+  .badge-gh  { background: rgba(176,96,112,0.15); color: var(--accent); border: 1px solid rgba(176,96,112,0.25); }
+  .badge-sw  { background: rgba(232,184,75,0.15); color: var(--yellow); border: 1px solid rgba(232,184,75,0.25); }
+  .badge-ejx { background: rgba(224,85,85,0.15); color: var(--red); border: 1px solid rgba(224,85,85,0.25); }
+  .module-col { font-family: monospace; font-size: 12px; color: var(--text2); }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .toc { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 40px; }
+  .toc a { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 13px; font-weight: 600; color: var(--text2); transition: color 0.15s, border-color 0.15s; }
+  .toc a:hover { color: var(--text); border-color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>Studio PWA <span>— Reference</span></h1>
+<p class="sub">Vanilla JS PWA для студии красоты. Деплой: GitHub Pages · Backend: YCLIENTS API · OTP: EmailJS · Feed: GitHub API</p>
+
+<div class="toc">
+  <a href="#screens">Экраны</a>
+  <a href="#func">Функционал</a>
+  <a href="#modules">Модули</a>
+  <a href="#storage">localStorage</a>
+  <a href="#api">API запросы</a>
+  <a href="#external">Внешние сервисы</a>
+  <a href="#sw">Service Worker</a>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ ЭКРАНЫ -->
+<h2 id="screens"><span class="num">1</span>Экраны приложения</h2>
+<table>
+  <thead><tr>
+    <th>ID экрана</th>
+    <th>Название</th>
+    <th>Описание</th>
+    <th>Переход</th>
+  </tr></thead>
+  <tbody>
+    <tr><td><span class="screen">s-home</span></td><td>Главная</td><td>Ближайшая запись, горизонтальный список мастеров, превью ленты, баннер установки PWA</td><td>Таб / после бронирования</td></tr>
+    <tr><td><span class="screen">s-services</span></td><td>Услуги</td><td>Список услуг с фильтрацией по категории и поиском</td><td>Таб «Запись»</td></tr>
+    <tr><td><span class="screen">s-masters</span></td><td>Мастера</td><td>Карточки мастеров с рейтингом, доступностью, кнопкой «Избранное»</td><td>После выбора услуги</td></tr>
+    <tr><td><span class="screen">s-slots</span></td><td>Дата / Время</td><td>Выбор даты (полоса на 21 день) и времени (слоты из API)</td><td>После выбора мастера</td></tr>
+    <tr><td><span class="screen">s-confirm</span></td><td>Подтверждение</td><td>Итоговая карточка записи или сообщение об успехе после бронирования</td><td>После выбора слота</td></tr>
+    <tr><td><span class="screen">s-history</span></td><td>История</td><td>Предстоящие и прошедшие визиты. Действия: перенести, отменить, оценить</td><td>Таб «История»</td></tr>
+    <tr><td><span class="screen">s-profile</span></td><td>Профиль</td><td>Имя, фото (загрузка/кроп), избранный мастер, последние визиты, уровень лояльности</td><td>Таб «Профиль»</td></tr>
+    <tr><td><span class="screen">s-login</span></td><td>Вход</td><td>Ввод телефона → отправка OTP на email клиента из YCLIENTS</td><td>Стартовый экран при отсутствии сессии</td></tr>
+    <tr><td><span class="screen">s-otp</span></td><td>Код подтверждения</td><td>4 цифры OTP, обратный отсчёт 3 мин, кнопка «Выслать повторно», лимит 5 попыток</td><td>После ввода телефона</td></tr>
+    <tr><td><span class="screen">s-register</span></td><td>Регистрация</td><td>Новый клиент: имя, email, телефон → создание записи в YCLIENTS</td><td>Когда телефон не найден в базе</td></tr>
+    <tr><td><span class="screen">s-consent</span></td><td>Согласие</td><td>Согласие на обработку ПД + опция удаления аккаунта</td><td>После успешного OTP / повторный показ</td></tr>
+    <tr><td><span class="screen">s-cancel</span></td><td>Отмена записи</td><td>Карточка записи + кнопка подтверждения отмены → DELETE /record/</td><td>Из главной / истории</td></tr>
+    <tr><td><span class="screen">s-review</span></td><td>Оценка визита</td><td>Звёзды (1–5), текстовый отзыв. Сохраняется в localStorage + ссылки на 2GIS / Яндекс</td><td>Из истории / push-уведомление</td></tr>
+    <tr><td><span class="screen">s-offer</span></td><td>Акция</td><td>Баннер специального предложения с переходом к выбору мастера</td><td>С главной (баннер)</td></tr>
+    <tr><td><span class="screen">s-crosssell</span></td><td>Кросс-продажа</td><td>Предложение записаться на доп. услугу после подтверждения</td><td>После бронирования (сценарий crosssell)</td></tr>
+    <tr><td><span class="screen">s-install</span></td><td>Установка PWA</td><td>Инструкция по добавлению на рабочий стол (iOS / Android)</td><td>С главной (баннер)</td></tr>
+    <tr><td><span class="screen">s-feed</span></td><td>Лента (клиент)</td><td>Посты студии: фото, текст, категория. Лайки, фильтр по категории</td><td>С главной (превью)</td></tr>
+    <tr><td><span class="screen">s-admin</span></td><td>Админ / Дашборд</td><td>Записи на сегодня, кол-во клиентов, выручка за день</td><td><code>?admin</code> в URL + пароль</td></tr>
+    <tr><td><span class="screen">s-admin-feed</span></td><td>Админ / Лента</td><td>Список постов (опубликованные + черновики), синхронизация с GitHub</td><td>Из панели админа</td></tr>
+    <tr><td><span class="screen">s-admin-post</span></td><td>Админ / Новый пост</td><td>Категория, текст, изображение (сжатие до 800px / JPEG 75%), черновик / публикация</td><td>Из ленты admin</td></tr>
+    <tr><td><span class="screen">s-admin-clients</span></td><td>Админ / Клиенты</td><td>Список всех клиентов из YCLIENTS с поиском по имени / телефону</td><td>Из панели админа</td></tr>
+    <tr><td><span class="screen">s-admin-push</span></td><td>Админ / Рассылки</td><td>История push-рассылок, шаблоны, запланированные</td><td>Из панели админа</td></tr>
+    <tr><td><span class="screen">s-admin-push-new</span></td><td>Админ / Новая рассылка</td><td>Текст, иконка, аудитория, мгновенная / отложенная отправка</td><td>Из рассылок</td></tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════ ФУНКЦИОНАЛ -->
+<h2 id="func"><span class="num">2</span>Функциональные блоки</h2>
+<table>
+  <thead><tr>
+    <th>Блок</th>
+    <th>Что делает</th>
+    <th>Ключевые функции</th>
+    <th>Источник данных</th>
+  </tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>Авторизация</strong></td>
+      <td>Вход по телефону → OTP на email → сессия в localStorage. Регистрация нового клиента. Email-fallback если email не задан в CRM.</td>
+      <td><code>sendCodeByPhone</code>, <code>verifyOtp</code>, <code>registerClient</code>, <code>retryEmail</code>, <code>logout</code></td>
+      <td><span class="badge badge-api">YCLIENTS</span> <span class="badge badge-ejx">EmailJS</span> <span class="badge badge-ls">localStorage</span></td>
+    </tr>
+    <tr>
+      <td><strong>Бронирование</strong></td>
+      <td>Услуга → Мастер → Дата → Время → Подтверждение. Защита от двойного нажатия. Запись сохраняется локально сразу после ответа API.</td>
+      <td><code>startBooking</code>, <code>_bookWithSession</code>, <code>quickBook</code>, <code>bookWithMaster</code>, <code>rebook</code></td>
+      <td><span class="badge badge-api">YCLIENTS</span> <span class="badge badge-ls">localStorage</span></td>
+    </tr>
+    <tr>
+      <td><strong>Перенос записи</strong></td>
+      <td>Выбор новой даты/времени → PUT /record/. Перед PUT подтягивает актуальный staff_id и svc_id из API.</td>
+      <td><code>rescheduleRecord</code>, <code>_rescheduleWithSession</code></td>
+      <td><span class="badge badge-api">YCLIENTS</span></td>
+    </tr>
+    <tr>
+      <td><strong>Отмена записи</strong></td>
+      <td>DELETE /record/ с hash. Обновляет статус в localStorage. AbortController 15 с.</td>
+      <td><code>cancelRecord</code>, <code>confirmCancel</code></td>
+      <td><span class="badge badge-api">YCLIENTS</span></td>
+    </tr>
+    <tr>
+      <td><strong>История визитов</strong></td>
+      <td>Синхронизирует записи с сервером при каждом открытии главной. Объединяет серверные и локальные, учитывает отменённые.</td>
+      <td><code>renderHistoryScreen</code>, <code>_fetchAndMergeServerRecords</code></td>
+      <td><span class="badge badge-api">YCLIENTS</span> <span class="badge badge-ls">localStorage</span></td>
+    </tr>
+    <tr>
+      <td><strong>Оценка визита</strong></td>
+      <td>1–5 звёзд + текст → сохранение в localStorage (до 100 записей). Ссылки на 2GIS и Яндекс.Карты для публичного отзыва.</td>
+      <td><code>setStar</code>, <code>submitReview</code>, <code>openReview</code>, <code>openRateVisit</code></td>
+      <td><span class="badge badge-ls">localStorage</span></td>
+    </tr>
+    <tr>
+      <td><strong>Профиль</strong></td>
+      <td>Фото профиля (кроп 200×200, base64). Избранный мастер. Уровень важности клиента из CRM. Последние 2 визита.</td>
+      <td><code>renderProfileScreen</code>, <code>renderLoyaltyBlock</code>, <code>_onProfilePhotoPicked</code></td>
+      <td><span class="badge badge-api">YCLIENTS</span> <span class="badge badge-ls">localStorage</span></td>
+    </tr>
+    <tr>
+      <td><strong>Лента постов</strong></td>
+      <td>Посты студии читаются из GitHub (posts.json). Кэш в localStorage. Лайки, фильтр по категории.</td>
+      <td><code>renderClientFeed</code>, <code>likeFeed</code>, <code>_toggleFeedFilter</code></td>
+      <td><span class="badge badge-gh">GitHub API</span> <span class="badge badge-ls">localStorage</span></td>
+    </tr>
+    <tr>
+      <td><strong>Push-уведомления</strong></td>
+      <td>Web Push через Service Worker (Notification API). Показ симулированного баннера в интерфейсе.</td>
+      <td><code>_sendNotification</code>, <code>showPushNotification</code>, <code>handlePushTap</code></td>
+      <td>Notification API / SW</td>
+    </tr>
+    <tr>
+      <td><strong>PWA / Установка</strong></td>
+      <td>Service Worker с network-first для JS-модулей, cache-first для статики. Web App Manifest. Баннер установки на iOS/Android.</td>
+      <td><code>sw.js</code>, <code>manifest.json</code></td>
+      <td><span class="badge badge-sw">Service Worker</span></td>
+    </tr>
+    <tr>
+      <td><strong>Поиск мастера</strong></td>
+      <td>Поиск по имени/телефону клиента. Запись «за другого» с подтверждением.</td>
+      <td><code>_homeSearch</code>, <code>showBookForOtherModal</code>, <code>_confirmBookOther</code></td>
+      <td><span class="badge badge-ls">localStorage</span></td>
+    </tr>
+    <tr>
+      <td><strong>Согласие / GDPR</strong></td>
+      <td>Тогл согласия на ПД. Запрос удаления аккаунта. Хранение флага в localStorage.</td>
+      <td><code>acceptConsent</code>, <code>consentToggle</code>, <code>showDeleteRequest</code></td>
+      <td><span class="badge badge-ls">localStorage</span></td>
+    </tr>
+    <tr>
+      <td><strong>Админ — Дашборд</strong></td>
+      <td>Записи на сегодня, уникальные клиенты, выручка. Данные из YCLIENTS API в реальном времени.</td>
+      <td><code>renderAdminDashboard</code></td>
+      <td><span class="badge badge-api">YCLIENTS</span></td>
+    </tr>
+    <tr>
+      <td><strong>Админ — Лента</strong></td>
+      <td>Создание поста (текст + фото), черновики. Синхронизация posts.json на GitHub через Personal Access Token.</td>
+      <td><code>publishPost</code>, <code>deletePost</code>, <code>renderAdminFeed</code>, <code>_ghSyncPosts</code></td>
+      <td><span class="badge badge-gh">GitHub API</span> <span class="badge badge-ls">localStorage</span></td>
+    </tr>
+    <tr>
+      <td><strong>Админ — Клиенты</strong></td>
+      <td>Полный список клиентов с поиском. Подгружает до 200 записей из YCLIENTS.</td>
+      <td><code>renderAdminClients</code>, <code>filterAdminClients</code></td>
+      <td><span class="badge badge-api">YCLIENTS</span></td>
+    </tr>
+    <tr>
+      <td><strong>Админ — Рассылки</strong></td>
+      <td>Шаблоны и кастомные push. Аудитория: все / активные / с записями. История в localStorage.</td>
+      <td><code>renderAdminPush</code>, <code>sendNewPush</code>, <code>deletePushCampaign</code></td>
+      <td><span class="badge badge-ls">localStorage</span> Notification API</td>
+    </tr>
+    <tr>
+      <td><strong>Demo-сценарии</strong></td>
+      <td>Автоматическое воспроизведение пользовательских сценариев для презентации. 14 сценариев.</td>
+      <td><code>runScenario</code>, <code>stopScenario</code>, <code>sheetRun</code></td>
+      <td>Внутренний таймер</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════ МОДУЛИ -->
+<h2 id="modules"><span class="num">3</span>Модули (docs/modules/)</h2>
+<table>
+  <thead><tr>
+    <th>Файл</th>
+    <th>Отвечает за</th>
+    <th>Экспортирует в window</th>
+  </tr></thead>
+  <tbody>
+    <tr><td class="module-col">constants.js</td><td>SCREENS, DUR, EASE, GRADS, PUSH_TEMPLATES, REVIEW_URLS, _GH_API</td><td>—</td></tr>
+    <tr><td class="module-col">utils.js</td><td>esc, getInitials, _sha256, _fmtPrice, _fmtDatetime, _normalizePhone, _maskEmail, _makeShort, _hasRealAvatar, _avatarHtml, _importanceLabel, _b64enc, _b64dec</td><td>—</td></tr>
+    <tr><td class="module-col">state.js</td><td>Глобальный state {}, SERVICES_DATA, MASTERS_DATA, getService, getMaster, setters</td><td>—</td></tr>
+    <tr><td class="module-col">storage.js</td><td>getSession, saveSession, clearSession, _loadStoredRecords, setAuthContext</td><td>—</td></tr>
+    <tr><td class="module-col">api.js</td><td>YC.get / YC.post, _findClientByPhone, _findClientByEmail, _fetchAndMergeServerRecords, _loadClientLoyalty</td><td>—</td></tr>
+    <tr><td class="module-col">navigation.js</td><td>go, back, setTx, registerOnEnter, navHistory, setUpdateDotsFn</td><td>go, back</td></tr>
+    <tr><td class="module-col">auth.js</td><td>sendCodeByPhone, verifyOtp, registerClient, logout, enterAdmin, retryEmail, _otpClear</td><td>sendCodeByPhone, verifyOtp, registerClient, logout, enterAdmin, retryEmail</td></tr>
+    <tr><td class="module-col">consent.js</td><td>acceptConsent, consentToggle, confirmConsentOff, showDeleteRequest, confirmDeleteRequest</td><td>все публичные функции</td></tr>
+    <tr><td class="module-col">booking.js</td><td>startBooking, rescheduleRecord, cancelRecord, confirmCancel, quickBook, rebook, bookWithMaster</td><td>все публичные функции</td></tr>
+    <tr><td class="module-col">slots.js</td><td>loadDates, loadTimes, selectDate, selectSlot, updateSlotsScreen, updateStickyBottom, updateConfirmScreen</td><td>selectDate, selectSlot</td></tr>
+    <tr><td class="module-col">services.js</td><td>renderServices, filterCategory, filterSearch, selectService, _updateCatChips</td><td>filterCategory, filterSearch, renderServices, selectService</td></tr>
+    <tr><td class="module-col">masters.js</td><td>renderMasters, toggleFav, selectMaster, selectAnyMaster</td><td>все публичные функции</td></tr>
+    <tr><td class="module-col">history.js</td><td>renderHistoryScreen, _renderHistoryFromCache</td><td>—</td></tr>
+    <tr><td class="module-col">profile.js</td><td>renderProfileScreen, renderHomeHero, _renderHomeFeedPreview, renderLoyaltyBlock, _onProfilePhotoPicked</td><td>_onProfilePhotoPicked</td></tr>
+    <tr><td class="module-col">review.js</td><td>renderReviewScreen, openRateVisit, submitReview, setStar, openReview</td><td>все публичные функции</td></tr>
+    <tr><td class="module-col">feed.js</td><td>renderClientFeed, likeFeed, _toggleFeedFilter, _feedFilterCat, _closeFeedFilter</td><td>все публичные функции</td></tr>
+    <tr><td class="module-col">notifications.js</td><td>_sendNotification, showPushNotification, hidePushNotification, handlePushTap</td><td>showPushNotification, hidePushNotification, handlePushTap</td></tr>
+    <tr><td class="module-col">search.js</td><td>_homeSearch, showBookForOtherModal, _confirmBookOther</td><td>все публичные функции</td></tr>
+    <tr><td class="module-col">scenarios.js</td><td>scenarios, runScenario, stopScenario, showTap, openSheet, closeSheet, sheetRun, updateDots</td><td>все публичные функции</td></tr>
+    <tr><td class="module-col">github.js</td><td>_ghRead, _ghWrite, _ghPullToLocal, _ghSyncPosts, _adminResetToken</td><td>_adminResetToken</td></tr>
+    <tr><td class="module-col">admin.js</td><td>renderAdminDashboard, renderAdminFeed, publishPost, deletePost, renderAdminClients, renderAdminPush, sendNewPush и др.</td><td>все публичные функции</td></tr>
+    <tr><td class="module-col">app.js</td><td>Точка входа: регистрирует onEnter-хендлеры, OTP auto-advance, initApp (загрузка данных из YCLIENTS), checkSession</td><td>selectTip, adminCat</td></tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════ LOCALSTORAGE -->
+<h2 id="storage"><span class="num">4</span>localStorage — ключи</h2>
+<table>
+  <thead><tr>
+    <th>Ключ</th>
+    <th>Тип</th>
+    <th>Содержимое</th>
+  </tr></thead>
+  <tbody>
+    <tr><td><code>yc_session</code></td><td>JSON object</td><td><code>{ client_id, name, email, phone }</code> — активная сессия пользователя</td></tr>
+    <tr><td><code>yc_records</code></td><td>JSON array</td><td>Записи клиента: id, svcName, masterName, datetime, status (upcoming / past / cancelled)</td></tr>
+    <tr><td><code>yc_otp</code></td><td>JSON object</td><td><code>{ codeHash, email, expiry, attempts }</code> — временный OTP (10 мин)</td></tr>
+    <tr><td><code>yc_auth_pending</code></td><td>JSON object</td><td><code>{ email, phone, client_id, client_name }</code> — данные до подтверждения OTP</td></tr>
+    <tr><td><code>yc_favs</code></td><td>JSON array</td><td>ID избранных мастеров: <code>["12345", "67890"]</code></td></tr>
+    <tr><td><code>yc_reviews</code></td><td>JSON array</td><td>Оценки визитов (до 100): masterId, stars, text, date</td></tr>
+    <tr><td><code>yc_feed_posts</code></td><td>JSON array</td><td>Посты ленты (кэш из GitHub). id, cat, text, image, date, draft</td></tr>
+    <tr><td><code>yc_feed_likes</code></td><td>JSON array</td><td>ID понравившихся постов</td></tr>
+    <tr><td><code>yc_push_campaigns</code></td><td>JSON array</td><td>История push-рассылок: icon, title, date, audience, scheduled</td></tr>
+    <tr><td><code>yc_profile_photo</code></td><td>string</td><td>Base64 data:image/jpeg фото профиля (200×200)</td></tr>
+    <tr><td><code>yc_install_seen</code></td><td>string</td><td><code>"1"</code> — баннер установки уже показан</td></tr>
+    <tr><td><code>yc_consent</code></td><td>string</td><td><code>"1"</code> — согласие на ПД принято</td></tr>
+    <tr><td><code>yc_reg_phone</code></td><td>string</td><td>Телефон при регистрации (временно)</td></tr>
+    <tr><td><code>yc_reg_email</code></td><td>string</td><td>Email при регистрации (временно)</td></tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════ API ЗАПРОСЫ -->
+<h2 id="api"><span class="num">5</span>YCLIENTS API — запросы</h2>
+<p style="color:var(--text2);margin-bottom:20px;">Base URL: <code>https://api.yclients.com/api/v1</code> · Company ID: <code>1940850</code> · Таймаут: 15 с (AbortController)</p>
+
+<table>
+  <thead><tr>
+    <th>Метод</th>
+    <th>Endpoint</th>
+    <th>Когда вызывается</th>
+    <th>Ключевые параметры</th>
+  </tr></thead>
+  <tbody>
+    <tr>
+      <td><span class="method get">GET</span></td>
+      <td><code>/service_categories/{company}</code></td>
+      <td>Инициализация приложения (app.js <code>initApp</code>)</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><span class="method get">GET</span></td>
+      <td><code>/services/{company}</code></td>
+      <td>Инициализация приложения</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><span class="method get">GET</span></td>
+      <td><code>/book_staff/{company}</code></td>
+      <td>Инициализация + экран мастеров</td>
+      <td><code>service_ids</code></td>
+    </tr>
+    <tr>
+      <td><span class="method get">GET</span></td>
+      <td><code>/clients/{company}</code></td>
+      <td>Вход по телефону / email</td>
+      <td><code>phone</code> или <code>email</code></td>
+    </tr>
+    <tr>
+      <td><span class="method get">GET</span></td>
+      <td><code>/clients/{company}/{client_id}</code></td>
+      <td>Загрузка уровня лояльности (экран профиля)</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><span class="method get">GET</span></td>
+      <td><code>/book_dates/{company}</code></td>
+      <td>Экран выбора даты</td>
+      <td><code>service_ids</code>, <code>staff_id</code></td>
+    </tr>
+    <tr>
+      <td><span class="method get">GET</span></td>
+      <td><code>/book_times/{company}/{staff_id}/{date}</code></td>
+      <td>Экран выбора времени (при смене даты)</td>
+      <td><code>service_ids</code></td>
+    </tr>
+    <tr>
+      <td><span class="method get">GET</span></td>
+      <td><code>/records/{company}</code></td>
+      <td>Синхронизация истории записей / Дашборд админа</td>
+      <td><code>client_id, count</code> или <code>start_date, end_date</code></td>
+    </tr>
+    <tr>
+      <td><span class="method get">GET</span></td>
+      <td><code>/record/{company}/{id}</code></td>
+      <td>Перенос записи — получить актуальные staff_id и svc_id</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><span class="method post">POST</span></td>
+      <td><code>/book_record/{company}</code></td>
+      <td>Создание новой записи</td>
+      <td><code>phone, fullname, email, appointments[]</code></td>
+    </tr>
+    <tr>
+      <td><span class="method post">POST</span></td>
+      <td><code>/clients/{company}</code></td>
+      <td>Регистрация нового клиента</td>
+      <td><code>name, phone, email</code></td>
+    </tr>
+    <tr>
+      <td><span class="method put">PUT</span></td>
+      <td><code>/record/{company}/{id}</code></td>
+      <td>Перенос записи на новую дату/время</td>
+      <td><code>datetime, staff_id, services[], client</code></td>
+    </tr>
+    <tr>
+      <td><span class="method delete">DELETE</span></td>
+      <td><code>/record/{company}/{id}</code></td>
+      <td>Отмена записи</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><span class="method get">GET</span></td>
+      <td><code>/clients/{company}?count=200</code></td>
+      <td>Список всех клиентов (экран Admin Clients)</td>
+      <td><code>count</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 style="margin-top:32px;">Примеры запросов и ответов</h2>
+
+<table>
+  <thead><tr>
+    <th style="width:50%">Запрос</th>
+    <th style="width:50%">Ответ (упрощённо)</th>
+  </tr></thead>
+  <tbody>
+    <tr>
+      <td>
+        <strong>Бронирование записи</strong><br>
+        <span class="method post">POST</span> <code>/book_record/1940850</code>
+        <pre>{
+  <span class="key">"phone"</span>:        <span class="str">"79161234567"</span>,
+  <span class="key">"fullname"</span>:     <span class="str">"Анна Петрова"</span>,
+  <span class="key">"email"</span>:        <span class="str">"anna@mail.ru"</span>,
+  <span class="key">"appointments"</span>: [{
+    <span class="key">"id"</span>:       <span class="num">1</span>,
+    <span class="key">"services"</span>: [<span class="num">4521083</span>],
+    <span class="key">"staff_id"</span>: <span class="num">2074619</span>,
+    <span class="key">"datetime"</span>: <span class="str">"2026-06-01 14:00:00"</span>
+  }],
+  <span class="key">"notify_by_sms"</span>: <span class="num">1</span>
+}</pre>
+      </td>
+      <td>
+        <pre>{
+  <span class="key">"success"</span>: <span class="num">true</span>,
+  <span class="key">"data"</span>: [{
+    <span class="key">"id"</span>:          <span class="num">98765432</span>,
+    <span class="key">"record_hash"</span>: <span class="str">"abc123def456"</span>,
+    <span class="key">"staff_id"</span>:    <span class="num">2074619</span>,
+    <span class="key">"services"</span>: [{
+      <span class="key">"id"</span>:   <span class="num">4521083</span>,
+      <span class="key">"cost"</span>: <span class="num">8000</span>
+    }]
+  }]
+}</pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <strong>Перенос записи</strong><br>
+        <span class="method put">PUT</span> <code>/record/1940850/98765432</code>
+        <pre>{
+  <span class="key">"datetime"</span>:      <span class="str">"2026-06-03 11:00:00"</span>,
+  <span class="key">"seance_length"</span>: <span class="num">7200</span>,
+  <span class="key">"staff_id"</span>:      <span class="num">2074619</span>,
+  <span class="key">"services"</span>: [{
+    <span class="key">"id"</span>:     <span class="num">4521083</span>,
+    <span class="key">"amount"</span>: <span class="num">1</span>
+  }],
+  <span class="key">"client"</span>: {
+    <span class="key">"id"</span>:    <span class="num">11223344</span>,
+    <span class="key">"phone"</span>: <span class="str">"79161234567"</span>
+  }
+}</pre>
+      </td>
+      <td>
+        <pre>{
+  <span class="key">"success"</span>: <span class="num">true</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"id"</span>:       <span class="num">98765432</span>,
+    <span class="key">"date"</span>:     <span class="str">"2026-06-03T11:00:00"</span>,
+    <span class="key">"staff_id"</span>: <span class="num">2074619</span>
+  }
+}</pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <strong>Доступные даты</strong><br>
+        <span class="method get">GET</span> <code>/book_dates/1940850?service_ids=4521083&staff_id=2074619</code>
+      </td>
+      <td>
+        <pre>{
+  <span class="key">"success"</span>: <span class="num">true</span>,
+  <span class="key">"data"</span>: {
+    <span class="key">"booking_dates"</span>: [
+      <span class="str">"2026-06-01"</span>,
+      <span class="str">"2026-06-02"</span>,
+      <span class="str">"2026-06-04"</span>
+    ]
+  }
+}</pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <strong>Доступное время</strong><br>
+        <span class="method get">GET</span> <code>/book_times/1940850/2074619/2026-06-01?service_ids=4521083</code>
+      </td>
+      <td>
+        <pre>{
+  <span class="key">"success"</span>: <span class="num">true</span>,
+  <span class="key">"data"</span>: [
+    { <span class="key">"time"</span>: <span class="str">"10:00"</span>, <span class="key">"seance_length"</span>: <span class="num">7200</span> },
+    { <span class="key">"time"</span>: <span class="str">"12:00"</span>, <span class="key">"seance_length"</span>: <span class="num">7200</span> },
+    { <span class="key">"time"</span>: <span class="str">"14:00"</span>, <span class="key">"seance_length"</span>: <span class="num">7200</span> }
+  ]
+}</pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <strong>Поиск клиента по телефону</strong><br>
+        <span class="method get">GET</span> <code>/clients/1940850?phone=79161234567</code>
+      </td>
+      <td>
+        <pre>{
+  <span class="key">"success"</span>: <span class="num">true</span>,
+  <span class="key">"data"</span>: [{
+    <span class="key">"id"</span>:    <span class="num">11223344</span>,
+    <span class="key">"name"</span>:  <span class="str">"Анна Петрова"</span>,
+    <span class="key">"phone"</span>: <span class="str">"79161234567"</span>,
+    <span class="key">"email"</span>: <span class="str">"anna@mail.ru"</span>
+  }]
+}</pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <strong>Записи клиента (история)</strong><br>
+        <span class="method get">GET</span> <code>/records/1940850?client_id=11223344&count=50</code>
+      </td>
+      <td>
+        <pre>{
+  <span class="key">"success"</span>: <span class="num">true</span>,
+  <span class="key">"data"</span>: [{
+    <span class="key">"id"</span>:            <span class="num">98765432</span>,
+    <span class="key">"date"</span>:          <span class="str">"2026-06-01T14:00:00"</span>,
+    <span class="key">"deleted"</span>:       <span class="num">false</span>,
+    <span class="key">"seance_length"</span>: <span class="num">7200</span>,
+    <span class="key">"services"</span>: [{ <span class="key">"title"</span>: <span class="str">"ПМ бровей"</span>, <span class="key">"cost"</span>: <span class="num">8000</span> }],
+    <span class="key">"staff"</span>:         { <span class="key">"id"</span>: <span class="num">2074619</span>, <span class="key">"name"</span>: <span class="str">"Мария С."</span> },
+    <span class="key">"record_hash"</span>:   <span class="str">"abc123def456"</span>
+  }]
+}</pre>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <strong>Отмена записи</strong><br>
+        <span class="method delete">DELETE</span> <code>/record/1940850/98765432</code>
+      </td>
+      <td>
+        <pre>{
+  <span class="key">"success"</span>: <span class="num">true</span>,
+  <span class="key">"data"</span>: <span class="num">true</span>
+}</pre>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════ ВНЕШНИЕ СЕРВИСЫ -->
+<h2 id="external"><span class="num">6</span>Внешние сервисы</h2>
+<table>
+  <thead><tr>
+    <th>Сервис</th>
+    <th>Используется для</th>
+    <th>Метод</th>
+    <th>Пример</th>
+  </tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>EmailJS</strong></td>
+      <td>Отправка OTP-кода на email клиента. Без серверной части — напрямую из браузера.</td>
+      <td><span class="method ext">SDK</span> <code>emailjs.send()</code></td>
+      <td>
+        <pre>emailjs.send(
+  <span class="str">'service_m2fr45h'</span>,
+  <span class="str">'template_0wps847'</span>,
+  {
+    <span class="key">to_email</span>: <span class="str">'anna@mail.ru'</span>,
+    <span class="key">message</span>:  <span class="str">'4821'</span>  <span class="cmt">// CSPRNG 4-digit</span>
+  }
+)</pre>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>GitHub REST API</strong></td>
+      <td>Хранение posts.json (лента студии). Чтение — публично, запись — через Personal Access Token администратора.</td>
+      <td>
+        <span class="method get">GET</span> <span class="method put">PUT</span><br>
+        <code>github.com/repos/…/contents/docs/posts.json</code>
+      </td>
+      <td>
+        <pre><span class="cmt">// Чтение (публично)</span>
+GET /repos/IVAHUB84/PWA/contents/docs/posts.json
+
+<span class="cmt">// Запись (требует token)</span>
+PUT /repos/IVAHUB84/PWA/contents/docs/posts.json
+Authorization: token ghp_…
+{ <span class="key">"message"</span>: <span class="str">"Update feed posts"</span>,
+  <span class="key">"content"</span>: <span class="str">"&lt;base64&gt;"</span>,
+  <span class="key">"sha"</span>:     <span class="str">"&lt;current sha&gt;"</span> }</pre>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>Web Push / Notification API</strong></td>
+      <td>Push-уведомления через Service Worker. Иконка, текст. Разрешение запрашивается при первой рассылке.</td>
+      <td><code>registration.showNotification()</code></td>
+      <td>
+        <pre>reg.showNotification(<span class="str">'Реснички'</span>, {
+  <span class="key">body</span>:  <span class="str">'Напоминание о визите завтра'</span>,
+  <span class="key">icon</span>:  <span class="str">'./icon-192.png'</span>,
+  <span class="key">badge</span>: <span class="str">'./icon-192.png'</span>
+})</pre>
+      </td>
+    </tr>
+    <tr>
+      <td><strong>2GIS / Яндекс.Карты</strong></td>
+      <td>Внешние ссылки для публикации отзыва. Открываются в новой вкладке.</td>
+      <td><span class="method ext">URL</span> <code>window.open()</code></td>
+      <td>Прямые URL на страницы отзывов конкретной точки</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ══════════════════════════════════════════════════════ SERVICE WORKER -->
+<h2 id="sw"><span class="num">7</span>Service Worker (sw.js)</h2>
+<table>
+  <thead><tr>
+    <th>Аспект</th>
+    <th>Поведение</th>
+  </tr></thead>
+  <tbody>
+    <tr><td>Версия кэша</td><td><code>v8</code> — поднимается при каждом изменении APP_SHELL</td></tr>
+    <tr><td>Статика (APP_SHELL)</td><td>Cache-first: prototype.html, style.css, manifest.json, иконки, все модули *.js — кэшируются при установке</td></tr>
+    <tr><td>JS-модули</td><td>Network-first с fallback на кэш: <code>/modules/</code> и <code>/app.js</code> — всегда запрашиваются из сети, при ошибке отдаётся кэшированная версия</td></tr>
+    <tr><td>YCLIENTS API</td><td>Network-only (не кэшируется) — данные должны быть актуальными</td></tr>
+    <tr><td>Оффлайн</td><td>Приложение открывается из кэша, показывает последние данные из localStorage</td></tr>
+    <tr><td>Активация</td><td><code>clients.claim()</code> — немедленное управление всеми вкладками без перезагрузки</td></tr>
+    <tr><td>Устаревший кэш</td><td>При активации удаляются все кэши с отличной от текущей версией</td></tr>
+  </tbody>
+</table>
+
+<p style="margin-top:48px;color:var(--text2);font-size:12px;">Studio PWA · Vanilla JS · GitHub Pages · <a href="https://ivahub84.github.io/PWA/" target="_blank">ivahub84.github.io/PWA/</a></p>
+
+</div>
+</body>
+</html>
