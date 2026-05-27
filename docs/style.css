@@ -100,6 +100,19 @@ body {
 }
 
 /* ── STATUS BAR ── */
+.home-header { position: relative; }
+.home-header::before,
+.home-header::after {
+  content: '';
+  position: absolute;
+  bottom: -32px;
+  width: 52px;
+  height: 32px;
+  z-index: 5;
+}
+.home-header::before { left: 0; background: #8B3558; border-radius: 0 0 0 18px; }
+.home-header::after  { right: 0; background: #C9956C; border-radius: 0 0 18px 0; }
+
 .status-bar {
   height: 59px; padding: 16px 28px 0;
   display: flex; align-items: center; justify-content: space-between;
