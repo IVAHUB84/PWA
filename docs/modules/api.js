@@ -107,10 +107,16 @@ export async function _fetchAndMergeServerRecords(clientId) {
 
 export async function _loadClientLoyalty() {
   const sess = getSession();
-  if (!sess || !sess.client_id) return null;
+  if (!sess) return null;
   try {
-    const r = await YC.get(`/clients/${YC.company}/${sess.client_id}`);
-    if (r.success && r.data) return r.data;
+    if (sess.phone) {
+      const r = await YC.get(`/clients/${YC.company}`, { phone: sess.phone });
+      if (r.success && Array.isArray(r.data) && r.data.length) return r.data[0];
+    }
+    if (sess.email) {
+      const r = await YC.get(`/clients/${YC.company}`, { email: sess.email });
+      if (r.success && Array.isArray(r.data) && r.data.length) return r.data[0];
+    }
   } catch {}
   return null;
 }

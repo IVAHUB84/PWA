@@ -3,7 +3,7 @@ import { _loadStoredRecords } from './storage.js';
 import { _loadClientLoyalty } from './api.js';
 import { YC } from './api.js';
 import { MASTERS_DATA } from './state.js';
-import { getInitials, esc, _fmtDatetime, _importanceLabel, _hasRealAvatar } from './utils.js';
+import { getInitials, esc, _fmtDatetime, _hasRealAvatar } from './utils.js';
 
 export function renderProfileScreen() {
   const s = getSession();
@@ -190,17 +190,22 @@ export async function renderLoyaltyBlock() {
     return;
   }
 
-  const imp     = data.importance != null ? Number(data.importance) : null;
-  const lvl     = _importanceLabel(imp);
-  const safeColor = /^(#[0-9a-fA-F]{3,8}|var\(--[\w-]+\))$/.test(lvl.color) ? lvl.color : 'var(--text)';
+  // importance приходит строкой из YCLIENTS ("Золото", "Обычный" и т.д.)
+  const impLabel = data.importance || '—';
+  const impId    = Number(data.importance_id ?? -1);
+  const impColor = impId >= 3 ? '#C9956C' : impId >= 1 ? 'var(--accent)' : 'var(--text-2)';
+
   const discount = data.discount != null ? Number(data.discount) : null;
   const balance  = Number(data.balance)  || 0;
-  const visits   = Number(data.visits_count) || 0;
+  const visits   = Number(data.visits)   || Number(data.visits_count) || 0;
+  const spent    = Number(data.spent)    || 0;
 
-  let html = row('Важность', esc(lvl.label), safeColor);
+  let html = row('Важность', esc(impLabel), impColor);
   html += row('Скидка', discount != null ? `${discount}%` : '—', discount > 0 ? 'var(--accent)' : '');
   if (balance > 0) html += row('Бонусный баланс', `${balance} ₽`, 'var(--accent)');
+  if (spent   > 0) html += row('Потрачено всего', `${spent} ₽`, '');
   html += row('Всего визитов', String(visits), '');
+  if (data.sex) html += row('Пол', esc(data.sex), '');
 
   el.innerHTML = html;
 
