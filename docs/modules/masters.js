@@ -50,31 +50,30 @@ export async function renderMasters() {
     const r = await YC.get(`/book_staff/${YC.company}`, { service_ids: svc.id });
     if (r.success && r.data && r.data.length) {
       const ids = new Set(r.data.map(s => String(s.id)));
-      const filtered = MASTERS_DATA.filter(m => ids.has(m.id));
-      if (filtered.length) {
-        masters = filtered;
-      } else {
-        const favs = JSON.parse(localStorage.getItem('yc_favs') || '[]');
-        masters = r.data.map((m, i) => ({
-          id: String(m.id),
-          name: m.name,
-          short: _makeShort(m.name),
-          role: m.specialization || 'Мастер',
-          exp: '',
-          avatar: m.avatar_big || m.avatar || '',
-          grad: _GRADS[i % _GRADS.length],
-          fav: favs.includes(String(m.id)),
-          avail: true,
-          availText: '● Есть окна сегодня',
-        }));
-      }
+      const favs = JSON.parse(localStorage.getItem('yc_favs') || '[]');
+      const staticById = Object.fromEntries(MASTERS_DATA.map(m => [m.id, m]));
+      masters = r.data.map((m, i) => {
+        const sm = staticById[String(m.id)];
+        return sm
+          ? { ...sm, fav: favs.includes(String(m.id)) }
+          : {
+              id: String(m.id), name: m.name, short: _makeShort(m.name),
+              role: m.specialization || 'Мастер', exp: '',
+              avatar: m.avatar_big || m.avatar || '',
+              grad: _GRADS[i % _GRADS.length],
+              fav: favs.includes(String(m.id)),
+              avail: true, availText: '● Есть окна сегодня',
+            };
+      });
     }
   } catch {}
-  if (!masters.length) masters = MASTERS_DATA;
-  const svcCat = svc.cat;
-  if (svcCat) {
-    const bycat = masters.filter(m => m.cats && m.cats.includes(svcCat));
-    if (bycat.length) masters = bycat;
+  if (!masters.length) {
+    masters = MASTERS_DATA;
+    const svcCat = svc.cat;
+    if (svcCat) {
+      const bycat = masters.filter(m => m.cats && m.cats.includes(svcCat));
+      if (bycat.length) masters = bycat;
+    }
   }
   masters.sort((a, b) => (b.fav ? 1 : 0) - (a.fav ? 1 : 0));
   list.innerHTML = masters.map((m, i) => _masterCardHtml(m, i, masters.length)).join('');
