@@ -226,20 +226,31 @@ if ('serviceWorker' in navigator) {
         const sw = reg.installing;
         sw.addEventListener('statechange', () => {
           if (sw.state === 'installed' && navigator.serviceWorker.controller) {
-            _showUpdateBanner();
+            _showUpdateBanner(reg);
           }
         });
       });
+      if (reg.waiting && navigator.serviceWorker.controller) {
+        _showUpdateBanner(reg);
+      }
     }).catch(() => {});
+
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      window.location.reload();
+    });
   });
 }
 
-function _showUpdateBanner() {
+function _showUpdateBanner(reg) {
   if (document.getElementById('sw-update-banner')) return;
   const el = document.createElement('div');
   el.id = 'sw-update-banner';
-  el.innerHTML = '<span>Доступно обновление</span><button onclick="window.location.reload()">Обновить</button>';
+  el.innerHTML = '<span>Доступно обновление</span><button id="sw-update-btn">Обновить</button>';
   document.body.appendChild(el);
+  document.getElementById('sw-update-btn').addEventListener('click', () => {
+    if (reg && reg.waiting) reg.waiting.postMessage('SKIP_WAITING');
+    else window.location.reload();
+  });
 }
 
 // ── ONESIGNAL ──

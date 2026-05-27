@@ -4,7 +4,7 @@ try {
   console.warn('OneSignal SW load failed', e);
 }
 
-const CACHE_VERSION = 'v26';
+const CACHE_VERSION = 'v27';
 const STATIC_CACHE  = `studio-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `studio-runtime-${CACHE_VERSION}`;
 
@@ -50,9 +50,12 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then(cache => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
-      .catch(err => { console.error('SW install cache failed', err); return self.skipWaiting(); })
+      .catch(err => console.error('SW install cache failed', err))
   );
+});
+
+self.addEventListener('message', event => {
+  if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
 
 // ── ACTIVATE: удаляем старые кэши ───────────────────────────────────────────
