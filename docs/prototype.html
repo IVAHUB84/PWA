@@ -265,15 +265,17 @@
       <span class="time">9:41</span><div class="dynamic-island"></div>    </div>
     <div class="page-title" style="padding-top:8px;">Профиль</div>
     <div class="scroll">
-      <div class="prof-head">
-        <div id="profAv" class="prof-av" style="background:linear-gradient(135deg,#C9956C,#E8C4A0);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;letter-spacing:-1px;box-shadow:0 4px 16px rgba(139,53,88,0.25);cursor:pointer;overflow:hidden;position:relative;" onclick="document.getElementById('profPhotoInput').click()">
-          <span id="profAvInner"></span>
-          <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.35);font-size:10px;text-align:center;padding:3px 0;color:#fff;font-weight:600;">фото</div>
+      <div style="margin:8px 20px 16px;background:var(--surface);border-radius:18px;padding:16px 16px 14px;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+        <div class="prof-head" style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);">
+          <div id="profAv" class="prof-av" style="background:linear-gradient(135deg,#C9956C,#E8C4A0);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;letter-spacing:-1px;box-shadow:0 4px 16px rgba(139,53,88,0.25);cursor:pointer;overflow:hidden;position:relative;" onclick="document.getElementById('profPhotoInput').click()">
+            <span id="profAvInner"></span>
+            <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.35);font-size:10px;text-align:center;padding:3px 0;color:#fff;font-weight:600;">фото</div>
+          </div>
+          <input type="file" id="profPhotoInput" accept="image/*" style="display:none" onchange="_onProfilePhotoPicked(this)">
+          <div><div class="prof-name" id="profName"></div><div class="prof-phone" id="profPhone"></div></div>
         </div>
-        <input type="file" id="profPhotoInput" accept="image/*" style="display:none" onchange="_onProfilePhotoPicked(this)">
-        <div><div class="prof-name" id="profName"></div><div class="prof-phone" id="profPhone"></div></div>
+        <div id="loyaltyBlock"></div>
       </div>
-      <div id="loyaltyBlock" style="margin:4px 20px 16px;padding:10px 16px;background:var(--surface);border-radius:14px;"></div>
       <div style="padding:0 20px 6px;"><div class="label">Избранный мастер</div></div>
       <div class="settings-group" id="profFavMasterBlock">
         <div class="s-row" id="profFavMasterRow">
@@ -583,10 +585,11 @@
   <!-- ══ FEED ══ -->
   <div class="screen" id="s-feed">
     <div class="status-bar"><span class="time">9:41</span><div class="dynamic-island"></div><div class="icons"><svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".7"/><rect x="4.5" y="5.5" width="3" height="6.5" rx=".7"/><rect x="9" y="3" width="3" height="9" rx=".7"/><rect x="13.5" y="0" width="3" height="12" rx=".7"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="8" cy="11" r="1.2" fill="currentColor" stroke="none"/><path d="M4.8 7.8a4.5 4.5 0 016.4 0" stroke-width="1.5"/><path d="M2 5a8 8 0 0112 0" stroke-width="1.5"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="20" height="11" rx="3.5" stroke="currentColor" stroke-opacity=".4"/><path d="M22 4v4a2 2 0 000-4z" fill="currentColor" fill-opacity=".4"/><rect x="2" y="2" width="15" height="8" rx="2.5" fill="currentColor"/></svg></div></div>
-    <div class="nav-bar" style="border-bottom:1px solid var(--border);"><div style="width:60px;"></div><div style="font-size:17px;font-weight:700;">Лента студии</div>
-      <div style="width:60px;text-align:right;position:relative;">
+    <div class="nav-bar" style="border-bottom:1px solid var(--border);flex-direction:column;align-items:stretch;height:auto;padding:10px 16px 8px;">
+      <div style="text-align:center;font-size:17px;font-weight:700;margin-bottom:8px;">Лента студии</div>
+      <div style="position:relative;">
         <button class="btn-ghost" style="font-size:13px;padding:4px 8px;" onclick="_toggleFeedFilter()">Фильтр ▾</button>
-        <div id="feedFilterDrop" style="display:none;position:absolute;right:0;top:32px;background:var(--bg);border:1px solid var(--border);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);z-index:100;min-width:130px;overflow:hidden;">
+        <div id="feedFilterDrop" style="display:none;position:absolute;left:0;top:32px;background:var(--bg);border:1px solid var(--border);border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);z-index:100;min-width:130px;overflow:hidden;">
           <div style="padding:4px 0;" id="feedFilterList"></div>
         </div>
       </div>
