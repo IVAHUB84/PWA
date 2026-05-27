@@ -178,36 +178,29 @@ export async function renderLoyaltyBlock() {
   el.innerHTML = `<div style="font-size:13px;color:var(--text-2);">Загрузка данных…</div>`;
   const data = await _loadClientLoyalty();
 
-  const row = (label, value, color) =>
-    `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);">
-      <span style="font-size:13px;color:var(--text-2);">${label}</span>
-      <span style="font-size:13px;font-weight:700;${color ? `color:${color};` : ''}">${value}</span>
-    </div>`;
+  if (!data) { el.style.display = 'none'; return; }
 
-  if (!data) {
-    el.innerHTML = row('Телефон', esc(sess.phone ? '+' + sess.phone : '—'), '') +
-                   row('Email',   esc(sess.email || '—'), '');
-    return;
-  }
-
-  // importance приходит строкой из YCLIENTS ("Золото", "Обычный" и т.д.)
   const impLabel = data.importance || '—';
   const impId    = Number(data.importance_id ?? -1);
-  const impColor = impId >= 3 ? '#C9956C' : impId >= 1 ? 'var(--accent)' : 'var(--text-2)';
+  const impGrad  = impId >= 3
+    ? 'linear-gradient(135deg,#C9956C,#E8C4A0)'
+    : impId >= 1
+      ? 'linear-gradient(135deg,#8B3558,#C9956C)'
+      : 'linear-gradient(135deg,#bbb,#ddd)';
 
-  const discount = data.discount != null ? Number(data.discount) : null;
-  const balance  = Number(data.balance)  || 0;
-  const visits   = Number(data.visits)   || Number(data.visits_count) || 0;
-  const spent    = Number(data.spent)    || 0;
+  const discount = data.discount != null ? Number(data.discount) : 0;
 
-  let html = row('Важность', esc(impLabel), impColor);
-  html += row('Скидка', discount != null ? `${discount}%` : '—', discount > 0 ? 'var(--accent)' : '');
-  if (balance > 0) html += row('Бонусный баланс', `${balance} ₽`, 'var(--accent)');
-  if (spent   > 0) html += row('Потрачено всего', `${spent} ₽`, '');
-  html += row('Всего визитов', String(visits), '');
-  if (data.sex) html += row('Пол', esc(data.sex), '');
-
-  el.innerHTML = html;
+  el.innerHTML = `
+    <div style="display:flex;gap:10px;">
+      <div style="flex:1;background:${impGrad};border-radius:12px;padding:14px 16px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:rgba(255,255,255,0.7);margin-bottom:6px;">Уровень</div>
+        <div style="font-size:18px;font-weight:800;color:#fff;">${esc(impLabel)}</div>
+      </div>
+      <div style="flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:6px;">Скидка</div>
+        <div style="font-size:28px;font-weight:800;color:${discount > 0 ? 'var(--accent)' : 'var(--text-2)'};">${discount}%</div>
+      </div>
+    </div>`;
 
   if (data.name) {
     const nameEl = document.getElementById('profName');
