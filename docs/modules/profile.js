@@ -164,14 +164,15 @@ export async function renderLoyaltyBlock() {
 
   if (!data) { el.style.display = 'none'; return; }
 
-  const impLabel = data.importance || '—';
+  const impLabel = data.importance || 'Начальный';
   const impId    = Number(data.importance_id ?? -1);
-  const impGrad  = impId >= 3
-    ? 'linear-gradient(135deg,#F5C518,#FFE066)'
-    : impId >= 1
-      ? 'linear-gradient(135deg,#8B3558,#C9956C)'
-      : 'linear-gradient(135deg,#9E9E9E,#BDBDBD)';
-  const impTextColor = impId >= 3 ? '#7A5800' : '#fff';
+  const _IMP = {
+    4: { grad: 'linear-gradient(135deg,#D4E2F0,#B0C8E8)', color: '#1A3A5C' },
+    3: { grad: 'linear-gradient(135deg,#F5C518,#FFE066)', color: '#7A5800' },
+    2: { grad: 'linear-gradient(135deg,#9BA3AF,#CFD4DC)', color: '#1F2937' },
+    1: { grad: 'linear-gradient(135deg,#B87333,#D4956A)', color: '#fff'   },
+  };
+  const { grad: impGrad, color: impTextColor } = _IMP[impId] || { grad: 'linear-gradient(135deg,#4A7EC7,#6FA3E0)', color: '#fff' };
 
   const discount = data.discount != null ? Number(data.discount) : 0;
 
