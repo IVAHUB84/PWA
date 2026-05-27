@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Write version.json
         run: |
-          echo "{\"date\":\"$(date -u '+%d.%m.%Y %H:%M')\",\"sha\":\"${GITHUB_SHA:0:7}\"}" > docs/version.json
+          echo "{\"date\":\"$(TZ='Europe/Moscow' date '+%d.%m.%Y %H:%M')\",\"sha\":\"${GITHUB_SHA:0:7}\"}" > docs/version.json
       - name: Commit
         run: |
           git config user.name "github-actions[bot]"
