@@ -177,28 +177,33 @@ export async function renderLoyaltyBlock() {
   el.style.display = '';
   el.innerHTML = `<div style="font-size:13px;color:var(--text-2);">Загрузка данных…</div>`;
   const data = await _loadClientLoyalty();
-  if (!data) { el.innerHTML = ''; el.style.display = 'none'; return; }
-
-  const lvl = _importanceLabel(data.importance ?? null);
-  const safeColor = /^(#[0-9a-fA-F]{3,8}|var\(--[\w-]+\))$/.test(lvl.color) ? lvl.color : 'inherit';
-  const discount = Number(data.discount) || 0;
-  const balance  = Number(data.balance)  || 0;
-  const visits   = Number(data.visits_count) || 0;
 
   const row = (label, value, color) =>
-    `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;">
+    `<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);">
       <span style="font-size:13px;color:var(--text-2);">${label}</span>
       <span style="font-size:13px;font-weight:700;${color ? `color:${color};` : ''}">${value}</span>
     </div>`;
 
+  if (!data) {
+    el.innerHTML = row('Телефон', esc(sess.phone ? '+' + sess.phone : '—'), '') +
+                   row('Email',   esc(sess.email || '—'), '');
+    return;
+  }
+
+  const imp     = data.importance != null ? Number(data.importance) : null;
+  const lvl     = _importanceLabel(imp);
+  const safeColor = /^(#[0-9a-fA-F]{3,8}|var\(--[\w-]+\))$/.test(lvl.color) ? lvl.color : 'var(--text)';
+  const discount = data.discount != null ? Number(data.discount) : null;
+  const balance  = Number(data.balance)  || 0;
+  const visits   = Number(data.visits_count) || 0;
+
   let html = row('Важность', esc(lvl.label), safeColor);
-  if (discount > 0) html += row('Скидка', `${discount}%`, 'var(--accent)');
-  if (balance  > 0) html += row('Бонусный баланс', `${balance} ₽`, '');
+  html += row('Скидка', discount != null ? `${discount}%` : '—', discount > 0 ? 'var(--accent)' : '');
+  if (balance > 0) html += row('Бонусный баланс', `${balance} ₽`, 'var(--accent)');
   html += row('Всего визитов', String(visits), '');
 
   el.innerHTML = html;
 
-  // Обновить имя в шапке профиля из YCLIENTS (может отличаться от сессии)
   if (data.name) {
     const nameEl = document.getElementById('profName');
     if (nameEl) nameEl.textContent = data.name;
