@@ -183,22 +183,23 @@ export async function renderLoyaltyBlock() {
   const impLabel = data.importance || '—';
   const impId    = Number(data.importance_id ?? -1);
   const impGrad  = impId >= 3
-    ? 'linear-gradient(135deg,#C9956C,#E8C4A0)'
+    ? 'linear-gradient(135deg,#F5C518,#FFE066)'
     : impId >= 1
       ? 'linear-gradient(135deg,#8B3558,#C9956C)'
-      : 'linear-gradient(135deg,#bbb,#ddd)';
+      : 'linear-gradient(135deg,#9E9E9E,#BDBDBD)';
+  const impTextColor = impId >= 3 ? '#7A5800' : '#fff';
 
   const discount = data.discount != null ? Number(data.discount) : 0;
 
   el.innerHTML = `
-    <div style="display:flex;gap:10px;">
-      <div style="flex:1;background:${impGrad};border-radius:12px;padding:14px 16px;">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:rgba(255,255,255,0.7);margin-bottom:6px;">Уровень</div>
-        <div style="font-size:18px;font-weight:800;color:#fff;">${esc(impLabel)}</div>
+    <div style="display:flex;gap:8px;">
+      <div style="flex:1;background:${impGrad};border-radius:10px;padding:10px 12px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:${impId >= 3 ? 'rgba(100,70,0,0.6)' : 'rgba(255,255,255,0.65)'};margin-bottom:3px;">Уровень</div>
+        <div style="font-size:15px;font-weight:800;color:${impTextColor};">${esc(impLabel)}</div>
       </div>
-      <div style="flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:6px;">Скидка</div>
-        <div style="font-size:28px;font-weight:800;color:${discount > 0 ? 'var(--accent)' : 'var(--text-2)'};">${discount}%</div>
+      <div style="flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);margin-bottom:3px;">Скидка</div>
+        <div style="font-size:20px;font-weight:800;color:${discount > 0 ? 'var(--accent)' : 'var(--text-2)'};">${discount}%</div>
       </div>
     </div>`;
 
