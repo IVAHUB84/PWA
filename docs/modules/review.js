@@ -58,7 +58,10 @@ export function submitReview() {
     text,
     saved: new Date().toISOString(),
   });
-  localStorage.setItem('yc_reviews', JSON.stringify(reviews));
+  try {
+    const trimmed = reviews.slice(-100);
+    localStorage.setItem('yc_reviews', JSON.stringify(trimmed));
+  } catch { }
   go('s-home', 'tab');
 }
 

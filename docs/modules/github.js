@@ -9,7 +9,12 @@ export async function _ghRead() {
     const d = await r.json();
     const parsed = JSON.parse(_b64dec(d.content));
     if (!Array.isArray(parsed)) return { posts: [], sha: d.sha };
-    return { posts: parsed, sha: d.sha };
+    const posts = parsed.filter(p =>
+      p && typeof p.id === 'number' &&
+      typeof p.text === 'string' && typeof p.cat === 'string' && typeof p.date === 'string' &&
+      (!p.image || /^https:\/\/\S+$/.test(p.image))
+    );
+    return { posts, sha: d.sha };
   } catch { return null; }
 }
 
@@ -40,6 +45,7 @@ export async function _ghPullToLocal() {
 }
 
 export async function _ghSyncPosts(postsToWrite) {
+  if (!Array.isArray(postsToWrite)) return;
   let token = sessionStorage.getItem('yc_gh_token');
   if (!token) {
     token = prompt('Введите GitHub Personal Access Token (нужен для синхронизации постов с клиентами).\n\nПолучить: GitHub → Settings → Developer settings → Personal access tokens → Generate new token → выбрать scope "public_repo"');
@@ -62,4 +68,4 @@ export function _adminResetToken() {
   else { sessionStorage.removeItem('yc_gh_token'); alert('Токен сброшен.'); }
 }
 
-Object.assign(window, { _ghRead, _ghWrite, _ghPullToLocal, _ghSyncPosts, _adminResetToken });
+Object.assign(window, { _adminResetToken });

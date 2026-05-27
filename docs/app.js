@@ -72,9 +72,6 @@ registerOnEnter('s-otp', () => {
     const el = document.getElementById(i);
     if (el) { el.value = ''; el.classList.remove('filled'); }
   });
-  const stored = JSON.parse(localStorage.getItem('yc_otp') || 'null');
-  const sub = document.getElementById('otpSub');
-  if (sub && stored) sub.textContent = 'Отправили код на ' + stored.email;
   setTimeout(() => { const el = document.getElementById('otp1'); if (el) el.focus(); }, 300);
 });
 

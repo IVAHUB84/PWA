@@ -188,6 +188,7 @@ export function runScenario(key) {
   stopScenario();
   const s = scenarios[key];
   if (!s) return;
+  if (!/^[\w-]+$/.test(key)) return;
 
   const btns = document.querySelectorAll('.scenario-btn');
   btns.forEach(b => b.classList.remove('playing'));
