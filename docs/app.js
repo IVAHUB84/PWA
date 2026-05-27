@@ -189,8 +189,25 @@ window.adminCat = function(el) {
 // ── SERVICE WORKER ──
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
+    navigator.serviceWorker.register('./sw.js').then(reg => {
+      reg.addEventListener('updatefound', () => {
+        const sw = reg.installing;
+        sw.addEventListener('statechange', () => {
+          if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+            _showUpdateBanner();
+          }
+        });
+      });
+    }).catch(() => {});
   });
+}
+
+function _showUpdateBanner() {
+  if (document.getElementById('sw-update-banner')) return;
+  const el = document.createElement('div');
+  el.id = 'sw-update-banner';
+  el.innerHTML = '<span>Доступно обновление</span><button onclick="window.location.reload()">Обновить</button>';
+  document.body.appendChild(el);
 }
 
 // ── ONESIGNAL ──
