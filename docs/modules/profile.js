@@ -13,8 +13,10 @@ export function renderProfileScreen() {
   const homeAv = document.getElementById('homeAv');
   if (!s) return;
   const initials = getInitials(s.name || s.email || '?');
-  if (nameEl) nameEl.textContent = s.name || s.email;
-  if (phoneEl) phoneEl.textContent = s.email || s.phone;
+  if (nameEl) nameEl.textContent = s.name || '—';
+  if (phoneEl) phoneEl.textContent = s.phone ? '+' + s.phone : '';
+  const emailEl = document.getElementById('profEmail');
+  if (emailEl) emailEl.textContent = s.email || '';
   const rawPhoto = localStorage.getItem('yc_profile_photo');
   const savedPhoto = rawPhoto && /^data:image\//.test(rawPhoto) ? rawPhoto : null;
   const inner = document.getElementById('profAvInner');
@@ -73,24 +75,6 @@ export function renderProfileScreen() {
     }
   }
 
-  const recentEl = document.getElementById('profRecentVisits');
-  if (recentEl) {
-    const now = new Date();
-    const past = _loadStoredRecords()
-      .filter(r => r.status !== 'cancelled' && new Date(r.datetime.replace(' ', 'T')) <= now)
-      .sort((a, b) => new Date(b.datetime) - new Date(a.datetime))
-      .slice(0, 2);
-    if (past.length) {
-      recentEl.innerHTML = past.map(r => `
-        <div class="s-row" data-sid="${esc(String(r.svcId))}" onclick="rebook(this.dataset.sid)">
-          <div style="width:36px;height:36px;border-radius:10px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:16px;">✨</div>
-          <div style="flex:1;"><div style="font-size:14px;font-weight:600;">${esc(r.svcName)}</div><div style="font-size:12px;color:var(--text-2);">${esc(r.masterName)} · ${_fmtDatetime(r.datetime)}</div></div>
-          <button class="btn-ghost" style="font-size:13px;">Повторить</button>
-        </div>`).join('');
-    } else {
-      recentEl.innerHTML = '<div style="padding:14px 16px;font-size:13px;color:var(--text-2);">Визитов пока нет</div>';
-    }
-  }
 }
 
 export function renderHomeHero() {

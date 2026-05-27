@@ -273,10 +273,15 @@
             <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.35);font-size:10px;text-align:center;padding:3px 0;color:#fff;font-weight:600;">фото</div>
           </div>
           <input type="file" id="profPhotoInput" accept="image/*" style="display:none" onchange="_onProfilePhotoPicked(this)">
-          <div><div class="prof-name" id="profName"></div><div class="prof-phone" id="profPhone"></div></div>
+          <div style="min-width:0;">
+            <div class="prof-name" id="profName"></div>
+            <div id="profPhone" style="font-size:13px;color:var(--text-2);margin-top:2px;"></div>
+            <div id="profEmail" style="font-size:12px;color:var(--text-2);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+          </div>
         </div>
         <div id="loyaltyBlock"></div>
       </div>
+
       <div style="padding:0 20px 6px;"><div class="label">Избранный мастер</div></div>
       <div class="settings-group" id="profFavMasterBlock">
         <div class="s-row" id="profFavMasterRow">
@@ -285,15 +290,10 @@
           <button class="btn-ghost" onclick="go('s-services','tab')">Записаться</button>
         </div>
       </div>
-      <div style="padding:16px 20px 6px;"><div class="label">Уведомления</div></div>
+
+      <div style="padding:16px 20px 6px;"><div class="label">Настройки</div></div>
       <div class="settings-group">
-        <div class="s-row"><div class="s-ico">🔔</div><div class="s-lbl">Напоминания о визите</div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-        <div class="s-row"><div class="s-ico">🔄</div><div class="s-lbl">Повторные процедуры</div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-        <div class="s-row"><div class="s-ico">🎁</div><div class="s-lbl">Акции и предложения</div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
-      </div>
-      <div style="padding:16px 20px 6px;"><div class="label">Согласия</div></div>
-      <div class="settings-group">
-        <div class="s-row"><div class="s-ico">🔔</div><div class="s-lbl">Уведомления о записях</div><div class="toggle on" onclick="consentToggle(this,'notify')"></div></div>
+        <div class="s-row"><div class="s-ico">🔔</div><div class="s-lbl">Напоминания о визите</div><div class="toggle on" onclick="consentToggle(this,'notify')"></div></div>
         <div class="s-row"><div class="s-ico">🎁</div><div class="s-lbl">Акции и предложения</div><div class="toggle on" onclick="consentToggle(this,'promo')"></div></div>
         <div class="s-row" id="photoConsentRow"><div class="s-ico">📸</div><div class="s-lbl">Публикация фото и видео</div><div class="toggle on" onclick="consentToggle(this,'photo')"></div></div>
         <div id="photoDeleteBtn" style="display:none;padding:10px 16px 14px 46px;">
@@ -302,21 +302,13 @@
         <div class="s-row"><div class="s-ico">💬</div><div class="s-lbl">Публикация отзывов</div><div class="toggle on" onclick="consentToggle(this,'reviews')"></div></div>
         <div class="s-row" style="cursor:pointer;" onclick="go('s-consent')">
           <div class="s-ico">📄</div>
-          <div class="s-lbl">Оферта и политика конфиденциальности</div>
+          <div class="s-lbl">Оферта и конфиденциальность</div>
           <div style="color:var(--border);font-size:18px;">›</div>
         </div>
       </div>
-      <div style="padding:16px 20px 6px;"><div class="label">Запись</div></div>
-      <div class="settings-group">
-        <div class="s-row" onclick="go('s-services','tab')"><div class="s-ico">✂️</div><div class="s-lbl">Записаться</div><div style="color:var(--border);font-size:18px;">›</div></div>
-        <div class="s-row" onclick="go('s-services','tab')"><div class="s-ico">👩‍👧</div><div class="s-lbl">Записать подругу / другого</div><div style="color:var(--border);font-size:18px;">›</div></div>
-      </div>
-      <div style="padding:0 20px 6px;"><div class="label">Последние визиты</div></div>
-      <div class="settings-group" id="profRecentVisits" style="margin-bottom:20px;">
-        <div style="padding:14px 16px;font-size:13px;color:var(--text-2);">Загрузка…</div>
-      </div>
-      <div style="padding:0 20px 32px;text-align:center;">
-        <button style="background:none;border:none;color:var(--red);font-size:15px;font-weight:600;cursor:pointer;" onclick="logout()">Выйти из аккаунта</button>
+
+      <div style="padding:20px 20px 32px;text-align:center;">
+        <button style="background:none;border:none;color:var(--text-2);font-size:14px;font-weight:500;cursor:pointer;" onclick="logout()">Выйти из аккаунта</button>
       </div>
     </div>
     <div class="tab-bar">
