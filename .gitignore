@@ -50,3 +50,8 @@ docs/preview_header.html
 # Doc build artifacts
 docs/docs/
 docs/stitch-brief.md
+docs/BRD.md
+docs/Design.md
+docs/FRD.md
+docs/package.json
+docs/package-lock.json
