@@ -106,14 +106,14 @@ export async function _fetchAndMergeServerRecords(clientId) {
   } catch {}
 }
 
-export async function postComment({ rating, text, staffId, recordId }, _fetch = fetch) {
+export async function postComment({ rating, text, staffId, recordId, clientId }, _fetch = fetch) {
   const ctrl = new AbortController();
   const tid = setTimeout(() => ctrl.abort(), 15000);
   try {
     const r = await _fetch(`${WORKER_URL}/review`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ rating, text, staff_id: staffId, record_id: recordId }),
+      body: JSON.stringify({ rating, text, staff_id: staffId, record_id: recordId, client_id: clientId }),
       signal: ctrl.signal,
     });
     if (!r.ok) return { ok: false };

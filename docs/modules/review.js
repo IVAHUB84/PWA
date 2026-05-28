@@ -3,6 +3,7 @@ import { go } from './navigation.js';
 import { REVIEW_URLS } from './constants.js';
 import { getInitials, _hasRealAvatar } from './utils.js';
 import { postComment } from './api.js';
+import { getSession } from './storage.js';
 
 export function _loadReviewedIds() {
   try {
@@ -119,11 +120,13 @@ export async function submitReview() {
 
   if (btn) { btn.disabled = true; btn.textContent = 'Отправка…'; }
 
+  const session = getSession();
   const result = await postComment({
     rating: stars,
     text,
     staffId: state._reviewMasterId,
     recordId: state._reviewRecordId,
+    clientId: session?.client_id || null,
   });
 
   if (result.ok) {

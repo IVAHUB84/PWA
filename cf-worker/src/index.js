@@ -199,7 +199,7 @@ async function handleReview(req, env) {
   if (!body || body.rating == null || !Number.isInteger(body.rating) || body.rating < 1 || body.rating > 5) {
     return json({ error: 'missing_fields' }, 400);
   }
-  const { rating, text, staff_id, record_id } = body;
+  const { rating, text, staff_id, record_id, client_id } = body;
   const ycUrl = `https://api.yclients.com/api/v1/comments/${env.YC_COMPANY}`;
   const headers = {
     Authorization: `Bearer ${env.YC_TOKEN}, User ${env.YC_USER_TOKEN}`,
@@ -208,7 +208,7 @@ async function handleReview(req, env) {
   };
   let ycResp, data;
   try {
-    ycResp = await fetch(ycUrl, { method: 'POST', headers, body: JSON.stringify({ rating, text, staff_id, record_id }) });
+    ycResp = await fetch(ycUrl, { method: 'POST', headers, body: JSON.stringify({ rating, text, staff_id, record_id, client_id }) });
     data = await ycResp.json().catch(() => ({}));
   } catch (e) {
     return json({ ok: false, status: 0 }, 502);
@@ -277,7 +277,10 @@ export default {
     if (req.method === 'POST' && url.pathname === '/unsubscribe') return handleUnsubscribe(req, env);
     if (req.method === 'POST' && url.pathname === '/send')        return handleSend(req, env);
     if (req.method === 'POST' && url.pathname === '/review')     return handleReview(req, env);
-
+    if (req.method === 'GET' && url.pathname === '/debug-auth') {
+      const h = `Bearer ${env.YC_TOKEN}, User ${env.YC_USER_TOKEN}`;
+      return json({ header_len: h.length, header_start: h.slice(0, 30), header_end: h.slice(-10) });
+    }
     return new Response('Not Found', { status: 404 });
   },
 
