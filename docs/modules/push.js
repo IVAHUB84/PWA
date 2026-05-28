@@ -1,11 +1,12 @@
 import { getSession } from './storage.js';
+import { WORKER_URL } from './constants.js';
 
 const _KEY_URL      = 'yc_worker_url';
 const _KEY_SUB      = 'yc_push_subscribed';
 const _KEY_SECRET   = 'yc_push_secret';
 
 function _workerUrl() {
-  return (localStorage.getItem(_KEY_URL) || '').replace(/\/$/, '');
+  return (localStorage.getItem(_KEY_URL) || WORKER_URL).replace(/\/$/, '');
 }
 
 let _vapidKey = null;
