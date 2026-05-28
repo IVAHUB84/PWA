@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v33';
+const CACHE_VERSION = 'v34';
 const STATIC_CACHE  = `studio-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `studio-runtime-${CACHE_VERSION}`;
 
@@ -17,6 +17,7 @@ const APP_SHELL = [
   './modules/booking.js',
   './modules/slots.js',
   './modules/services.js',
+  './modules/serviceImages.js',
   './modules/masters.js',
   './modules/history.js',
   './modules/profile.js',
