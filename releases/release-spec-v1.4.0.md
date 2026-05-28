@@ -104,15 +104,15 @@
 
 ## Чек-лист готовности к релизу
 
-- [ ] Задача 1: endpoint `POST /review` в Worker реализован
-- [ ] Задача 2: `postComment` шлёт на Worker, контракт возврата сохранён
-- [ ] Задача 3: `CACHE_VERSION` v36 → v37, `version.json` → v1.4.0
-- [ ] Соответствие ADR-004 проверено (architect)
-- [ ] Тесты `postComment` → Worker добавлены и проходят
-- [ ] КП-1: в DevTools → Network виден запрос на Worker URL, не на `api.yclients.com/comments`
-- [ ] КП-2: отзыв появляется на карточке мастера (`s-master`, `GET /comments`)
-- [ ] КП-3: YCLIENTS-токены отсутствуют в коде PWA — они в Cloudflare Secrets
-- [ ] КП-4: при ошибке Worker fail-safe в `review.js` работает (сообщение, поля не очищаются)
-- [ ] КП-5: Worker деплоится командой `cd cf-worker && npx wrangler deploy`
-- [ ] Code review пройден
-- [ ] Деплой по порядку: сначала Worker, потом PWA
+- [x] Задача 1: endpoint `POST /review` в Worker реализован
+- [x] Задача 2: `postComment` шлёт на Worker, контракт возврата сохранён
+- [x] Задача 3: `CACHE_VERSION` v36 → v37, `version.json` → v1.4.0
+- [x] Соответствие ADR-004 проверено (architect)
+- [x] Тесты `postComment` → Worker добавлены и проходят
+- [x] КП-1: в DevTools → Network виден запрос на Worker URL, не на `api.yclients.com/comments`
+- [ ] КП-2: отзыв появляется на карточке мастера (`s-master`, `GET /comments`) — проверяется при деплое
+- [x] КП-3: YCLIENTS-токены отсутствуют в коде PWA — они в Cloudflare Secrets
+- [x] КП-4: при ошибке Worker fail-safe в `review.js` работает (сообщение, поля не очищаются)
+- [x] КП-5: Worker деплоится командой `cd cf-worker && npx wrangler deploy`
+- [x] Code review пройден
+- [ ] Деплой по порядку: сначала Worker, потом PWA — выполняется при деплое
