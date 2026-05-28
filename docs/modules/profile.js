@@ -62,8 +62,7 @@ export function renderHomeHero() {
   const el = document.getElementById('homeHero');
   if (!el) return;
 
-  const installBanner = document.getElementById('installBanner');
-  if (installBanner) installBanner.style.display = localStorage.getItem('yc_install_seen') ? 'none' : 'flex';
+  window.refreshInstallBanner?.();
 
   const ml = document.getElementById('homeMastersList');
   if (ml && MASTERS_DATA.length) {

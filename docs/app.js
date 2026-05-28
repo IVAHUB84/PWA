@@ -23,6 +23,7 @@ import './modules/consent.js';
 import './modules/notifications.js';
 import './modules/search.js';
 import './modules/scenarios.js';
+import { attachInstallListeners, maybeShowInstallOverlay } from './modules/install.js';
 
 // ── CROSS-MODULE CALLBACKS ──
 setAuthRenderFns({ renderHomeHero, renderProfileScreen, renderAdminDashboard });
@@ -205,6 +206,7 @@ async function _trySubscribeExistingSession() {
 }
 
 // ── BOOT ──
+attachInstallListeners();
 renderServices();
 (function checkSession() {
   const sess = getSession();
@@ -224,6 +226,7 @@ renderServices();
     });
     setTimeout(_trySubscribeExistingSession, 3000);
   }
+  maybeShowInstallOverlay();
 })();
 initApp();
 

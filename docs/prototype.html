@@ -61,7 +61,7 @@
 
       <div id="homeHero"></div>
 
-      <div id="installBanner" class="install-banner" onclick="go('s-install')" style="display:none;">
+      <div id="installBanner" class="install-banner" onclick="triggerInstall()" style="display:none;">
         <div style="font-size:20px;">📲</div>
         <div style="flex:1;"><div style="font-size:13px;font-weight:700;">Добавить на экран</div><div style="font-size:11px;color:var(--text-2);">Включить уведомления о записи</div></div>
         <div style="font-size:18px;color:var(--border);">›</div>
@@ -255,8 +255,8 @@
         <div class="install-step"><div class="step-ico">✅</div><div><div class="step-ttl">Нажмите «Добавить»</div><div class="step-dsc">Приложение появится на главном экране</div></div></div>
       </div>
       <div class="install-btns">
-        <button class="btn-primary" onclick="localStorage.setItem('yc_install_seen','1');go('s-home','tab')" style="width:100%;">Понятно, добавлю</button>
-        <button class="btn-dim" onclick="go('s-home','tab')">Позже</button>
+        <button class="btn-primary" onclick="dismissInstall();go('s-home','tab')" style="width:100%;">Понятно, добавлю</button>
+        <button class="btn-dim" onclick="dismissInstall();go('s-home','tab')">Позже</button>
       </div>
     </div>
   </div>
@@ -809,6 +809,15 @@
       <div style="padding:0 20px 10px;"><div class="label">Предпросмотр</div></div>
       <div class="push-preview"><div class="push-p-icon" id="pushNewIcon">📅</div><div style="flex:1;"><div class="push-p-title" id="pushNewTitle">Реснички · Напоминание о визите</div><div class="push-p-body" id="pushNewPreview">Напоминаем о вашей записи завтра. Ждём вас в студии!</div></div></div>
       <div style="padding:16px 20px 0;"><button class="btn-primary" id="pushNewSendBtn" onclick="sendNewPush()">Отправить сейчас</button></div>
+    </div>
+  </div>
+
+  <div id="installOverlay" style="display:none" class="install-overlay">
+    <div class="install-overlay__card">
+      <h2 class="install-overlay__title">Установите приложение</h2>
+      <p class="install-overlay__text">Добавьте приложение на экран «Домой» и получайте напоминания о ваших записях</p>
+      <button class="btn-primary" onclick="triggerInstall()">Установить</button>
+      <button class="btn-ghost" onclick="dismissInstall()">Позже</button>
     </div>
   </div>
 
