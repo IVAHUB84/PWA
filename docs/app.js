@@ -243,7 +243,7 @@ fetch('./version.json?_=' + Date.now())
   .then(v => {
     if (!v) return;
     const el = document.getElementById('buildInfo');
-    if (el) el.textContent = '#' + v.build + ' · ' + v.date;
+    if (el) el.textContent = (v.version || ('#' + v.build)) + ' · ' + v.date + (v.time ? ' ' + v.time : '');
   }).catch(() => {});
 
 // ── SERVICE WORKER ──
