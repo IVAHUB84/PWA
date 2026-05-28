@@ -6,15 +6,6 @@ import { bookWithMaster } from './booking.js';
 
 const _staffByServiceCache = new Map();
 
-function _avgRating(masterId) {
-  let reviews;
-  try { reviews = JSON.parse(localStorage.getItem('yc_reviews') || '[]'); } catch { reviews = []; }
-  const rel = reviews.filter(r => r.masterId === masterId && r.stars > 0);
-  if (!rel.length) return '';
-  const avg = rel.reduce((s, r) => s + r.stars, 0) / rel.length;
-  return ` · ⭐ ${avg.toFixed(1)}`;
-}
-
 function _masterCardHtml(m, i, total) {
   const last = i === total - 1;
   const favBadge = m.fav ? '<div class="fav-badge">❤️</div>' : '';
@@ -23,7 +14,6 @@ function _masterCardHtml(m, i, total) {
   const styles = [...(m.avail ? [] : ['opacity:0.55']), ...(last ? ['margin-bottom:24px'] : [])];
   const styleAttr = styles.length ? ` style="${styles.join(';')}"` : '';
   const click = m.avail ? ` data-mid="${esc(m.id)}" onclick="openMasterCard(this.dataset.mid)"` : '';
-  const rating = _avgRating(m.id);
   const initStr = getInitials(m.name);
   const avatarInner = _hasRealAvatar(m)
     ? `<img src="${esc(m.avatar_big || m.avatar)}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<div class=&quot;av-initials&quot;>${initStr}</div>')">`
@@ -32,7 +22,7 @@ function _masterCardHtml(m, i, total) {
     <div class="master-av" style="background:${m.grad};">${avatarInner}${favBadge}</div>
     <div class="master-info">
       <div class="master-name">${esc(m.name)}${favChip}</div>
-      <div class="master-role">${esc(m.role)}${m.exp ? ' · стаж ' + esc(m.exp) : ''}${rating}</div>
+      <div class="master-role">${esc(m.role)}${m.exp ? ' · стаж ' + esc(m.exp) : ''}</div>
       <div class="master-avail ${availCls}">${esc(m.availText)}</div>
     </div>
     <button data-mid="${esc(m.id)}" onclick="event.stopPropagation();toggleFav(this.dataset.mid)" style="background:none;border:none;cursor:pointer;font-size:20px;padding:4px 6px;flex-shrink:0;" title="В избранное">${m.fav ? '❤️' : '🤍'}</button>

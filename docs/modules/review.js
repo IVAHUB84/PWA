@@ -2,6 +2,22 @@ import { state, MASTERS_DATA } from './state.js';
 import { go } from './navigation.js';
 import { REVIEW_URLS } from './constants.js';
 import { getInitials, _hasRealAvatar } from './utils.js';
+import { postComment } from './api.js';
+
+export function _loadReviewedIds() {
+  try {
+    const v = JSON.parse(localStorage.getItem('yc_reviewed_ids') || '[]');
+    return Array.isArray(v) ? v : [];
+  } catch { return []; }
+}
+
+export function _saveReviewedId(recordId) {
+  const ids = _loadReviewedIds();
+  if (!ids.includes(String(recordId))) {
+    ids.push(String(recordId));
+    try { localStorage.setItem('yc_reviewed_ids', JSON.stringify(ids)); } catch {}
+  }
+}
 
 export function setStar(n) {
   document.querySelectorAll('#starsRow .star').forEach((s, i) => s.classList.toggle('on', i < n));
@@ -37,6 +53,8 @@ export function renderReviewScreen() {
   document.getElementById('_customTipInput')?.remove();
   document.getElementById('_starsHint')?.remove();
   setStar(0);
+  const btn = document.querySelector('#s-review button[onclick*="submitReview"]');
+  if (btn) { btn.disabled = false; btn.textContent = 'Отправить отзыв'; }
 }
 
 export function openRateVisit(recordId, masterId, masterName, svcName, datetime) {
@@ -68,7 +86,7 @@ export function _selectCustomTip(btn) {
   }
 }
 
-export function submitReview() {
+export async function submitReview() {
   const stars = document.querySelectorAll('#starsRow .star.on').length;
   if (!stars) {
     const row = document.getElementById('starsRow');
@@ -89,28 +107,33 @@ export function submitReview() {
   }
   document.getElementById('_starsHint')?.remove();
   const text = (document.getElementById('reviewTextarea')?.value || '').trim();
-  const tipBtn = document.querySelector('#s-review .tip-btn.sel');
-  const customInp = document.getElementById('_customTipInput');
-  const tips = tipBtn
-    ? (tipBtn.textContent.trim() === 'Своя сумма' && customInp?.value ? customInp.value + ' ₽' : tipBtn.textContent.trim())
-    : '';
-  const reviews = JSON.parse(localStorage.getItem('yc_reviews') || '[]');
-  reviews.push({
-    recordId: state._reviewRecordId || null,
-    masterId: state._reviewMasterId,
-    masterName: state._reviewMasterName,
-    svcName: state._reviewSvcName,
-    date: state._reviewRecordDate,
-    stars,
+
+  const btn = document.querySelector('#s-review button[onclick*="submitReview"]');
+  const origLabel = btn ? btn.textContent : null;
+
+  if (!state._reviewMasterId && !state._reviewRecordId) {
+    alert('Не удалось определить данные визита. Попробуйте снова из истории визитов.');
+    if (btn) { btn.disabled = false; btn.textContent = origLabel; }
+    return;
+  }
+
+  if (btn) { btn.disabled = true; btn.textContent = 'Отправка…'; }
+
+  const result = await postComment({
+    rating: stars,
     text,
-    tips,
-    saved: new Date().toISOString(),
+    staffId: state._reviewMasterId,
+    recordId: state._reviewRecordId,
   });
-  try {
-    const trimmed = reviews.slice(-100);
-    localStorage.setItem('yc_reviews', JSON.stringify(trimmed));
-  } catch { }
-  go('s-home', 'tab');
+
+  if (result.ok) {
+    if (state._reviewRecordId) _saveReviewedId(state._reviewRecordId);
+    alert('Спасибо! Ваш отзыв отправлен.');
+    go('s-home', 'tab');
+  } else {
+    if (btn) { btn.disabled = false; btn.textContent = origLabel; }
+    alert('Не удалось отправить отзыв. Проверьте соединение и попробуйте ещё раз.');
+  }
 }
 
 export function openReview(platform) {

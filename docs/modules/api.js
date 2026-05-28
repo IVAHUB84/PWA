@@ -105,6 +105,17 @@ export async function _fetchAndMergeServerRecords(clientId) {
   } catch {}
 }
 
+export async function postComment({ rating, text, staffId, recordId }, _ycPost = YC.post.bind(YC)) {
+  try {
+    const body = { rating, text, staff_id: staffId, record_id: recordId };
+    const r = await _ycPost('/comments/' + YC.company, body);
+    if (r && r.success) return { ok: true };
+    return { ok: false };
+  } catch {
+    return { ok: false };
+  }
+}
+
 export async function fetchStaffByService(serviceId, _ycGet = YC.get.bind(YC)) {
   try {
     const r = await _ycGet('/book_staff/' + YC.company, { 'service_ids[]': serviceId });

@@ -3,6 +3,7 @@ import { _loadStoredRecords } from './storage.js';
 import { _loadClientLoyalty } from './api.js';
 import { MASTERS_DATA } from './state.js';
 import { getInitials, esc, _fmtDatetime, _hasRealAvatar } from './utils.js';
+import { _loadReviewedIds } from './review.js';
 
 export function renderProfileScreen() {
   const s = getSession();
@@ -88,8 +89,7 @@ export function renderHomeHero() {
   _renderHomeFeedPreview();
 
   if (!next) {
-    const reviews = JSON.parse(localStorage.getItem('yc_reviews') || '[]');
-    const reviewedIds = new Set(reviews.map(r => r.recordId).filter(Boolean));
+    const reviewedIds = new Set(_loadReviewedIds());
     const sevenDaysAgo = new Date(now - 7 * 86400000);
     const lastUnreviewed = records
       .filter(r => r.status !== 'cancelled')
@@ -101,7 +101,7 @@ export function renderHomeHero() {
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-2);margin-bottom:10px;">Оцените прошлый визит</div>
         <div style="font-size:14px;font-weight:700;margin-bottom:2px;">${esc(lastUnreviewed.svcName)}</div>
         <div style="font-size:12px;color:var(--text-2);margin-bottom:12px;">${esc(lastUnreviewed.masterName)} · ${_fmtDatetime(lastUnreviewed.datetime)}</div>
-        <button class="btn-ghost" style="width:100%;font-size:14px;" data-rid="${esc(String(lastUnreviewed.id))}" data-mid="${esc(String(lastUnreviewed.masterId))}" data-mname="${esc(lastUnreviewed.masterName)}" data-sname="${esc(lastUnreviewed.svcName)}" data-dt="${esc(lastUnreviewed.datetime)}" onclick="openRateVisit(this.dataset.rid,this.dataset.mid,this.dataset.mname,this.dataset.sname,this.dataset.dt)">Оставить отзыв →</button>
+        <button class="btn-ghost" style="width:100%;font-size:14px;" data-rid="${esc(String(lastUnreviewed.id))}" data-mid="${esc(String(lastUnreviewed.ycStaffId || lastUnreviewed.masterId))}" data-mname="${esc(lastUnreviewed.masterName)}" data-sname="${esc(lastUnreviewed.svcName)}" data-dt="${esc(lastUnreviewed.datetime)}" onclick="openRateVisit(this.dataset.rid,this.dataset.mid,this.dataset.mname,this.dataset.sname,this.dataset.dt)">Оставить отзыв →</button>
       </div>`;
       return;
     }
