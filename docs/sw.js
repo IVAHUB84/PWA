@@ -72,8 +72,9 @@ self.addEventListener('fetch', event => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Не перехватываем не-GET и YCLIENTS API
+  // Не перехватываем не-GET, не-HTTP(S) и YCLIENTS API
   if (request.method !== 'GET') return;
+  if (!url.protocol.startsWith('http')) return;
   if (NETWORK_ONLY_HOSTS.some(h => url.hostname.includes(h))) return;
 
   const isSameOrigin = url.origin === self.location.origin;
