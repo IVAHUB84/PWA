@@ -191,6 +191,32 @@ async function handleSend(req, env) {
   return json({ ok: true, sent, failed });
 }
 
+// ── Review proxy ─────────────────────────────────────────────────────────────
+
+async function handleReview(req, env) {
+  let body;
+  try { body = await req.json(); } catch { return json({ error: 'bad_json' }, 400); }
+  if (!body || body.rating == null || !Number.isInteger(body.rating) || body.rating < 1 || body.rating > 5) {
+    return json({ error: 'missing_fields' }, 400);
+  }
+  const { rating, text, staff_id, record_id } = body;
+  const ycUrl = `https://api.yclients.com/api/v1/comments/${env.YC_COMPANY}`;
+  const headers = {
+    Authorization: `Bearer ${env.YC_TOKEN}, User ${env.YC_USER_TOKEN}`,
+    Accept: 'application/vnd.yclients.v2+json',
+    'Content-Type': 'application/json',
+  };
+  let ycResp, data;
+  try {
+    ycResp = await fetch(ycUrl, { method: 'POST', headers, body: JSON.stringify({ rating, text, staff_id, record_id }) });
+    data = await ycResp.json().catch(() => ({}));
+  } catch (e) {
+    return json({ ok: false, status: 0 }, 502);
+  }
+  if (ycResp.ok && data.success === true) return json({ ok: true });
+  return json({ ok: false, status: ycResp.status }, 502);
+}
+
 // ── Cron: send reminders for tomorrow's bookings ─────────────────────────────
 
 async function handleCron(env) {
@@ -250,6 +276,7 @@ export default {
     if (req.method === 'POST' && url.pathname === '/subscribe')   return handleSubscribe(req, env);
     if (req.method === 'POST' && url.pathname === '/unsubscribe') return handleUnsubscribe(req, env);
     if (req.method === 'POST' && url.pathname === '/send')        return handleSend(req, env);
+    if (req.method === 'POST' && url.pathname === '/review')     return handleReview(req, env);
 
     return new Response('Not Found', { status: 404 });
   },
