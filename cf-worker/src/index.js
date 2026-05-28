@@ -27,6 +27,13 @@ function fromB64url(str) {
   return Uint8Array.from(atob(padded), c => c.charCodeAt(0));
 }
 
+// ── Endpoint hash ────────────────────────────────────────────────────────────
+
+export async function endpointHash(endpoint) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(endpoint));
+  return b64url(buf);
+}
+
 // ── HKDF (full Extract+Expand via Web Crypto) ────────────────────────────────
 
 async function hkdf(salt, ikm, info, length) {
@@ -134,28 +141,36 @@ async function sendOne(subscription, payload, env) {
 
 // ── Route handlers ───────────────────────────────────────────────────────────
 
-async function handleSubscribe(req, env) {
+export async function handleSubscribe(req, env) {
   let body;
   try { body = await req.json(); } catch { return json({ error: 'bad_json' }, 400); }
   const { subscription, clientId, phone } = body;
   if (!subscription?.endpoint || !clientId) return json({ error: 'missing_fields' }, 400);
+  const hash = await endpointHash(subscription.endpoint);
   await env.SUBSCRIPTIONS.put(
-    `sub:${clientId}`,
-    JSON.stringify({ subscription, clientId: String(clientId), phone: phone || '', ts: Date.now() })
+    `sub:${clientId}:${hash}`,
+    JSON.stringify({
+      subscription,
+      clientId: String(clientId),
+      phone: phone || '',
+      endpoint: subscription.endpoint,
+      ts: Date.now(),
+    })
   );
   return json({ ok: true });
 }
 
-async function handleUnsubscribe(req, env) {
+export async function handleUnsubscribe(req, env) {
   let body;
   try { body = await req.json(); } catch { return json({ error: 'bad_json' }, 400); }
-  const { clientId } = body;
-  if (!clientId) return json({ error: 'missing_fields' }, 400);
-  await env.SUBSCRIPTIONS.delete(`sub:${clientId}`);
+  const { clientId, endpoint } = body;
+  if (!clientId || !endpoint) return json({ error: 'missing_fields' }, 400);
+  const hash = await endpointHash(endpoint);
+  await env.SUBSCRIPTIONS.delete(`sub:${clientId}:${hash}`);
   return json({ ok: true });
 }
 
-async function handleSend(req, env) {
+export async function handleSend(req, env, _sendOne = sendOne) {
   if (req.headers.get('X-Admin-Secret') !== env.ADMIN_SECRET) return new Response('Unauthorized', { status: 401 });
   let body;
   try { body = await req.json(); } catch { return json({ error: 'bad_json' }, 400); }
@@ -165,27 +180,32 @@ async function handleSend(req, env) {
   const payload = JSON.stringify({ title, body: text, icon: './icon-192.png' });
   let sent = 0, failed = 0;
 
-  if (targetClientId) {
-    const val = await env.SUBSCRIPTIONS.get(`sub:${targetClientId}`);
-    if (!val) return json({ ok: false, error: 'not_found' });
-    const { subscription } = JSON.parse(val);
-    const status = await sendOne(subscription, payload, env);
-    if (status === 410) await env.SUBSCRIPTIONS.delete(`sub:${targetClientId}`);
-    status < 300 ? sent++ : failed++;
-  } else {
-    let cursor = undefined;
-    do {
-      const list = await env.SUBSCRIPTIONS.list({ prefix: 'sub:', cursor, limit: 100 });
-      for (const key of list.keys) {
-        const val = await env.SUBSCRIPTIONS.get(key.name);
-        if (!val) continue;
-        const { subscription } = JSON.parse(val);
-        const status = await sendOne(subscription, payload, env);
-        if (status === 410) await env.SUBSCRIPTIONS.delete(key.name);
-        status < 300 ? sent++ : failed++;
+  const prefix = targetClientId ? `sub:${targetClientId}:` : 'sub:';
+  let cursor = undefined;
+  do {
+    const list = await env.SUBSCRIPTIONS.list({ prefix, cursor, limit: 100 });
+    for (const key of list.keys) {
+      const val = await env.SUBSCRIPTIONS.get(key.name);
+      if (!val) continue;
+      const parsed = JSON.parse(val);
+      const subscription = parsed.subscription;
+      if (!subscription?.endpoint) continue;
+      const host = new URL(subscription.endpoint).host;
+      const status = await _sendOne(subscription, payload, env);
+      if (status < 300) {
+        console.log(`[send] host=${host} status=${status}`);
+        sent++;
+      } else {
+        console.warn(`[send] host=${host} status=${status}`);
+        failed++;
       }
-      cursor = list.list_complete ? undefined : list.cursor;
-    } while (cursor);
+      if (status === 410) await env.SUBSCRIPTIONS.delete(key.name);
+    }
+    cursor = list.list_complete ? undefined : list.cursor;
+  } while (cursor);
+
+  if (targetClientId && sent === 0 && failed === 0) {
+    return json({ ok: false, error: 'not_found' });
   }
 
   return json({ ok: true, sent, failed });
@@ -219,7 +239,7 @@ async function handleReview(req, env) {
 
 // ── Cron: send reminders for tomorrow's bookings ─────────────────────────────
 
-async function handleCron(env) {
+export async function handleCron(env, _sendOne = sendOne) {
   const tomorrow = new Date();
   tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
   const dateStr = tomorrow.toISOString().slice(0, 10);
@@ -244,9 +264,7 @@ async function handleCron(env) {
   for (const rec of records) {
     const clientId = rec.client?.id;
     if (!clientId) continue;
-    const val = await env.SUBSCRIPTIONS.get(`sub:${clientId}`);
-    if (!val) continue;
-    const { subscription } = JSON.parse(val);
+
     const svc = rec.services?.[0]?.title || 'процедура';
     const time = (rec.date || '').slice(11, 16);
     const payload = JSON.stringify({
@@ -254,9 +272,28 @@ async function handleCron(env) {
       body: `Завтра в ${time}: ${svc}. Ждём вас!`,
       icon: './icon-192.png',
     });
-    const status = await sendOne(subscription, payload, env);
-    if (status === 410) await env.SUBSCRIPTIONS.delete(`sub:${clientId}`);
-    if (status < 300) sent++;
+
+    let cursor = undefined;
+    do {
+      const list = await env.SUBSCRIPTIONS.list({ prefix: `sub:${clientId}:`, cursor, limit: 100 });
+      for (const key of list.keys) {
+        const val = await env.SUBSCRIPTIONS.get(key.name);
+        if (!val) continue;
+        const parsed = JSON.parse(val);
+        const subscription = parsed.subscription;
+        if (!subscription?.endpoint) continue;
+        const host = new URL(subscription.endpoint).host;
+        const status = await _sendOne(subscription, payload, env);
+        if (status < 300) {
+          console.log(`[cron] host=${host} status=${status}`);
+          sent++;
+        } else {
+          console.warn(`[cron] host=${host} status=${status}`);
+        }
+        if (status === 410) await env.SUBSCRIPTIONS.delete(key.name);
+      }
+      cursor = list.list_complete ? undefined : list.cursor;
+    } while (cursor);
   }
 
   console.log(`Cron reminders: ${sent} sent for ${dateStr}`);
@@ -277,10 +314,6 @@ export default {
     if (req.method === 'POST' && url.pathname === '/unsubscribe') return handleUnsubscribe(req, env);
     if (req.method === 'POST' && url.pathname === '/send')        return handleSend(req, env);
     if (req.method === 'POST' && url.pathname === '/review')     return handleReview(req, env);
-    if (req.method === 'GET' && url.pathname === '/debug-auth') {
-      const h = `Bearer ${env.YC_TOKEN}, User ${env.YC_USER_TOKEN}`;
-      return json({ header_len: h.length, header_start: h.slice(0, 30), header_end: h.slice(-10) });
-    }
     return new Response('Not Found', { status: 404 });
   },
 

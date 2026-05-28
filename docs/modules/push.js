@@ -72,12 +72,15 @@ export async function unsubscribePush() {
   try {
     const reg = await navigator.serviceWorker.ready;
     const sub = await reg.pushManager.getSubscription();
-    if (sub) await sub.unsubscribe();
-    await fetch(`${url}/unsubscribe`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ clientId: String(sess.client_id) }),
-    });
+    if (sub) {
+      const endpoint = sub.endpoint;
+      await fetch(`${url}/unsubscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId: String(sess.client_id), endpoint }),
+      });
+      await sub.unsubscribe();
+    }
     localStorage.removeItem(_KEY_SUB);
   } catch {}
 }
