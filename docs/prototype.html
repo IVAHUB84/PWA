@@ -295,13 +295,9 @@
         <div id="notifSettingsChevron" style="font-size:18px;color:var(--text-2);transition:transform .2s;line-height:1;">›</div>
       </div>
       <div class="settings-group" id="notifSettingsGroup" style="display:none;">
-        <div class="s-row"><div class="s-ico">🔔</div><div class="s-lbl">Напоминания о визите</div><div class="toggle on" onclick="consentToggle(this,'notify')"></div></div>
-        <div class="s-row"><div class="s-ico">🎁</div><div class="s-lbl">Акции и предложения</div><div class="toggle on" onclick="consentToggle(this,'promo')"></div></div>
-        <div class="s-row" id="photoConsentRow"><div class="s-ico">📸</div><div class="s-lbl">Публикация фото и видео</div><div class="toggle on" onclick="consentToggle(this,'photo')"></div></div>
-        <div id="photoDeleteBtn" style="display:none;padding:10px 16px 14px 46px;">
-          <button onclick="showDeleteRequest()" style="font-size:13px;font-weight:600;color:var(--red);background:none;border:none;cursor:pointer;padding:0;">Запросить удаление материалов →</button>
-        </div>
-        <div class="s-row"><div class="s-ico">💬</div><div class="s-lbl">Публикация отзывов</div><div class="toggle on" onclick="consentToggle(this,'reviews')"></div></div>
+        <div id="notifUnavailableHint" style="display:none;padding:10px 16px;font-size:13px;color:var(--text-2);">Уведомления недоступны. Разрешите уведомления в настройках браузера.</div>
+        <div class="s-row"><div class="s-ico">🔔</div><div class="s-lbl">Push-уведомления</div><div class="toggle on" data-push-type="promo" onclick="consentToggle(this,'promo')"></div></div>
+        <div class="s-row"><div class="s-ico">📅</div><div class="s-lbl">Напоминания о визитах</div><div class="toggle on" data-push-type="notify" onclick="consentToggle(this,'notify')"></div></div>
         <div class="s-row" style="cursor:pointer;" onclick="go('s-consent')">
           <div class="s-ico">📄</div>
           <div class="s-lbl">Оферта и конфиденциальность</div>
@@ -581,23 +577,6 @@
       <button id="consentModalConfirm" style="width:100%;margin-bottom:10px;" class="btn-danger" onclick="confirmConsentOff()">Отключить</button>
       <button style="width:100%;" class="btn-secondary" onclick="closeConsentModal()">Оставить включённым</button>
     </div>
-  </div>
-
-  <!-- ══ DELETE REQUEST MODAL ══ -->
-  <div id="deleteModal" style="display:none;position:absolute;inset:0;z-index:100;background:rgba(0,0,0,0.45);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);align-items:flex-end;" onclick="closeDeleteModal()">
-    <div style="background:var(--bg);border-radius:20px 20px 0 0;padding:24px 20px 40px;width:100%;" onclick="event.stopPropagation()">
-      <div style="width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px;"></div>
-      <div style="font-size:36px;margin-bottom:12px;">🗑️</div>
-      <div style="font-size:19px;font-weight:800;margin-bottom:8px;">Удаление материалов</div>
-      <div style="font-size:14px;color:var(--text-2);line-height:1.55;margin-bottom:24px;">Мы удалим все ваши фото и видео из публикаций студии в течение 5 рабочих дней. После удаления восстановление невозможно.</div>
-      <button style="width:100%;margin-bottom:10px;" class="btn-danger" onclick="confirmDeleteRequest()">Подтвердить запрос</button>
-      <button style="width:100%;" class="btn-secondary" onclick="closeDeleteModal()">Отмена</button>
-    </div>
-  </div>
-
-  <!-- ══ DELETE DONE TOAST ══ -->
-  <div id="deleteToast" style="display:none;position:absolute;bottom:100px;left:16px;right:16px;z-index:101;background:#1C1C1E;color:#fff;border-radius:14px;padding:14px 16px;font-size:14px;font-weight:600;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.25);">
-    Запрос на удаление отправлен ✓
   </div>
 
   <!-- ══ CONSENT ══ -->
