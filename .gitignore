@@ -1,20 +1,32 @@
+# Claude Code local settings (не должны попадать в репозиторий)
+.claude/settings.local.json
+
 # Secrets
 .env
 .env.*
-
-# Claude
 CLAUDE.local.md
-
-# Node
-node_modules/
-docs/node_modules/
-
-# Netlify
-docs/.netlify/
 
 # OS
 .DS_Store
 Thumbs.db
+Desktop.ini
+
+# Editors / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Логи и временные файлы
+*.log
+*.tmp
+
+# Dependencies
+node_modules/
+cf-worker/node_modules/
+docs/node_modules/
 
 # Build artifacts
 deploy.zip
+docs/.netlify/
