@@ -1,10 +1,10 @@
 import { go } from './navigation.js';
+import { getSession } from './storage.js';
+import { savePreferences } from './push.js';
 
 const CONSENT_INFO = {
-  notify:  { icon: '🔔', title: 'Отключить уведомления о записях?',       text: 'Вы перестанете получать напоминания о предстоящих визитах, уведомления об отмене и переносе записей. Важную информацию придётся проверять вручную.' },
-  promo:   { icon: '🎁', title: 'Отключить акции и предложения?',          text: 'Вы не будете получать персональные скидки, новости студии и спецпредложения. Их можно будет посмотреть только в разделе «Лента».' },
-  photo:   { icon: '📸', title: 'Отозвать согласие на фото и видео?',      text: 'Студия прекратит использовать новые материалы с вашим участием. Уже опубликованные фото и видео могут остаться — используйте кнопку «Запросить удаление» для их удаления.' },
-  reviews: { icon: '💬', title: 'Отозвать согласие на публикацию отзывов?', text: 'Студия не сможет публиковать ваши новые отзывы. Ранее опубликованные отзывы останутся на сайте и в соцсетях.' },
+  notify:  { icon: '🔔', title: 'Отключить напоминания о визитах?',    text: 'Вы перестанете получать напоминания о предстоящих визитах, уведомления об отмене и переносе записей. Важную информацию придётся проверять вручную.' },
+  promo:   { icon: '🔕', title: 'Отключить push-уведомления?',          text: 'Вы не будете получать уведомления от студии: новости, акции и спецпредложения. Их можно будет посмотреть только в разделе «Лента».' },
 };
 
 let _pendingToggle = null;
@@ -19,15 +19,16 @@ export function acceptConsent() {
 }
 
 export function consentToggle(el, type) {
-  if (!el.classList.contains('on')) {
-    el.classList.add('on');
-    if (type === 'photo') {
-      const btn = document.getElementById('photoDeleteBtn');
-      if (btn) btn.style.display = 'none';
-    }
+  // Push-тумблеры профиля: promo и notify/remind
+  if (type === 'promo' || type === 'notify') {
+    _handlePushToggle(el, type);
     return;
   }
-  // Prevent overwrite if modal is already open for another toggle
+  // Остальные типы (onboarding и будущие)
+  if (!el.classList.contains('on')) {
+    el.classList.add('on');
+    return;
+  }
   if (_pendingToggle) return;
   const info = CONSENT_INFO[type];
   if (!info) return;
@@ -45,6 +46,70 @@ export function consentToggle(el, type) {
   requestAnimationFrame(() => { modal.style.opacity = '1'; });
 }
 
+function _handlePushToggle(el, type) {
+  if (el.classList.contains('disabled')) return;
+  const isOn = el.classList.contains('on');
+  const newValue = !isOn;
+
+  if (!newValue) {
+    // Выключение — показать подтверждающую модалку
+    if (_pendingToggle) return;
+    const info = CONSENT_INFO[type];
+    if (!info) { _applyPushToggle(el, type, newValue); return; }
+    const modal = document.getElementById('consentModal');
+    if (!modal) { _applyPushToggle(el, type, newValue); return; }
+    _pendingToggle = el;
+    _pendingType = type;
+    const iconEl = document.getElementById('consentModalIcon');
+    const titleEl = document.getElementById('consentModalTitle');
+    const textEl = document.getElementById('consentModalText');
+    if (iconEl) iconEl.textContent = info.icon;
+    if (titleEl) titleEl.textContent = info.title;
+    if (textEl) textEl.textContent = info.text;
+    modal.style.display = 'flex';
+    requestAnimationFrame(() => { modal.style.opacity = '1'; });
+  } else {
+    // Включение — сразу применить без модалки
+    _applyPushToggle(el, type, newValue);
+  }
+}
+
+function _getNotifGroup() {
+  return document.getElementById('notifSettingsGroup');
+}
+
+function _readBothToggleValues() {
+  const group = _getNotifGroup();
+  const promoEl  = group?.querySelector('.toggle[data-push-type="promo"]');
+  const notifyEl = group?.querySelector('.toggle[data-push-type="notify"]');
+  return {
+    promo:  promoEl  ? promoEl.classList.contains('on')  : true,
+    remind: notifyEl ? notifyEl.classList.contains('on') : true,
+  };
+}
+
+async function _applyPushToggle(el, type, newValue) {
+  if (newValue) {
+    el.classList.add('on');
+  } else {
+    el.classList.remove('on');
+  }
+
+  const sess = getSession();
+  if (!sess?.client_id) return;
+
+  const { promo, remind } = _readBothToggleValues();
+  const ok = await savePreferences(sess.client_id, { promo, remind });
+  if (!ok) {
+    // Откат визуального состояния при ошибке
+    if (newValue) {
+      el.classList.remove('on');
+    } else {
+      el.classList.add('on');
+    }
+  }
+}
+
 function closeConsentModal() {
   const modal = document.getElementById('consentModal');
   if (modal) modal.style.display = 'none';
@@ -54,34 +119,17 @@ function closeConsentModal() {
 
 export function confirmConsentOff() {
   if (_pendingToggle) {
-    _pendingToggle.classList.remove('on');
-    if (_pendingType === 'photo') {
-      const btn = document.getElementById('photoDeleteBtn');
-      if (btn) btn.style.display = 'block';
+    const el = _pendingToggle;
+    const type = _pendingType;
+    closeConsentModal();
+    if (type === 'promo' || type === 'notify') {
+      _applyPushToggle(el, type, false);
+    } else {
+      el.classList.remove('on');
     }
+    return;
   }
   closeConsentModal();
-}
-
-export function showDeleteRequest() {
-  const modal = document.getElementById('deleteModal');
-  if (modal) modal.style.display = 'flex';
-}
-
-function closeDeleteModal() {
-  const modal = document.getElementById('deleteModal');
-  if (modal) modal.style.display = 'none';
-}
-
-export function confirmDeleteRequest() {
-  closeDeleteModal();
-  const btn = document.getElementById('photoDeleteBtn');
-  if (btn) btn.innerHTML = '<span style="font-size:13px;color:var(--text-2);padding:0;">Запрос на удаление отправлен ✓</span>';
-  const toast = document.getElementById('deleteToast');
-  if (toast) {
-    toast.style.display = 'block';
-    setTimeout(() => { toast.style.display = 'none'; }, 3000);
-  }
 }
 
 export function toggleConsent(row) {
@@ -92,6 +140,6 @@ export function toggleConsent(row) {
 }
 
 Object.assign(window, {
-  acceptConsent, consentToggle, confirmConsentOff, showDeleteRequest, confirmDeleteRequest, toggleConsent,
-  closeConsentModal, closeDeleteModal,
+  acceptConsent, consentToggle, confirmConsentOff, toggleConsent,
+  closeConsentModal,
 });

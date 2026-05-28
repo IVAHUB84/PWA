@@ -86,6 +86,31 @@ export async function unsubscribePush() {
   } catch {}
 }
 
+export async function getPreferences(clientId) {
+  const url = _workerUrl();
+  try {
+    const r = await fetch(`${url}/preferences?clientId=${encodeURIComponent(clientId)}`);
+    if (!r.ok) return { promo: true, remind: true };
+    return await r.json();
+  } catch {
+    return { promo: true, remind: true };
+  }
+}
+
+export async function savePreferences(clientId, { promo, remind }) {
+  const url = _workerUrl();
+  try {
+    const r = await fetch(`${url}/preferences`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId: String(clientId), promo, remind }),
+    });
+    return r.ok;
+  } catch {
+    return false;
+  }
+}
+
 export async function sendAdminPush(title, body, targetClientId) {
   const url = _workerUrl();
   const secret = localStorage.getItem(_KEY_SECRET);
@@ -103,4 +128,4 @@ export async function sendAdminPush(title, body, targetClientId) {
   } catch(e) { return { ok: false, sent: 0, error: String(e) }; }
 }
 
-Object.assign(window, { subscribePush, unsubscribePush });
+Object.assign(window, { subscribePush, unsubscribePush, getPreferences, savePreferences });

@@ -1,5 +1,5 @@
-import { getSession } from './storage.js';
-import { _loadStoredRecords } from './storage.js';
+import { getSession, _loadStoredRecords } from './storage.js';
+import { getPreferences } from './push.js';
 import { _loadClientLoyalty } from './api.js';
 import { MASTERS_DATA } from './state.js';
 import { getInitials, esc, _fmtDatetime, _hasRealAvatar } from './utils.js';
@@ -266,10 +266,53 @@ export function _toggleNotifSettings() {
   const open = g.style.display !== 'none';
   g.style.display = open ? 'none' : '';
   if (ch) ch.style.transform = open ? '' : 'rotate(90deg)';
+  if (!open) _loadNotifToggles();
+}
+
+function _setPushToggle(el, value) {
+  if (!el) return;
+  if (value) {
+    el.classList.add('on');
+  } else {
+    el.classList.remove('on');
+  }
+}
+
+export async function _loadNotifToggles() {
+  const g = document.getElementById('notifSettingsGroup');
+  if (!g) return;
+
+  const pushAvailable = ('serviceWorker' in navigator) &&
+    ('PushManager' in window) &&
+    (typeof Notification !== 'undefined') &&
+    Notification.permission === 'granted';
+
+  const unavailableEl = document.getElementById('notifUnavailableHint');
+
+  const promoEl  = g.querySelector('.toggle[data-push-type="promo"]');
+  const notifyEl = g.querySelector('.toggle[data-push-type="notify"]');
+
+  if (!pushAvailable) {
+    if (promoEl)  promoEl.classList.add('disabled');
+    if (notifyEl) notifyEl.classList.add('disabled');
+    if (unavailableEl) unavailableEl.style.display = '';
+    return;
+  }
+
+  if (unavailableEl) unavailableEl.style.display = 'none';
+  if (promoEl)  promoEl.classList.remove('disabled');
+  if (notifyEl) notifyEl.classList.remove('disabled');
+
+  const sess = getSession();
+  if (!sess?.client_id) return;
+
+  const prefs = await getPreferences(sess.client_id);
+  _setPushToggle(promoEl, prefs.promo);
+  _setPushToggle(notifyEl, prefs.remind);
 }
 
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
   if ((localStorage.getItem('yc_theme') || 'system') === 'system') _setTheme('system');
 });
 
-Object.assign(window, { renderProfileScreen, renderHomeHero, _renderHomeFeedPreview, renderLoyaltyBlock, _toggleNotifSettings, _toggleThemeSettings, _setTheme, _initThemeUI, _csToggle, _reviewCount, _initOfferUrgency });
+Object.assign(window, { renderProfileScreen, renderHomeHero, _renderHomeFeedPreview, renderLoyaltyBlock, _toggleNotifSettings, _loadNotifToggles, _toggleThemeSettings, _setTheme, _initThemeUI, _csToggle, _reviewCount, _initOfferUrgency });
