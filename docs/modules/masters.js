@@ -5,6 +5,7 @@ import { _hasRealAvatar, getInitials, esc } from './utils.js';
 import { bookWithMaster } from './booking.js';
 
 const _staffByServiceCache = new Map();
+let _masterTapMode = 'browse'; // 'browse' — безопасный дефолт: тап ведёт в профиль, а не на прямой переход к брони
 
 function _masterCardHtml(m, i, total) {
   const last = i === total - 1;
@@ -13,7 +14,7 @@ function _masterCardHtml(m, i, total) {
   const availCls = m.avail ? 'avail-yes' : 'avail-no';
   const styles = [...(m.avail ? [] : ['opacity:0.55']), ...(last ? ['margin-bottom:24px'] : [])];
   const styleAttr = styles.length ? ` style="${styles.join(';')}"` : '';
-  const click = m.avail ? ` data-mid="${esc(m.id)}" onclick="openMasterCard(this.dataset.mid)"` : '';
+  const click = m.avail ? ` data-mid="${esc(m.id)}" onclick="tapMaster(this.dataset.mid)"` : '';
   const initStr = getInitials(m.name);
   const avatarInner = _hasRealAvatar(m)
     ? `<img src="${esc(m.avatar_big || m.avatar)}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<div class=&quot;av-initials&quot;>${initStr}</div>')">`
@@ -52,6 +53,7 @@ export async function renderMasters() {
   const anyMasterEl = document.querySelector('#s-masters .any-master');
   const masterLabelEl = document.querySelector('#s-masters .label');
   if (browseAll) {
+    _masterTapMode = 'browse';
     if (sub) sub.textContent = 'Все мастера студии';
     if (anyMasterEl) anyMasterEl.style.display = 'none';
     if (masterLabelEl) masterLabelEl.style.display = 'none';
@@ -97,6 +99,7 @@ export async function renderMasters() {
   const fp = masters.map(m => `${m.id}|${m.fav ? 1 : 0}|${m.avatar_big || m.avatar || ''}`).join(',');
   if (list.dataset.fp === fp) return;
   list.dataset.fp = fp;
+  _masterTapMode = 'book';
   list.innerHTML = masters.map((m, i) => _masterCardHtml(m, i, masters.length)).join('');
 }
 
@@ -238,4 +241,12 @@ export function selectAnyMaster() {
   go('s-slots');
 }
 
-Object.assign(window, { renderMasters, toggleFav, toggleFavFromCard, selectMaster, selectAnyMaster, openMasterCard, bookFromMaster, bookServiceFromMaster, _browseAllMasters });
+export function tapMaster(id) {
+  if (_masterTapMode === 'book') {
+    selectMaster(id);
+  } else {
+    openMasterCard(id);
+  }
+}
+
+Object.assign(window, { renderMasters, toggleFav, toggleFavFromCard, selectMaster, selectAnyMaster, openMasterCard, bookFromMaster, bookServiceFromMaster, _browseAllMasters, tapMaster });
