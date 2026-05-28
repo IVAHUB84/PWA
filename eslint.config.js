@@ -3,6 +3,22 @@ import js from '@eslint/js';
 export default [
   js.configs.recommended,
   {
+    files: ['docs/modules/**/*.test.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+      },
+    },
+    rules: {
+      'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      'no-undef': 'error',
+      'no-console': 'off',
+    },
+  },
+  {
     files: ['docs/modules/**/*.js', 'docs/app.js'],
     languageOptions: {
       ecmaVersion: 2022,
