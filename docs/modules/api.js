@@ -1,5 +1,6 @@
 import { _normalizePhone } from './utils.js';
 import { getSession } from './storage.js';
+import { WORKER_URL } from './constants.js';
 
 export const EMAILJS = {
   serviceId:  'service_m2fr45h',
@@ -105,14 +106,24 @@ export async function _fetchAndMergeServerRecords(clientId) {
   } catch {}
 }
 
-export async function postComment({ rating, text, staffId, recordId }, _ycPost = YC.post.bind(YC)) {
+export async function postComment({ rating, text, staffId, recordId }, _fetch = fetch) {
+  const ctrl = new AbortController();
+  const tid = setTimeout(() => ctrl.abort(), 15000);
   try {
-    const body = { rating, text, staff_id: staffId, record_id: recordId };
-    const r = await _ycPost('/comments/' + YC.company, body);
-    if (r && r.success) return { ok: true };
+    const r = await _fetch(`${WORKER_URL}/review`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rating, text, staff_id: staffId, record_id: recordId }),
+      signal: ctrl.signal,
+    });
+    if (!r.ok) return { ok: false };
+    const data = await r.json();
+    if (data && data.ok === true) return { ok: true };
     return { ok: false };
   } catch {
     return { ok: false };
+  } finally {
+    clearTimeout(tid);
   }
 }
 

@@ -1,3 +1,5 @@
+export const WORKER_URL = 'https://studio-push.ivahub84.workers.dev';
+
 export const SCREENS = [
   's-home', 's-services', 's-masters', 's-slots', 's-confirm', 's-history',
   's-install', 's-profile', 's-login', 's-otp', 's-register', 's-cancel',
