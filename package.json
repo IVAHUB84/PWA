@@ -10,6 +10,7 @@
   "scripts": {
     "icons": "node docs/generate-icons.js",
     "lint": "eslint docs/modules docs/app.js",
-    "fmt": "prettier --write docs/modules docs/app.js"
+    "fmt": "prettier --write docs/modules docs/app.js",
+    "test": "node docs/modules/install.test.js && node docs/modules/masters-filter.test.js && node docs/modules/serviceImages.test.js && node docs/modules/review-post.test.js && node docs/modules/post-comment-worker.test.js"
   }
 }
