@@ -30,3 +30,23 @@ docs/node_modules/
 # Build artifacts
 deploy.zip
 docs/.netlify/
+
+# Claude working dirs
+.claude/
+docs/.claude/
+cf-worker/.claude/
+
+# Screenshots / temp
+verify_4_wrong_otp.png
+docs/Copilot_*.png
+
+# Generated HTML previews
+docs/BRD.html
+docs/architecture.html
+docs/requirements.html
+docs/status-report.html
+docs/preview_header.html
+
+# Doc build artifacts
+docs/docs/
+docs/stitch-brief.md
