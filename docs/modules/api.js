@@ -105,6 +105,17 @@ export async function _fetchAndMergeServerRecords(clientId) {
   } catch {}
 }
 
+export async function fetchStaffByService(serviceId, _ycGet = YC.get.bind(YC)) {
+  try {
+    const r = await _ycGet('/book_staff/' + YC.company, { 'service_ids[]': serviceId });
+    if (!r || r.success === false) return null;
+    if (!Array.isArray(r.data)) return null;
+    return r.data;
+  } catch {
+    return null;
+  }
+}
+
 export async function _loadClientLoyalty() {
   const sess = getSession();
   if (!sess) return null;

@@ -1,8 +1,10 @@
 import { state, MASTERS_DATA, getService } from './state.js';
 import { go } from './navigation.js';
-import { YC } from './api.js';
+import { YC, fetchStaffByService } from './api.js';
 import { _hasRealAvatar, getInitials, esc } from './utils.js';
 import { bookWithMaster } from './booking.js';
+
+const _staffByServiceCache = new Map();
 
 function _avgRating(masterId) {
   let reviews;
@@ -38,12 +40,20 @@ function _masterCardHtml(m, i, total) {
   </div>`;
 }
 
+export function _intersectWithMasters(staffResult, mastersData) {
+  if (staffResult === null) return { masters: mastersData, empty: false, error: true };
+  if (staffResult.length === 0) return { masters: [], empty: true, error: false };
+  const ycIds = new Set(staffResult.map(s => String(s.id)));
+  const matched = mastersData.filter(m => ycIds.has(String(m.id)));
+  return { masters: matched, empty: matched.length === 0, error: false };
+}
+
 export function _browseAllMasters() {
   state._mastersAll = true;
   go('s-masters');
 }
 
-export function renderMasters() {
+export async function renderMasters() {
   const browseAll = state._mastersAll;
   state._mastersAll = false;
   const sub = document.getElementById('mastersSub');
@@ -60,17 +70,39 @@ export function renderMasters() {
     if (list.dataset.fp !== fp) { list.dataset.fp = fp; list.innerHTML = masters.map((m, i) => _masterCardHtml(m, i, masters.length)).join(''); }
     return;
   }
+
   if (anyMasterEl) anyMasterEl.style.display = '';
   if (masterLabelEl) masterLabelEl.style.display = '';
   const svc = getService();
   if (sub) sub.textContent = `${svc.name} · ${svc.dur} мин`;
+
+  const serviceId = state.serviceId;
   const favs = JSON.parse(localStorage.getItem('yc_favs') || '[]');
-  let masters = MASTERS_DATA.map(m => ({ ...m, fav: favs.includes(String(m.id)) }));
-  const svcCat = svc.cat;
-  if (svcCat) {
-    const bycat = masters.filter(m => m.cats && m.cats.includes(svcCat));
-    if (bycat.length) masters = bycat;
+
+  let staffResult;
+  if (_staffByServiceCache.has(serviceId)) {
+    staffResult = _staffByServiceCache.get(serviceId);
+  } else {
+    list.innerHTML = '<div style="padding:48px 20px;text-align:center;color:var(--text-2);font-size:14px;">Загрузка мастеров…</div>';
+    staffResult = await fetchStaffByService(serviceId);
+    if (state.serviceId !== serviceId) return;
+    if (staffResult !== null) {
+      _staffByServiceCache.set(serviceId, staffResult);
+    }
   }
+
+  if (state.serviceId !== serviceId) return;
+
+  const allMasters = MASTERS_DATA.map(m => ({ ...m, fav: favs.includes(String(m.id)) }));
+  const { masters, empty } = _intersectWithMasters(staffResult, allMasters);
+
+  if (empty) {
+    if (anyMasterEl) anyMasterEl.style.display = 'none';
+    list.dataset.fp = '';
+    list.innerHTML = '<div style="padding:48px 20px;text-align:center;color:var(--text-2);font-size:14px;">На эту услугу сейчас нет доступных мастеров</div>';
+    return;
+  }
+
   masters.sort((a, b) => (b.fav ? 1 : 0) - (a.fav ? 1 : 0));
   const fp = masters.map(m => `${m.id}|${m.fav ? 1 : 0}|${m.avatar_big || m.avatar || ''}`).join(',');
   if (list.dataset.fp === fp) return;
