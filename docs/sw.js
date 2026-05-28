@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v37';
+const CACHE_VERSION = 'v38';
 const STATIC_CACHE  = `studio-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `studio-runtime-${CACHE_VERSION}`;
 
@@ -30,6 +30,7 @@ const APP_SHELL = [
   './modules/search.js',
   './modules/pin.js',
   './modules/push.js',
+  './modules/install.js',
   './manifest.json',
   './logo.png',
   './logobest.png',
