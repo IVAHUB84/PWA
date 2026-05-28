@@ -2,6 +2,7 @@ import { state, SERVICES_DATA } from './state.js';
 import { go } from './navigation.js';
 import { esc } from './utils.js';
 import { YC } from './api.js';
+import { resolveServiceImage } from './serviceImages.js';
 
 function _updateCatFilterBtn() {
   const lbl = document.getElementById('catFilterLabel');
@@ -82,14 +83,20 @@ function _renderList(data) {
     list.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--text-2);">Ничего не найдено</div>';
     return;
   }
-  list.innerHTML = data.map((s, i) => {
-    const last = i === data.length - 1 ? ' style="margin-bottom:24px;"' : '';
-    return `<div class="svc-card"${last} data-sid="${esc(s.id)}" onclick="selectService(this.dataset.sid)">
-      <div class="svc-line"></div>
-      <div class="svc-body"><div class="svc-name">${esc(s.name)}</div><div class="svc-meta">${s.dur} мин · ${esc(s.cat)}</div></div>
-      <div class="svc-right"><div class="svc-price">${esc(s.priceStr)}</div><div class="svc-cta">Записаться →</div></div>
+  const cards = data.map(s => {
+    const img = resolveServiceImage(s);
+    const coverHtml = img.type === 'photo'
+      ? `<img class="svc-cover-img" src="${esc(img.src)}" alt="${esc(s.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="svc-cover-placeholder" style="background:${esc(img.grad)};display:none">${esc(img.emoji)}</div>`
+      : `<div class="svc-cover-placeholder" style="background:${esc(img.grad)}">${esc(img.emoji)}</div>`;
+    return `<div class="svc-catalog-card" data-sid="${esc(s.id)}" onclick="selectService(this.dataset.sid)">
+      <div class="svc-cover">${coverHtml}</div>
+      <div class="svc-info">
+        <div class="svc-name">${esc(s.name)}</div>
+        <div class="svc-meta">${esc(s.priceStr)} · ${s.dur} мин</div>
+      </div>
     </div>`;
   }).join('');
+  list.innerHTML = `<div class="svc-catalog">${cards}</div>`;
 }
 
 export async function renderServices() {

@@ -8,7 +8,7 @@ export const scenarios = {
     steps: [
       { screen: 's-home',     delay: 2400 },
       { screen: 's-services', delay: 2600, tapTarget: '.tab-bar .tab:nth-child(2)' },
-      { screen: 's-masters',  delay: 2600, tapTarget: '.svc-card' },
+      { screen: 's-masters',  delay: 2600, tapTarget: '.svc-catalog-card' },
       { screen: 's-slots',    delay: 2800, tapTarget: '.master-card.fav' },
       { screen: 's-confirm',  delay: 2600, tapTarget: '.sticky-bottom .btn-primary' },
       { screen: 's-home',     delay: 2200, tab: true, tapTarget: '.tab-bar .tab:first-child' },
@@ -42,7 +42,7 @@ export const scenarios = {
     steps: [
       { screen: 's-home',      delay: 2000 },
       { screen: 's-services',  delay: 2400, tapTarget: '.tab-bar .tab:nth-child(2)' },
-      { screen: 's-masters',   delay: 2600, tapTarget: '.svc-card' },
+      { screen: 's-masters',   delay: 2600, tapTarget: '.svc-catalog-card' },
       { screen: 's-slots',     delay: 2600, tapTarget: '.master-card.fav' },
       { screen: 's-confirm',   delay: 2800, tapTarget: '.sticky-bottom .btn-primary' },
       { screen: 's-crosssell', delay: 2400, tapTarget: '.btn-ghost' },
