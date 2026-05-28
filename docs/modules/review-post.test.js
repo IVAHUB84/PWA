@@ -1,5 +1,5 @@
 /**
- * Тесты отправки отзыва в YCLIENTS и признака «оценено» (v1.3.0).
+ * Тесты отправки отзыва (контракт postComment) и признака «оценено».
  *
  * Запуск: node docs/modules/review-post.test.js
  */
@@ -41,14 +41,25 @@ function clearStorage() {
   Object.keys(_storage).forEach(k => delete _storage[k]);
 }
 
+function mockFetch(status, responseBody) {
+  return async (_url, _opts) => ({
+    ok: status >= 200 && status < 300,
+    status,
+    json: async () => responseBody,
+  });
+}
+
 // ── postComment: тело запроса ───────────────────────────────────────────────
 
 console.log('\n-- postComment: формирует корректное тело --');
 {
   let capturedBody = null;
-  const mockPost = async (path, body) => { capturedBody = body; return { success: true }; };
+  const capturingFetch = async (_url, opts) => {
+    capturedBody = JSON.parse(opts.body);
+    return { ok: true, json: async () => ({ ok: true }) };
+  };
 
-  await postComment({ rating: 5, text: 'Отличная работа', staffId: 123, recordId: 456 }, mockPost);
+  await postComment({ rating: 5, text: 'Отличная работа', staffId: 123, recordId: 456 }, capturingFetch);
 
   assertEqual(capturedBody.rating, 5, 'rating = 5');
   assertEqual(capturedBody.text, 'Отличная работа', 'text передан');
@@ -64,8 +75,11 @@ console.log('\n-- postComment: рейтинг 1–5 передаётся как 
 {
   for (const r of [1, 2, 3, 4, 5]) {
     let capturedBody = null;
-    const mockPost = async (path, body) => { capturedBody = body; return { success: true }; };
-    await postComment({ rating: r, text: '', staffId: 1, recordId: 1 }, mockPost);
+    const capturingFetch = async (_url, opts) => {
+      capturedBody = JSON.parse(opts.body);
+      return { ok: true, json: async () => ({ ok: true }) };
+    };
+    await postComment({ rating: r, text: '', staffId: 1, recordId: 1 }, capturingFetch);
     assertEqual(capturedBody.rating, r, `rating ${r} передан`);
   }
 }
@@ -73,45 +87,45 @@ console.log('\n-- postComment: рейтинг 1–5 передаётся как 
 console.log('\n-- postComment: пустой текст допустим --');
 {
   let capturedBody = null;
-  const mockPost = async (path, body) => { capturedBody = body; return { success: true }; };
-  await postComment({ rating: 4, text: '', staffId: 1, recordId: 1 }, mockPost);
+  const capturingFetch = async (_url, opts) => {
+    capturedBody = JSON.parse(opts.body);
+    return { ok: true, json: async () => ({ ok: true }) };
+  };
+  await postComment({ rating: 4, text: '', staffId: 1, recordId: 1 }, capturingFetch);
   assertEqual(capturedBody.text, '', 'text пустая строка передана');
 }
 
-console.log('\n-- postComment: success:true → { ok: true } --');
+console.log('\n-- postComment: ok:true → { ok: true } --');
 {
-  const mockPost = async () => ({ success: true });
-  const result = await postComment({ rating: 5, text: '', staffId: 1, recordId: 1 }, mockPost);
-  assertEqual(result, { ok: true }, 'success:true → ok:true');
+  const result = await postComment({ rating: 5, text: '', staffId: 1, recordId: 1 }, mockFetch(200, { ok: true }));
+  assertEqual(result, { ok: true }, 'ok:true → ok:true');
 }
 
-console.log('\n-- postComment: success:false → { ok: false } --');
+console.log('\n-- postComment: ok:false → { ok: false } --');
 {
-  const mockPost = async () => ({ success: false });
-  const result = await postComment({ rating: 5, text: '', staffId: 1, recordId: 1 }, mockPost);
-  assertEqual(result, { ok: false }, 'success:false → ok:false');
+  const result = await postComment({ rating: 5, text: '', staffId: 1, recordId: 1 }, mockFetch(200, { ok: false }));
+  assertEqual(result, { ok: false }, 'ok:false → ok:false');
 }
 
-console.log('\n-- postComment: HTTP 4xx (_status) → { ok: false } --');
+console.log('\n-- postComment: HTTP 4xx → { ok: false } --');
 {
-  const mockPost = async () => ({ success: false, _status: 403 });
-  const result = await postComment({ rating: 5, text: '', staffId: 1, recordId: 1 }, mockPost);
-  assertEqual(result, { ok: false }, '_status 403 → ok:false');
+  const result = await postComment({ rating: 5, text: '', staffId: 1, recordId: 1 }, mockFetch(403, {}));
+  assertEqual(result, { ok: false }, 'HTTP 403 → ok:false');
 }
 
 console.log('\n-- postComment: исключение (сеть) → { ok: false } --');
 {
-  const mockPost = async () => { throw new Error('network error'); };
-  const result = await postComment({ rating: 5, text: '', staffId: 1, recordId: 1 }, mockPost);
+  const throwingFetch = async () => { throw new Error('network error'); };
+  const result = await postComment({ rating: 5, text: '', staffId: 1, recordId: 1 }, throwingFetch);
   assertEqual(result, { ok: false }, 'исключение → ok:false');
 }
 
 console.log('\n-- postComment: один запрос на вызов --');
 {
   let callCount = 0;
-  const mockPost = async () => { callCount++; return { success: true }; };
-  await postComment({ rating: 3, text: 'Хорошо', staffId: 10, recordId: 20 }, mockPost);
-  assertEqual(callCount, 1, 'ровно один вызов YC.post');
+  const countingFetch = async () => { callCount++; return { ok: true, json: async () => ({ ok: true }) }; };
+  await postComment({ rating: 3, text: 'Хорошо', staffId: 10, recordId: 20 }, countingFetch);
+  assertEqual(callCount, 1, 'ровно один вызов fetch');
 }
 
 // ── признак «оценено»: yc_reviewed_ids ─────────────────────────────────────
