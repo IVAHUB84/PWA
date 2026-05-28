@@ -261,21 +261,23 @@ console.log('\n-- handleCron: клиент с двумя подписками п
   kv.store.set(`sub:77:${hashA}`, JSON.stringify({ subscription: MOCK_SUB_A, clientId: '77', endpoint: ENDPOINT_A }));
   kv.store.set(`sub:77:${hashB}`, JSON.stringify({ subscription: MOCK_SUB_B, clientId: '77', endpoint: ENDPOINT_B }));
 
+  // nowMs: UTC 15:00 2026-05-28 → локальное 18:00 2026-05-28; завтра = 2026-05-29
+  const cronNowMs = Date.UTC(2026, 4, 28, 15, 0, 0);
+
   const origFetch = globalThis.fetch;
   globalThis.fetch = async (url) => {
     if (url.includes('yclients')) {
-      return {
-        ok: true,
-        json: async () => ({
-          success: true,
-          data: [{
-            deleted: false,
-            client: { id: 77 },
-            services: [{ title: 'Ламинирование' }],
-            date: '2026-05-29T15:00:00',
-          }],
-        }),
-      };
+      const urlObj = new URL(url);
+      const startDate = urlObj.searchParams.get('start_date');
+      // Запись на завтра 2026-05-29
+      const data = startDate === '2026-05-29' ? [{
+        id: 9999,
+        deleted: false,
+        client: { id: 77 },
+        services: [{ title: 'Ламинирование' }],
+        date: '2026-05-29T15:00:00',
+      }] : [];
+      return { ok: true, json: async () => ({ success: true, data }) };
     }
     return { status: 200 };
   };
@@ -288,7 +290,7 @@ console.log('\n-- handleCron: клиент с двумя подписками п
     YC_USER_TOKEN: 'utok',
   };
 
-  await handleCron(env, fakeSend);
+  await handleCron(env, fakeSend, cronNowMs);
   globalThis.fetch = origFetch;
 
   assertEqual(fakeSend.calls.length, 2, 'sendOne вызван дважды (оба устройства)');

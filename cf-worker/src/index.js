@@ -8,6 +8,8 @@ const CORS = {
   'Access-Control-Allow-Headers': 'Content-Type, X-Admin-Secret',
 };
 
+const STUDIO_TZ_OFFSET_MIN = 180; // UTC+3 (Москва)
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -139,6 +141,29 @@ async function sendOne(subscription, payload, env) {
   return resp.status;
 }
 
+// ── Preferences helpers ──────────────────────────────────────────────────────
+
+export async function getPrefs(env, clientId) {
+  try {
+    const raw = await env.SUBSCRIPTIONS.get(`prefs:${clientId}`);
+    if (!raw) return { promo: true, remind: true };
+    const parsed = JSON.parse(raw);
+    return {
+      promo:  parsed.promo  === false ? false : true,
+      remind: parsed.remind === false ? false : true,
+    };
+  } catch {
+    return { promo: true, remind: true };
+  }
+}
+
+export async function putPrefs(env, clientId, { promo, remind }) {
+  await env.SUBSCRIPTIONS.put(
+    `prefs:${clientId}`,
+    JSON.stringify({ promo: Boolean(promo), remind: Boolean(remind), ts: Date.now() })
+  );
+}
+
 // ── Route handlers ───────────────────────────────────────────────────────────
 
 export async function handleSubscribe(req, env) {
@@ -170,6 +195,30 @@ export async function handleUnsubscribe(req, env) {
   return json({ ok: true });
 }
 
+export async function handlePreferences(req, env) {
+  if (req.method === 'POST') {
+    let body;
+    try { body = await req.json(); } catch { return json({ error: 'bad_json' }, 400); }
+    const { clientId, promo, remind } = body;
+    if (!clientId) return json({ error: 'missing_fields' }, 400);
+    await putPrefs(env, clientId, {
+      promo:  promo  !== false,
+      remind: remind !== false,
+    });
+    return json({ ok: true });
+  }
+
+  if (req.method === 'GET') {
+    const url = new URL(req.url);
+    const clientId = url.searchParams.get('clientId');
+    if (!clientId) return json({ error: 'missing_fields' }, 400);
+    const prefs = await getPrefs(env, clientId);
+    return json(prefs);
+  }
+
+  return new Response('Method Not Allowed', { status: 405 });
+}
+
 export async function handleSend(req, env, _sendOne = sendOne) {
   if (req.headers.get('X-Admin-Secret') !== env.ADMIN_SECRET) return new Response('Unauthorized', { status: 401 });
   let body;
@@ -179,6 +228,8 @@ export async function handleSend(req, env, _sendOne = sendOne) {
 
   const payload = JSON.stringify({ title, body: text, icon: './icon-192.png' });
   let sent = 0, failed = 0;
+
+  const prefsCache = new Map();
 
   const prefix = targetClientId ? `sub:${targetClientId}:` : 'sub:';
   let cursor = undefined;
@@ -190,6 +241,15 @@ export async function handleSend(req, env, _sendOne = sendOne) {
       const parsed = JSON.parse(val);
       const subscription = parsed.subscription;
       if (!subscription?.endpoint) continue;
+
+      const clientId = String(parsed.clientId || '');
+      if (clientId) {
+        if (!prefsCache.has(clientId)) {
+          prefsCache.set(clientId, await getPrefs(env, clientId));
+        }
+        if (prefsCache.get(clientId).promo === false) continue;
+      }
+
       const host = new URL(subscription.endpoint).host;
       const status = await _sendOne(subscription, payload, env);
       if (status < 300) {
@@ -237,42 +297,76 @@ async function handleReview(req, env) {
   return json({ ok: false, status: ycResp.status }, 502);
 }
 
-// ── Cron: send reminders for tomorrow's bookings ─────────────────────────────
+// ── Cron: send reminders ──────────────────────────────────────────────────────
 
-export async function handleCron(env, _sendOne = sendOne) {
-  const tomorrow = new Date();
-  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-  const dateStr = tomorrow.toISOString().slice(0, 10);
+export async function handleCron(env, _sendOne = sendOne, _nowMs = null) {
+  const nowMs = _nowMs !== null ? _nowMs : Date.now();
+  // «Локальное сейчас» студии (UTC+3): сдвигаем UTC на смещение и используем UTC-геттеры
+  const localNow = new Date(nowMs + STUDIO_TZ_OFFSET_MIN * 60000);
+  const localYear  = localNow.getUTCFullYear();
+  const localMonth = localNow.getUTCMonth();
+  const localDay   = localNow.getUTCDate();
+  const localHour  = localNow.getUTCHours();
 
-  const r = await fetch(
-    `https://api.yclients.com/api/v1/records/${env.YC_COMPANY}?start_date=${dateStr}&end_date=${dateStr}&count=200`,
-    {
-      headers: {
-        Authorization: `Bearer ${env.YC_TOKEN}, User ${env.YC_USER_TOKEN}`,
-        Accept: 'application/vnd.yclients.v2+json',
-        'Content-Type': 'application/json',
-      },
-    }
-  );
-  if (!r.ok) { console.error('YCLIENTS records fetch failed', r.status); return; }
-  const data = await r.json();
-  if (!data.success || !Array.isArray(data.data)) return;
+  const todayStr    = `${localYear}-${String(localMonth + 1).padStart(2, '0')}-${String(localDay).padStart(2, '0')}`;
+  const tomorrowDt  = new Date(Date.UTC(localYear, localMonth, localDay + 1));
+  const tomorrowStr = tomorrowDt.toISOString().slice(0, 10);
 
-  const records = data.data.filter(rec => !rec.deleted);
+  // Выборка записей на сегодня и на завтра
+  async function fetchRecords(dateStr) {
+    const r = await fetch(
+      `https://api.yclients.com/api/v1/records/${env.YC_COMPANY}?start_date=${dateStr}&end_date=${dateStr}&count=200`,
+      {
+        headers: {
+          Authorization: `Bearer ${env.YC_TOKEN}, User ${env.YC_USER_TOKEN}`,
+          Accept: 'application/vnd.yclients.v2+json',
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    if (!r.ok) { console.error('YCLIENTS records fetch failed', r.status); return []; }
+    const data = await r.json();
+    if (!data.success || !Array.isArray(data.data)) return [];
+    return data.data.filter(rec => !rec.deleted);
+  }
+
+  const [todayRecords, tomorrowRecords] = await Promise.all([
+    fetchRecords(todayStr),
+    fetchRecords(tomorrowStr),
+  ]);
+
   let sent = 0;
 
-  for (const rec of records) {
+  // Обработка одного вида напоминания для одной записи
+  async function processReminder(rec, kind) {
+    const recordId = rec.id;
+    if (!recordId) return;
+
     const clientId = rec.client?.id;
-    if (!clientId) continue;
+    if (!clientId) return;
+
+    // Анти-дубль
+    const markerKey = `reminded:${recordId}:${kind}`;
+    const existing = await env.SUBSCRIPTIONS.get(markerKey);
+    if (existing) return;
+
+    const prefs = await getPrefs(env, clientId);
+    if (prefs.remind === false) return;
 
     const svc = rec.services?.[0]?.title || 'процедура';
     const time = (rec.date || '').slice(11, 16);
+
+    const payloadBody = kind === 'day'
+      ? `Завтра в ${time}: ${svc}. Ждём вас!`
+      : `Сегодня в ${time}: ${svc}. Скоро ждём вас!`;
+
     const payload = JSON.stringify({
       title: 'Реснички · Напоминание о визите',
-      body: `Завтра в ${time}: ${svc}. Ждём вас!`,
+      body: payloadBody,
       icon: './icon-192.png',
     });
 
+    let anySuccess = false;
     let cursor = undefined;
     do {
       const list = await env.SUBSCRIPTIONS.list({ prefix: `sub:${clientId}:`, cursor, limit: 100 });
@@ -285,18 +379,54 @@ export async function handleCron(env, _sendOne = sendOne) {
         const host = new URL(subscription.endpoint).host;
         const status = await _sendOne(subscription, payload, env);
         if (status < 300) {
-          console.log(`[cron] host=${host} status=${status}`);
+          console.log(`[cron:${kind}] host=${host} status=${status}`);
           sent++;
+          anySuccess = true;
         } else {
-          console.warn(`[cron] host=${host} status=${status}`);
+          console.warn(`[cron:${kind}] host=${host} status=${status}`);
         }
         if (status === 410) await env.SUBSCRIPTIONS.delete(key.name);
       }
       cursor = list.list_complete ? undefined : list.cursor;
     } while (cursor);
+
+    if (anySuccess) {
+      await env.SUBSCRIPTIONS.put(markerKey, '1', { expirationTtl: 172800 });
+    }
   }
 
-  console.log(`Cron reminders: ${sent} sent for ${dateStr}`);
+  // Вид «day» — накануне, только при localHour === 18
+  if (localHour === 18) {
+    for (const rec of tomorrowRecords) {
+      await processReminder(rec, 'day');
+    }
+  }
+
+  // Вид «soon» — окно [now+90, now+150) минут до визита.
+  // Используем абсолютные ms: recDateStr — локальное время студии «YYYY-MM-DDTHH:MM:SS»,
+  // переводим его в UTC (вычитая смещение UTC+3), чтобы корректно обрабатывать
+  // визиты 00:00–01:29, для которых «2 часа назад» — предыдущие сутки.
+  // Перебираем записи и сегодня, и завтра — ранне-утренние визиты следующего дня
+  // могут попасть в окно к концу текущего вечера.
+  for (const rec of [...todayRecords, ...tomorrowRecords]) {
+    const recDateStr = rec.date || '';
+    if (!recDateStr) continue;
+    // recDateStr — локальное время студии «YYYY-MM-DDTHH:MM:SS».
+    // Парсим как UTC через Date.UTC, чтобы не зависеть от системной TZ среды исполнения,
+    // затем вычитаем смещение UTC+3 → получаем истинный UTC-момент визита.
+    const [datePart, timePart = '00:00:00'] = recDateStr.replace(' ', 'T').split('T');
+    const [yr, mo, dy] = datePart.split('-').map(Number);
+    const [hh, mm, ss = 0] = timePart.split(':').map(Number);
+    const recLocalMs = Date.UTC(yr, mo - 1, dy, hh, mm, ss);
+    if (isNaN(recLocalMs)) continue;
+    const recUtcMs = recLocalMs - STUDIO_TZ_OFFSET_MIN * 60000;
+    const diffMin = (recUtcMs - nowMs) / 60000;
+    if (diffMin >= 90 && diffMin < 150) {
+      await processReminder(rec, 'soon');
+    }
+  }
+
+  console.log(`Cron reminders: ${sent} sent (today=${todayStr}, tomorrow=${tomorrowStr})`);
 }
 
 // ── Entry point ───────────────────────────────────────────────────────────────
@@ -310,10 +440,13 @@ export default {
     if (req.method === 'GET' && url.pathname === '/vapid-public-key') {
       return json({ key: env.VAPID_PUBLIC_KEY });
     }
-    if (req.method === 'POST' && url.pathname === '/subscribe')   return handleSubscribe(req, env);
-    if (req.method === 'POST' && url.pathname === '/unsubscribe') return handleUnsubscribe(req, env);
-    if (req.method === 'POST' && url.pathname === '/send')        return handleSend(req, env);
-    if (req.method === 'POST' && url.pathname === '/review')     return handleReview(req, env);
+    if (req.method === 'POST' && url.pathname === '/subscribe')    return handleSubscribe(req, env);
+    if (req.method === 'POST' && url.pathname === '/unsubscribe')  return handleUnsubscribe(req, env);
+    if (req.method === 'POST' && url.pathname === '/send')         return handleSend(req, env);
+    if (req.method === 'POST' && url.pathname === '/review')       return handleReview(req, env);
+    if ((req.method === 'POST' || req.method === 'GET') && url.pathname === '/preferences') {
+      return handlePreferences(req, env);
+    }
     return new Response('Not Found', { status: 404 });
   },
 

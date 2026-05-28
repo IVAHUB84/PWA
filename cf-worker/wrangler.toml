@@ -8,7 +8,7 @@ binding = "SUBSCRIPTIONS"
 id = "db55a2dffd2f456bb5a6ca5578546c90"
 
 [triggers]
-crons = ["0 15 * * *"]
+crons = ["*/30 * * * *"]
 
 # Secrets (set via wrangler secret put):
 #   VAPID_PUBLIC_KEY       — base64url P-256 public key
