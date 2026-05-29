@@ -102,6 +102,57 @@ export function renderHistoryScreen() {
   }
 }
 
+export function _upcomingItemHtml(r) {
+  return `
+    <div class="s-row" style="align-items:flex-start;">
+      <div class="s-ico" style="padding-top:2px;">📅</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:15px;font-weight:600;">${esc(r.svcName)}</div>
+        <div style="font-size:12px;color:var(--text-2);margin-top:2px;">${esc(r.masterName)} · ${_fmtDatetime(r.datetime)}</div>
+        ${r.price ? `<div style="font-size:13px;font-weight:700;margin-top:3px;color:var(--accent);">${esc(String(r.price))}</div>` : ''}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;padding-top:2px;">
+        <button class="btn-ghost" style="font-size:12px;" data-rid="${esc(String(r.id))}" onclick="event.stopPropagation();rescheduleRecord(this.dataset.rid)">Перенести</button>
+        <button class="btn-ghost" style="font-size:12px;color:var(--red);" data-cid="${esc(String(r.id))}" data-chash="${esc(r.hash||'')}" onclick="event.stopPropagation();cancelRecord(this.dataset.cid,this.dataset.chash)">Отменить</button>
+      </div>
+    </div>`;
+}
+
+export function _upcomingListHtml(records, opts = {}) {
+  if (opts && opts.withHeader) {
+    return `
+      <div style="padding:8px 20px 6px;"><div class="label">Предстоящие · ${records.length}</div></div>
+      <div class="settings-group" style="margin-bottom:16px;">
+        ${records.map(_upcomingItemHtml).join('')}
+      </div>`;
+  }
+  return `<div class="settings-group" style="margin-bottom:16px;">
+    ${records.map(_upcomingItemHtml).join('')}
+  </div>`;
+}
+
+export function renderUpcomingScreen() {
+  const el = document.getElementById('upcomingList');
+  if (!el) return;
+  const draw = () => {
+    const now = new Date();
+    const upcoming = _loadStoredRecords()
+      .filter(r => r.status !== 'cancelled' && new Date(r.datetime.replace(' ', 'T')) > now)
+      .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+    el.innerHTML = upcoming.length
+      ? _upcomingListHtml(upcoming, { withHeader: false })
+      : `<div style="display:flex;flex-direction:column;align-items:center;padding:48px 20px 32px;text-align:center;">
+      <div style="font-size:56px;margin-bottom:16px;">📅</div>
+      <div style="font-size:17px;font-weight:800;">Нет предстоящих записей</div>
+    </div>`;
+  };
+  draw();
+  const session = getSession();
+  if (session && session.client_id) {
+    _fetchAndMergeServerRecords(session.client_id).then(draw);
+  }
+}
+
 export function _renderHistoryFromCache() {
   const records = _loadStoredRecords().filter(r => r.status !== 'cancelled');
   const reviewedIds = new Set(_loadReviewedIds());
@@ -122,23 +173,7 @@ export function _renderHistoryFromCache() {
     if (!upcoming.length) {
       upEl.innerHTML = '';
     } else {
-      upEl.innerHTML = `
-        <div style="padding:8px 20px 6px;"><div class="label">Предстоящие · ${upcoming.length}</div></div>
-        <div class="settings-group" style="margin-bottom:16px;">
-          ${upcoming.map(r => `
-            <div class="s-row" style="align-items:flex-start;">
-              <div class="s-ico" style="padding-top:2px;">📅</div>
-              <div style="flex:1;min-width:0;">
-                <div style="font-size:15px;font-weight:600;">${esc(r.svcName)}</div>
-                <div style="font-size:12px;color:var(--text-2);margin-top:2px;">${esc(r.masterName)} · ${_fmtDatetime(r.datetime)}</div>
-                ${r.price ? `<div style="font-size:13px;font-weight:700;margin-top:3px;color:var(--accent);">${esc(String(r.price))}</div>` : ''}
-              </div>
-              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;padding-top:2px;">
-                <button class="btn-ghost" style="font-size:12px;" data-rid="${esc(String(r.id))}" onclick="event.stopPropagation();rescheduleRecord(this.dataset.rid)">Перенести</button>
-                <button class="btn-ghost" style="font-size:12px;color:var(--red);" data-cid="${esc(String(r.id))}" data-chash="${esc(r.hash||'')}" onclick="event.stopPropagation();cancelRecord(this.dataset.cid,this.dataset.chash)">Отменить</button>
-              </div>
-            </div>`).join('')}
-        </div>`;
+      upEl.innerHTML = _upcomingListHtml(upcoming, { withHeader: true });
     }
   }
 
@@ -175,4 +210,4 @@ export function _renderHistoryFromCache() {
     </div>`;
 }
 
-Object.assign(window, { renderHistoryScreen, _openHistPeriod, _histPreset, _applyHistPeriod });
+Object.assign(window, { renderHistoryScreen, renderUpcomingScreen, _openHistPeriod, _histPreset, _applyHistPeriod });
