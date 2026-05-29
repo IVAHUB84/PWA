@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v57';
+const CACHE_VERSION = 'v58';
 const STATIC_CACHE  = `studio-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `studio-runtime-${CACHE_VERSION}`;
 
@@ -101,6 +101,29 @@ self.addEventListener('fetch', event => {
         });
         return cached || networkFetch;
       })
+    );
+    return;
+  }
+
+  if (
+    url.hostname === 'assets.yclients.com' &&
+    (url.pathname.startsWith('/main_service_image/') || url.pathname.startsWith('/gallery_service_image/'))
+  ) {
+    // Фото услуг YCLIENTS: stale-while-revalidate
+    event.respondWith(
+      caches.open(RUNTIME_CACHE).then(cache =>
+        cache.match(request).then(cached => {
+          const revalidate = fetch(request).then(res => {
+            if (res.ok) cache.put(request, res.clone());
+            return res;
+          });
+          if (cached) {
+            revalidate.catch(() => {});
+            return cached;
+          }
+          return revalidate.catch(() => cached);
+        })
+      )
     );
     return;
   }
