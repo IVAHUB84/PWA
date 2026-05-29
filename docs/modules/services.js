@@ -165,14 +165,18 @@ export function openServiceCard(id) {
   let galleryHtml;
 
   if (s.photos && s.photos.length >= 2) {
-    const slides = s.photos.map(url =>
-      `<div class="svc-carousel-slide"><img src="${esc(url)}" alt="${esc(s.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="svc-card-placeholder" style="background:${esc(img.grad)};display:none">${esc(img.emoji)}</div></div>`
-    ).join('');
+    const makeSlide = url =>
+      `<div class="svc-carousel-slide"><img src="${esc(url)}" alt="${esc(s.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="svc-card-placeholder" style="background:${esc(img.grad)};display:none">${esc(img.emoji)}</div></div>`;
+    const cloneFirst = makeSlide(s.photos[0]);
+    const cloneLast = makeSlide(s.photos[s.photos.length - 1]);
+    const realSlides = s.photos.map(makeSlide).join('');
     const dots = s.photos.map((_, i) =>
       `<div class="svc-carousel-dot${i === 0 ? ' active' : ''}" data-idx="${i}"></div>`
     ).join('');
     galleryHtml = `<div class="svc-card-gallery">
-      <div class="svc-carousel" id="svcCarousel">${slides}</div>
+      <div class="svc-carousel" id="svcCarousel">
+        <div class="svc-carousel-track" id="svcTrack">${cloneLast}${realSlides}${cloneFirst}</div>
+      </div>
       <div class="svc-carousel-dots" id="svcDots">${dots}</div>
     </div>`;
   } else if (s.photos && s.photos.length === 1) {
@@ -202,12 +206,103 @@ export function openServiceCard(id) {
     </div>`;
 
   if (s.photos && s.photos.length >= 2) {
-    const carousel = container.querySelector('#svcCarousel');
+    const track = container.querySelector('#svcTrack');
     const dots = container.querySelectorAll('#svcDots .svc-carousel-dot');
-    if (carousel && dots.length) {
-      carousel.addEventListener('scroll', () => {
-        const idx = Math.min(s.photos.length - 1, Math.max(0, Math.round(carousel.scrollLeft / carousel.offsetWidth)));
-        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+
+    if (track) {
+      const SLIDE_GAP = 8; // must match gap of .svc-carousel-track in style.css
+      const n = s.photos.length;
+      let logIdx = 0;
+      let transitioning = false;
+      let transitionGuard = null;
+
+      const carousel = container.querySelector('#svcCarousel');
+
+      function slideWidth() {
+        const slide = track.firstElementChild;
+        return slide ? slide.offsetWidth : carousel.offsetWidth - 44; // 44 must match calc(100% - 44px) slide width in CSS
+      }
+
+      function translateForIdx(idx) {
+        const sw = slideWidth();
+        const peek = (carousel.offsetWidth - sw) / 2;
+        return -((idx + 1) * (sw + SLIDE_GAP)) + peek;
+      }
+
+      function setPos(idx, animate) {
+        if (!animate) track.style.transition = 'none';
+        track.style.transform = `translateX(${translateForIdx(idx)}px)`;
+        if (!animate) {
+          track.getBoundingClientRect();
+          track.style.transition = '';
+        }
+      }
+
+      function updateDots() {
+        const visual = ((logIdx % n) + n) % n;
+        dots.forEach((d, i) => d.classList.toggle('active', i === visual));
+      }
+
+      function settle() {
+        transitioning = false;
+        if (logIdx < 0) {
+          logIdx = n - 1;
+          setPos(logIdx, false);
+          updateDots();
+        } else if (logIdx >= n) {
+          logIdx = 0;
+          setPos(logIdx, false);
+          updateDots();
+        }
+      }
+
+      setPos(logIdx, false);
+      updateDots();
+
+      track.addEventListener('transitionend', () => {
+        if (!transitioning) return;
+        clearTimeout(transitionGuard);
+        settle();
+      });
+
+      function goTo(newIdx) {
+        if (transitioning) return;
+        transitioning = true;
+        logIdx = newIdx;
+        track.style.transition = '';
+        track.style.transform = `translateX(${translateForIdx(logIdx)}px)`;
+        updateDots();
+        clearTimeout(transitionGuard);
+        transitionGuard = setTimeout(() => { // 500ms > CSS transition duration (0.35s)
+          if (!transitioning) return;
+          settle();
+        }, 500);
+      }
+
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchMoved = false;
+
+      track.addEventListener('touchstart', e => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchMoved = false;
+      }, { passive: true });
+
+      track.addEventListener('touchmove', () => {
+        touchMoved = true;
+      }, { passive: true });
+
+      track.addEventListener('touchend', e => {
+        if (!touchMoved) return;
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        const dy = e.changedTouches[0].clientY - touchStartY;
+        if (Math.abs(dx) < 30 || Math.abs(dx) < Math.abs(dy)) return;
+        if (dx < 0) {
+          goTo(logIdx + 1);
+        } else {
+          goTo(logIdx - 1);
+        }
       }, { passive: true });
     }
   }
