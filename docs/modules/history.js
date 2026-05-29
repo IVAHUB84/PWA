@@ -105,13 +105,10 @@ export function renderHistoryScreen() {
 export function _upcomingItemHtml(r) {
   return `
     <div class="s-row" style="flex-direction:column;align-items:stretch;gap:12px;">
-      <div style="display:flex;align-items:flex-start;gap:12px;">
-        <div class="s-ico" style="padding-top:2px;">📅</div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:15px;font-weight:600;">${esc(r.svcName)}</div>
-          <div style="font-size:12px;color:var(--text-2);margin-top:2px;">${esc(r.masterName)} · ${_fmtDatetime(r.datetime)}</div>
-          ${r.price ? `<div style="font-size:13px;font-weight:700;margin-top:3px;color:var(--accent);">${esc(String(r.price))}</div>` : ''}
-        </div>
+      <div style="min-width:0;">
+        <div style="font-size:15px;font-weight:600;">${esc(r.svcName)}</div>
+        <div style="font-size:12px;color:var(--text-2);margin-top:2px;">${esc(r.masterName)} · ${_fmtDatetime(r.datetime)}</div>
+        ${r.price ? `<div style="font-size:13px;font-weight:700;margin-top:3px;color:var(--accent);">${esc(String(r.price))}</div>` : ''}
       </div>
       <div style="display:flex;gap:10px;">
         <button style="flex:1;height:44px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;" data-rid="${esc(String(r.id))}" onclick="event.stopPropagation();rescheduleRecord(this.dataset.rid)">Перенести</button>
