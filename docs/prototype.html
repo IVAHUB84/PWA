@@ -846,7 +846,9 @@
       <div class="nav-bar" style="padding-bottom:8px;">
         <button class="back-btn" onclick="back()" style="color:#fff;">‹ Назад</button>
         <span style="flex:1;font-size:17px;font-weight:800;color:#fff;text-align:center;">Уведомления</span>
-        <div style="width:60px;"></div>
+        <button class="inbox-clear-btn" onclick="clearInboxHistory()" aria-label="Очистить историю уведомлений">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4 12.5 11.5"/><path d="M9.5 8.5 15.5 14.5"/><path d="M15.5 14.5 11 19c-1.5 1.5-6 2-7.5.5S2.5 13.5 4 12l5.5-3.5"/><path d="M6 14 9 17"/><path d="M9 12 12 15"/></svg>
+        </button>
       </div>
     </div>
     <div class="scroll">
@@ -855,9 +857,6 @@
         <div>Уведомлений пока нет</div>
       </div>
       <div id="inboxList"></div>
-      <div style="padding:16px 20px 24px;">
-        <button class="btn-ghost" style="color:var(--text-2);font-size:14px;" onclick="clearInboxHistory()">Очистить историю</button>
-      </div>
     </div>
   </div>
 
