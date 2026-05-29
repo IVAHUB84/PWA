@@ -158,11 +158,21 @@ async function initApp() {
     if (btn) btn.style.display = 'flex';
   }
   try {
-    const [catsRes, svcRes, staffRes] = await Promise.all([
+    const [catsRes, svcRes, staffRes, galleryRes] = await Promise.all([
       YC.get(`/service_categories/${YC.company}`),
       YC.get(`/services/${YC.company}`),
       YC.get(`/book_staff/${YC.company}`),
+      YC.get(`/company/${YC.company}/services/`).catch(() => ({})),
     ]);
+    const gallery = {};
+    try {
+      if (galleryRes.success !== false && galleryRes.data && Array.isArray(galleryRes.data)) {
+        galleryRes.data.forEach(svc => {
+          const urls = serviceImageUrls(svc.image_group);
+          if (urls.length) gallery[String(svc.id)] = urls;
+        });
+      }
+    } catch {}
     const catMap = {};
     if (catsRes.success && catsRes.data) catsRes.data.forEach(c => { catMap[c.id] = c.title; });
     if (svcRes.success && svcRes.data && svcRes.data.length) {
@@ -175,6 +185,9 @@ async function initApp() {
         comment: s.comment || '',
         photos: serviceImageUrls(s.image_group),
       })));
+      SERVICES_DATA.forEach(s => {
+        if (gallery[s.id] && gallery[s.id].length) s.photos = gallery[s.id];
+      });
       renderServices();
     }
     if (staffRes.success && staffRes.data && staffRes.data.length) {
