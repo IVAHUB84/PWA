@@ -101,3 +101,16 @@ export function _importanceLabel(importance) {
     default: return { label: 'Обычный',     color: 'var(--text-2)' };
   }
 }
+
+/* ── HAPTIC ── */
+const _HAPTIC_PATTERNS = { select: 10, submit: 12, fab: 12, tap: 10 };
+let _reducedMotionMql = null;
+export function hapticTap(kind = 'tap') {
+  if (typeof navigator === 'undefined' || !('vibrate' in navigator)) return;
+  if (!_reducedMotionMql && typeof window !== 'undefined' && window.matchMedia) {
+    _reducedMotionMql = window.matchMedia('(prefers-reduced-motion: reduce)');
+  }
+  if (_reducedMotionMql && _reducedMotionMql.matches) return;
+  try { navigator.vibrate(_HAPTIC_PATTERNS[kind] || _HAPTIC_PATTERNS.tap); } catch {}
+}
+if (typeof window !== 'undefined') window.hapticTap = hapticTap;

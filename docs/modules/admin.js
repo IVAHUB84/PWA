@@ -1,6 +1,6 @@
 import { YC } from './api.js';
 import { go } from './navigation.js';
-import { esc } from './utils.js';
+import { esc, hapticTap } from './utils.js';
 import { PUSH_TEMPLATES } from './constants.js';
 import { sendAdminPush, subscribePush, initPush } from './push.js';
 import { _ghPullToLocal, _ghSyncPosts } from './github.js';
@@ -125,6 +125,7 @@ export async function publishPost(draft) {
     if (!serviceId) { alert('Выберите услугу'); return; }
   }
 
+  if (!draft) hapticTap('submit');
   _publishInProgress = true;
   const post = {
     id: Date.now(), type: postType, cat, text,
@@ -482,6 +483,7 @@ export function sendNewPush() {
   const text  = document.getElementById('pushNewText')?.value.trim() || '';
   const icon  = document.getElementById('pushNewIcon')?.textContent || '📅';
   if (!text) { alert('Введите текст уведомления'); return; }
+  hapticTap('submit');
   const audEl = document.querySelector('#s-admin-push-new .audience-row.sel [style*="font-weight:700"]');
   const audience = audEl?.textContent || 'Все клиенты';
   const campaigns = _ls('yc_push_campaigns');
@@ -511,6 +513,7 @@ export function sendNewPush() {
 }
 
 export function sendPush() {
+  hapticTap('submit');
   const toast = document.createElement('div');
   toast.textContent = 'Рассылка отправлена ✓';
   toast.style.cssText = 'position:absolute;bottom:calc(83px + 16px);left:20px;right:20px;background:var(--primary);color:#fff;border-radius:12px;padding:14px 18px;font-size:14px;font-weight:700;text-align:center;z-index:300;';

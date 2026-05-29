@@ -1,6 +1,6 @@
 import { YC } from './api.js';
 import { state, getService, getMaster, getStaffPrice } from './state.js';
-import { _hasRealAvatar, getInitials, esc, _fmtDatetime } from './utils.js';
+import { _hasRealAvatar, getInitials, esc, _fmtDatetime, hapticTap } from './utils.js';
 import { _loadStoredRecords } from './storage.js';
 
 function _setConfirmBtnEnabled(enabled) {
@@ -209,6 +209,7 @@ export function selectDate(el, iso) {
 }
 
 export function selectSlot(el, time) {
+  hapticTap('select');
   document.querySelectorAll('#s-slots .slot').forEach(s => s.classList.remove('sel'));
   el.classList.add('sel');
   state.slot = time || el.textContent.trim();

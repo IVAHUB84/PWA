@@ -1,6 +1,6 @@
 import { state, SERVICES_DATA, staffServicePrice } from './state.js';
 import { go, registerOnEnter } from './navigation.js';
-import { esc, _fmtPrice } from './utils.js';
+import { esc, _fmtPrice, hapticTap } from './utils.js';
 import { YC } from './api.js';
 import { resolveServiceImage } from './serviceImages.js';
 
@@ -145,6 +145,7 @@ export async function renderServices() {
 }
 
 export function selectService(id) {
+  hapticTap('select');
   if (state.masterPreSelected) {
     state.serviceId = id;
     go('s-slots');

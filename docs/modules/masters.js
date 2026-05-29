@@ -1,7 +1,7 @@
 import { state, MASTERS_DATA, getService, staffServicePrice } from './state.js';
 import { go } from './navigation.js';
 import { YC, fetchStaffByService } from './api.js';
-import { _hasRealAvatar, getInitials, esc, _fmtPrice } from './utils.js';
+import { _hasRealAvatar, getInitials, esc, _fmtPrice, hapticTap } from './utils.js';
 import { bookWithMaster } from './booking.js';
 
 const _staffByServiceCache = new Map();
@@ -229,10 +229,12 @@ export function toggleFavFromCard(masterId) {
 }
 
 export function bookFromMaster(id) {
+  hapticTap('submit');
   bookWithMaster(id);
 }
 
 export function bookServiceFromMaster(masterId, serviceId) {
+  hapticTap('submit');
   const m = MASTERS_DATA.find(x => x.id === masterId);
   state.masterId = masterId;
   state.masterName = m?.name || '';
@@ -244,11 +246,13 @@ export function bookServiceFromMaster(masterId, serviceId) {
 }
 
 export function selectAnyMaster() {
+  hapticTap('select');
   state.masterId = null;
   go('s-slots');
 }
 
 export function tapMaster(id) {
+  hapticTap('select');
   if (_masterTapMode === 'book') {
     selectMaster(id);
   } else {

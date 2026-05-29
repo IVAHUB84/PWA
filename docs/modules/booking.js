@@ -4,7 +4,7 @@ import { getSession } from './storage.js';
 import { setAuthContext } from './storage.js';
 import { YC, _findClientByPhone } from './api.js';
 import { _loadStoredRecords } from './storage.js';
-import { getInitials, esc, _fmtDatetime, _normalizePhone, _hasRealAvatar } from './utils.js';
+import { getInitials, esc, _fmtDatetime, _normalizePhone, _hasRealAvatar, hapticTap } from './utils.js';
 
 // Callback for renderHomeHero — registered by app.js once profile.js is loaded
 let _renderHomeHeroFn = () => {};
@@ -136,6 +136,7 @@ async function _rescheduleWithSession(session) {
 
 // ── PUBLIC API ──
 export function startBooking() {
+  hapticTap('submit');
   const session = getSession();
   if (!session) {
     state._bookAfterLogin = true;

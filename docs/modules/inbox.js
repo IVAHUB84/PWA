@@ -17,10 +17,13 @@ export async function updateInboxBadge() {
     if (count > 0) {
       badge.textContent = count > 9 ? '9+' : String(count);
       badge.style.display = 'flex';
+      badge.classList.add('inbox-badge--pulse');
     } else {
+      badge.classList.remove('inbox-badge--pulse');
       badge.style.display = 'none';
     }
   } catch {
+    badge.classList.remove('inbox-badge--pulse');
     badge.style.display = 'none';
   }
 }

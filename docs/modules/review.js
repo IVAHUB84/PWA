@@ -1,7 +1,7 @@
 import { state, MASTERS_DATA } from './state.js';
 import { go } from './navigation.js';
 import { REVIEW_URLS } from './constants.js';
-import { getInitials, _hasRealAvatar } from './utils.js';
+import { getInitials, _hasRealAvatar, hapticTap } from './utils.js';
 import { postComment } from './api.js';
 import { getSession } from './storage.js';
 
@@ -103,6 +103,7 @@ export function _selectCustomTip(btn) {
 }
 
 export async function submitReview() {
+  hapticTap('submit');
   const stars = document.querySelectorAll('#starsRow .star.on').length;
   if (!stars) {
     const row = document.getElementById('starsRow');
