@@ -58,6 +58,9 @@ export default [
         URLSearchParams: 'readonly',
         AbortController: 'readonly',
         Uint32Array: 'readonly',
+        confirm: 'readonly',
+        indexedDB: 'readonly',
+        IDBKeyRange: 'readonly',
       },
     },
     rules: {

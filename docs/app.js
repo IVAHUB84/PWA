@@ -25,6 +25,7 @@ import './modules/notifications.js';
 import './modules/search.js';
 import './modules/scenarios.js';
 import { attachInstallListeners, maybeShowInstallOverlay } from './modules/install.js';
+import { updateInboxBadge, enterInbox } from './modules/inbox.js';
 
 // ── CROSS-MODULE CALLBACKS ──
 setAuthRenderFns({ renderHomeHero, renderProfileScreen, renderAdminDashboard });
@@ -52,6 +53,7 @@ registerOnEnter('s-history',  () => renderHistoryScreen());
 registerOnEnter('s-upcoming', () => renderUpcomingScreen());
 registerOnEnter('s-home', () => {
   renderHomeHero();
+  updateInboxBadge();
   const sess = getSession();
   if (sess && sess.client_id) {
     _fetchAndMergeServerRecords(sess.client_id).then(() => renderHomeHero());
@@ -63,6 +65,7 @@ registerOnEnter('s-home', () => {
     }
   });
 });
+registerOnEnter('s-inbox', () => enterInbox());
 registerOnEnter('s-profile',  () => { renderProfileScreen(); renderLoyaltyBlock(); });
 registerOnEnter('s-feed',           () => renderClientFeed());
 registerOnEnter('s-post',           () => renderPostScreen());
@@ -278,6 +281,7 @@ renderServices();
     renderHomeHero();
     renderProfileScreen();
     renderLoyaltyBlock();
+    updateInboxBadge();
     _ghRead().then(gh => {
       if (gh && gh.sha !== null && gh.posts.length) {
         localStorage.setItem('yc_feed_posts', JSON.stringify(gh.posts.filter(p => !p.draft)));

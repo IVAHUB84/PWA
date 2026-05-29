@@ -865,4 +865,56 @@ body {
   font-size: 15px; color: var(--text); line-height: 1.55;
   margin-bottom: 20px;
 }
+
+/* ── INBOX BELL ── */
+.inbox-bell-btn {
+  position: relative;
+  background: rgba(255,255,255,0.15);
+  border: 1.5px solid rgba(255,255,255,0.3);
+  border-radius: 12px;
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; cursor: pointer; flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.inbox-bell-btn:active { opacity: 0.75; }
+.inbox-bell-btn svg { display: block; }
+
+.inbox-badge {
+  position: absolute;
+  top: 4px; right: 4px;
+  min-width: 18px; height: 18px;
+  background: #FF3B30;
+  border-radius: 9px;
+  border: 2px solid rgba(139,53,88,0.9);
+  color: #fff;
+  font-size: 10px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 3px;
+  line-height: 1;
+}
+
+/* ── INBOX SCREEN ── */
+.inbox-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 60px 20px 20px;
+  color: var(--text-2); font-size: 15px; text-align: center;
+}
+
+.inbox-item {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.inbox-item-title {
+  font-size: 14px; font-weight: 700; color: var(--text);
+  margin-bottom: 3px;
+}
+.inbox-item-body {
+  font-size: 13px; color: var(--text-2); line-height: 1.45;
+  margin-bottom: 5px;
+}
+.inbox-item-time {
+  font-size: 11px; color: var(--text-2);
+}
 .svc-card-cta { padding: 12px 20px 32px; }

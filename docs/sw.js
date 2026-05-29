@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v59';
+const CACHE_VERSION = 'v60';
 const STATIC_CACHE  = `studio-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `studio-runtime-${CACHE_VERSION}`;
 
@@ -31,6 +31,8 @@ const APP_SHELL = [
   './modules/pin.js',
   './modules/push.js',
   './modules/install.js',
+  './modules/inboxStore.js',
+  './modules/inbox.js',
   './manifest.json',
   './logo.png',
   './logobest.png',
@@ -154,6 +156,76 @@ self.addEventListener('fetch', event => {
   );
 });
 
+// ── INBOX (inline) ───────────────────────────────────────────────────────────
+// Контракт должен точно совпадать с docs/modules/inboxStore.js:
+// DB_NAME, DB_VERSION, STORE, keyPath, формат id, структура записи, LIMIT.
+const _IDB_NAME    = 'studio-inbox';
+const _IDB_VERSION = 1;
+const _IDB_STORE   = 'notifications';
+const _IDB_LIMIT   = 50;
+
+function _idbOpen() {
+  return new Promise((resolve, reject) => {
+    const req = self.indexedDB.open(_IDB_NAME, _IDB_VERSION);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(_IDB_STORE)) {
+        db.createObjectStore(_IDB_STORE, { keyPath: 'id' });
+      }
+    };
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror   = e => reject(e.target.error);
+  });
+}
+
+function _idbMakeId(title, body, ts) {
+  const bucket = Math.floor(ts / 60000);
+  return bucket + ':' + String(title ?? '') + '|' + String(body ?? '');
+}
+
+function _idbTrimOldest(db) {
+  return new Promise((resolve, reject) => {
+    const tx    = db.transaction(_IDB_STORE, 'readwrite');
+    const store = tx.objectStore(_IDB_STORE);
+    const allReq = store.getAll();
+    allReq.onsuccess = () => {
+      const all = allReq.result;
+      if (all.length <= _IDB_LIMIT) { resolve(); return; }
+      all.sort((a, b) => a.ts - b.ts);
+      const toDelete = all.slice(0, all.length - _IDB_LIMIT);
+      let pending = toDelete.length;
+      if (!pending) { resolve(); return; }
+      toDelete.forEach(rec => {
+        const del = store.delete(rec.id);
+        del.onsuccess = () => { if (--pending === 0) resolve(); };
+        del.onerror   = () => { if (--pending === 0) resolve(); };
+      });
+    };
+    allReq.onerror = e => reject(e.target.error);
+  });
+}
+
+async function _idbAddNotification({ title, body, icon, ts }) {
+  const db = await _idbOpen();
+  const id  = _idbMakeId(title, body, ts);
+  const record = { id, title: String(title ?? ''), body: String(body ?? ''), icon: icon || null, ts, read: false };
+  const inserted = await new Promise((resolve, reject) => {
+    const tx    = db.transaction(_IDB_STORE, 'readwrite');
+    const store = tx.objectStore(_IDB_STORE);
+    const getReq = store.get(id);
+    getReq.onsuccess = () => {
+      if (getReq.result) { resolve(false); return; }
+      const putReq = store.put(record);
+      putReq.onsuccess = () => resolve(true);
+      putReq.onerror   = e => reject(e.target.error);
+    };
+    getReq.onerror = e => reject(e.target.error);
+    tx.onerror = e => reject(e.target.error);
+  });
+  if (inserted) await _idbTrimOldest(db);
+  db.close();
+}
+
 // ── PUSH ─────────────────────────────────────────────────────────────────────
 self.addEventListener('push', event => {
   let data = {};
@@ -166,7 +238,24 @@ self.addEventListener('push', event => {
     vibrate: [300, 100, 300],
     data: { url: './' },
   };
-  event.waitUntil(self.registration.showNotification(title, opts));
+
+  const ts = Date.now();
+
+  const storeHistory = _idbAddNotification({ title, body: data.body || '', icon: data.icon || null, ts })
+    .catch(() => {});
+
+  const notifyClients = self.clients
+    .matchAll({ type: 'window', includeUncontrolled: true })
+    .then(list => list.forEach(c => c.postMessage({ type: 'PUSH_RECEIVED', ts })))
+    .catch(() => {});
+
+  event.waitUntil(
+    Promise.all([
+      self.registration.showNotification(title, opts),
+      storeHistory,
+      notifyClients,
+    ])
+  );
 });
 
 self.addEventListener('notificationclick', event => {
