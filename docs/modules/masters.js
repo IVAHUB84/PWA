@@ -9,7 +9,6 @@ let _masterTapMode = 'browse'; // 'browse' — безопасный дефолт
 
 function _masterCardHtml(m, i, total, priceStr) {
   const last = i === total - 1;
-  const favBadge = m.fav ? '<div class="fav-badge">❤️</div>' : '';
   const favChip = m.fav ? ' <span class="fav-chip">Избранная</span>' : '';
   const availCls = m.avail ? 'avail-yes' : 'avail-no';
   const styles = [...(m.avail ? [] : ['opacity:0.55']), ...(last ? ['margin-bottom:24px'] : [])];
@@ -21,7 +20,7 @@ function _masterCardHtml(m, i, total, priceStr) {
     : `<div class="av-initials">${initStr}</div>`;
   const priceHtml = priceStr ? `<div class="master-price">${esc(priceStr)}</div>` : '';
   return `<div class="master-card${m.fav ? ' fav' : ''}"${styleAttr}${click}>
-    <div class="master-av" style="background:${m.grad};">${avatarInner}${favBadge}</div>
+    <div class="master-av" style="background:${m.grad};">${avatarInner}</div>
     <div class="master-info">
       <div class="master-name">${esc(m.name)}${favChip}</div>
       <div class="master-role">${esc(m.role)}${m.exp ? ' · стаж ' + esc(m.exp) : ''}</div>
