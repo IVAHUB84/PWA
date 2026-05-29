@@ -1,5 +1,7 @@
-import { getAllNotifications, getUnreadCount, markAllRead, clearAll } from './inboxStore.js';
+import { getAllNotifications, getUnreadCount, markAllRead, clearAll, deleteNotification, setRead } from './inboxStore.js';
 import { esc } from './utils.js';
+
+let _items = [];
 
 function _fmtTs(ts) {
   const d = new Date(ts);
@@ -29,15 +31,22 @@ export async function renderInbox() {
   if (!container) return;
 
   try {
-    const items = await getAllNotifications();
-    if (!items.length) {
+    _items = await getAllNotifications();
+    if (!_items.length) {
       container.innerHTML = '';
       if (empty) empty.style.display = 'block';
       return;
     }
     if (empty) empty.style.display = 'none';
-    container.innerHTML = items.map(n => `
-      <div class="inbox-item">
+    container.innerHTML = _items.map((n, i) => `
+      <div class="inbox-item${n.read ? '' : ' inbox-item--unread'}">
+        <button class="inbox-dots" onclick="inboxToggleMenu(event, ${i})" aria-label="Действия">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+        </button>
+        <div class="inbox-menu" id="inboxMenu-${i}">
+          <button onclick="inboxMarkUnreadAt(${i})">Сделать непрочитанным</button>
+          <button class="inbox-menu-danger" onclick="inboxDeleteAt(${i})">Удалить</button>
+        </div>
         <div class="inbox-item-title">${esc(n.title)}</div>
         <div class="inbox-item-body">${esc(n.body)}</div>
         <div class="inbox-item-time">${esc(_fmtTs(n.ts))}</div>
@@ -49,9 +58,41 @@ export async function renderInbox() {
   }
 }
 
-export async function enterInbox() {
+function _closeMenus() {
+  document.querySelectorAll('.inbox-item.menu-open').forEach(it => it.classList.remove('menu-open'));
+}
+
+export function inboxToggleMenu(event, idx) {
+  event.stopPropagation();
+  const menu = document.getElementById('inboxMenu-' + idx);
+  if (!menu) return;
+  const item = menu.closest('.inbox-item');
+  const willOpen = !item.classList.contains('menu-open');
+  _closeMenus();
+  if (willOpen) item.classList.add('menu-open');
+}
+
+export async function inboxDeleteAt(idx) {
+  const item = _items[idx];
+  if (!item) return;
+  await deleteNotification(item.id);
   await renderInbox();
+  await updateInboxBadge();
+}
+
+export async function inboxMarkUnreadAt(idx) {
+  const item = _items[idx];
+  if (!item) return;
+  await setRead(item.id, false);
+  await renderInbox();
+  await updateInboxBadge();
+}
+
+document.addEventListener('click', _closeMenus);
+
+export async function enterInbox() {
   await markAllRead();
+  await renderInbox();
   await updateInboxBadge();
 }
 
@@ -68,10 +109,10 @@ if ('serviceWorker' in navigator) {
       updateInboxBadge();
       const inboxScreen = document.getElementById('s-inbox');
       if (inboxScreen && inboxScreen.classList.contains('active')) {
-        renderInbox().then(() => markAllRead()).then(() => updateInboxBadge());
+        enterInbox();
       }
     }
   });
 }
 
-Object.assign(window, { updateInboxBadge, renderInbox, enterInbox, clearInboxHistory });
+Object.assign(window, { updateInboxBadge, renderInbox, enterInbox, clearInboxHistory, inboxToggleMenu, inboxDeleteAt, inboxMarkUnreadAt });

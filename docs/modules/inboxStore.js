@@ -142,6 +142,40 @@ export async function markAllRead() {
   } catch {}
 }
 
+export async function deleteNotification(id) {
+  try {
+    const db = await _openDB();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      const req = tx.objectStore(STORE).delete(id);
+      req.onsuccess = () => resolve();
+      req.onerror   = e => reject(e.target.error);
+    });
+    db.close();
+  } catch {}
+}
+
+export async function setRead(id, read) {
+  try {
+    const db = await _openDB();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      const store = tx.objectStore(STORE);
+      const getReq = store.get(id);
+      getReq.onsuccess = () => {
+        const rec = getReq.result;
+        if (!rec) { resolve(); return; }
+        rec.read = !!read;
+        const putReq = store.put(rec);
+        putReq.onsuccess = () => resolve();
+        putReq.onerror   = e => reject(e.target.error);
+      };
+      getReq.onerror = e => reject(e.target.error);
+    });
+    db.close();
+  } catch {}
+}
+
 export async function clearAll() {
   try {
     const db = await _openDB();
