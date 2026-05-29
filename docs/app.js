@@ -1,8 +1,8 @@
 import { EMAILJS, YC, _fetchAndMergeServerRecords } from './modules/api.js';
 import { getSession } from './modules/storage.js';
-import { state, MASTERS_DATA, setMastersData, setServicesData } from './modules/state.js';
+import { state, MASTERS_DATA, SERVICES_DATA, setMastersData, setServicesData, servicePriceRange, staffServicePrice } from './modules/state.js';
 import { _GRADS } from './modules/constants.js';
-import { _fmtPrice, _makeShort } from './modules/utils.js';
+import { _fmtPrice, _fmtPriceRange, _makeShort } from './modules/utils.js';
 import { registerOnEnter } from './modules/navigation.js';
 import { setAuthRenderFns } from './modules/auth.js';
 import { setBookingRenderFns } from './modules/booking.js';
@@ -169,6 +169,7 @@ async function initApp() {
         id: String(s.id), name: s.title,
         cat: catMap[s.category_id] || 'Другое',
         dur: s.duration || 60,
+        price_min: s.price_min || 0,
         priceStr: _fmtPrice(s.price_min, s.price_max),
       })));
       renderServices();
@@ -193,8 +194,44 @@ async function initApp() {
     }
     renderHomeHero();
     renderServices();
+    _collectStaffPrices();
   } catch(e) { console.error('initApp failed', e); }
   initPush();
+}
+
+async function _collectStaffPrices() {
+  const masters = MASTERS_DATA.filter(m => m.id);
+  if (!masters.length) return;
+  await Promise.all(masters.map(async m => {
+    try {
+      const staffId = m.ycId || m.id;
+      if (!/^\d+$/.test(staffId)) return;
+      const r = await YC.get(`/book_services/${YC.company}`, { staff_id: staffId }, { silent: true });
+      const services = r?.data?.services;
+      if (!Array.isArray(services)) return;
+      services.forEach(s => {
+        const price = s.price_min;
+        if (!price || price <= 0) return;
+        const sid = String(s.id);
+        if (!staffServicePrice[m.id]) staffServicePrice[m.id] = {};
+        staffServicePrice[m.id][sid] = price;
+        const cur = servicePriceRange[sid];
+        if (!cur) {
+          servicePriceRange[sid] = { min: price, max: price };
+        } else {
+          if (price < cur.min) cur.min = price;
+          if (price > cur.max) cur.max = price;
+        }
+      });
+    } catch { /* graceful degradation */ }
+  }));
+  SERVICES_DATA.forEach(s => {
+    const range = servicePriceRange[s.id];
+    if (range) {
+      s.priceStr = _fmtPriceRange(range.min, range.max);
+    }
+  });
+  renderServices();
 }
 
 async function _trySubscribeExistingSession() {

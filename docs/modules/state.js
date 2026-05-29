@@ -1,3 +1,5 @@
+import { _fmtPrice } from './utils.js';
+
 export let SERVICES_DATA = [
   { id: 'svc1',  name: 'Перманентный макияж бровей',      cat: 'Брови',    dur: 120, priceStr: 'от 8 000 ₽' },
   { id: 'svc2',  name: 'Перманентный макияж губ',          cat: 'Губы',     dur: 150, priceStr: 'от 10 000 ₽' },
@@ -23,6 +25,9 @@ export let MASTERS_DATA = [
 
 export function setServicesData(data) { SERVICES_DATA = data; }
 export function setMastersData(data) { MASTERS_DATA = data; }
+
+export const servicePriceRange = {};
+export const staffServicePrice = {};
 
 export const state = {
   category: 'Все',
@@ -56,4 +61,13 @@ export function getService() {
 
 export function getMaster() {
   return state.masterId ? MASTERS_DATA.find(m => m.id === state.masterId) : null;
+}
+
+export function getStaffPrice(svc, m) {
+  if (m) {
+    const cached = staffServicePrice[m.id]?.[svc.id];
+    if (cached) return _fmtPrice(cached, cached);
+    if (svc.price_min) return _fmtPrice(svc.price_min, svc.price_min);
+  }
+  return svc.priceStr;
 }

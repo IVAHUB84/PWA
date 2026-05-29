@@ -20,7 +20,7 @@ export const YC = {
       'Content-Type': 'application/json',
     };
   },
-  async get(path, params = {}) {
+  async get(path, params = {}, opts = {}) {
     const ctrl = new AbortController();
     const tid = setTimeout(() => ctrl.abort(), 15000);
     try {
@@ -29,7 +29,7 @@ export const YC = {
       const r = await fetch(url.toString(), { headers: this._h(), signal: ctrl.signal });
       if (!r.ok) return { success: false, _status: r.status };
       return r.json();
-    } catch(e) { console.error('YC.get', path, e); return { success: false }; }
+    } catch(e) { if (!opts.silent) console.error('YC.get', path, e); return { success: false }; }
     finally { clearTimeout(tid); }
   },
   async post(path, body, method = 'POST') {

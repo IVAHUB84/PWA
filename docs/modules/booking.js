@@ -1,5 +1,5 @@
 import { go } from './navigation.js';
-import { state, getService, getMaster, SERVICES_DATA, MASTERS_DATA } from './state.js';
+import { state, getService, getMaster, SERVICES_DATA, MASTERS_DATA, getStaffPrice } from './state.js';
 import { getSession } from './storage.js';
 import { setAuthContext } from './storage.js';
 import { YC, _findClientByPhone } from './api.js';
@@ -10,6 +10,10 @@ import { getInitials, esc, _fmtDatetime, _normalizePhone, _hasRealAvatar } from 
 let _renderHomeHeroFn = () => {};
 export function setBookingRenderFns({ renderHomeHero }) {
   if (renderHomeHero) _renderHomeHeroFn = renderHomeHero;
+}
+
+function _getBookingPrice(svc, m) {
+  return getStaffPrice(svc, m);
 }
 
 // ── SAVE BOOKED RECORD ──
@@ -27,7 +31,7 @@ function _saveBookedRecord(rec) {
     svcName: svc.name, svcId: svc.id,
     masterName: m ? m.name : 'Любой мастер', masterId: m ? m.id : 0,
     ycStaffId, ycSvcId,
-    datetime, price: svc.priceStr, dur: svc.dur, status: 'upcoming',
+    datetime, price: _getBookingPrice(svc, m), dur: svc.dur, status: 'upcoming',
     forName: state._bookOtherName || '',
   });
   localStorage.setItem('yc_records', JSON.stringify(records));

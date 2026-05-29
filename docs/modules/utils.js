@@ -20,6 +20,13 @@ export function _fmtPrice(min, max) {
   return min === max || !max ? f(min) : 'от ' + f(min);
 }
 
+export function _fmtPriceRange(min, max) {
+  if (!min) return 'По запросу';
+  const f = n => Math.round(n).toLocaleString('ru-RU') + ' ₽';
+  if (min === max || !max) return f(min);
+  return 'от ' + f(min) + ' до ' + f(max);
+}
+
 export function _fmtDatetime(datetime) {
   const d = new Date(datetime.replace(' ', 'T'));
   return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }) + ' · ' + datetime.slice(11, 16);

@@ -1,5 +1,5 @@
 import { YC } from './api.js';
-import { state, getService, getMaster } from './state.js';
+import { state, getService, getMaster, getStaffPrice } from './state.js';
 import { _hasRealAvatar, getInitials, esc, _fmtDatetime } from './utils.js';
 import { _loadStoredRecords } from './storage.js';
 
@@ -61,6 +61,10 @@ export function updateStickyBottom() {
   if (btn) btn.textContent = state._rescheduleId ? 'Перенести запись' : 'Подтвердить запись';
 }
 
+function _getPriceForConfirm(svc, m) {
+  return getStaffPrice(svc, m);
+}
+
 // ── CONFIRM SCREEN ──
 export function updateConfirmScreen() {
   const svc = getService();
@@ -82,7 +86,7 @@ export function updateConfirmScreen() {
     </div>
     <div class="confirm-row">
       <div class="confirm-row-icon">💰</div>
-      <div><div class="confirm-row-val">${esc(svc.priceStr)}</div><div class="confirm-row-lbl">Стоимость</div></div>
+      <div><div class="confirm-row-val">${esc(_getPriceForConfirm(svc, m))}</div><div class="confirm-row-lbl">Стоимость</div></div>
     </div>
     ${state._bookOtherName ? `<div class="confirm-row">
       <div class="confirm-row-icon">👤</div>

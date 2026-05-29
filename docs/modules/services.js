@@ -1,6 +1,6 @@
-import { state, SERVICES_DATA } from './state.js';
+import { state, SERVICES_DATA, staffServicePrice } from './state.js';
 import { go } from './navigation.js';
-import { esc } from './utils.js';
+import { esc, _fmtPrice } from './utils.js';
 import { YC } from './api.js';
 import { resolveServiceImage } from './serviceImages.js';
 
@@ -109,13 +109,20 @@ export async function renderServices() {
     let data = [];
     try {
       const r = await YC.get(`/book_services/${YC.company}`, { staff_id: state.masterId });
-      const masterSvcIds = new Set((r.data?.services || []).map(s => String(s.id)));
-      data = SERVICES_DATA.filter(s => masterSvcIds.has(s.id));
-      if (!data.length && r.data?.services?.length) {
-        data = r.data.services.map(s => ({
+      const masterSvcs = r.data?.services || [];
+      const masterSvcMap = {};
+      masterSvcs.forEach(s => { masterSvcMap[String(s.id)] = s; });
+      const masterSvcIds = new Set(Object.keys(masterSvcMap));
+      data = SERVICES_DATA.filter(s => masterSvcIds.has(s.id)).map(s => {
+        const ms = masterSvcMap[s.id];
+        const price = staffServicePrice[state.masterId]?.[s.id] ?? ms?.price_min;
+        return Object.assign({}, s, { priceStr: _fmtPrice(price, price) });
+      });
+      if (!data.length && masterSvcs.length) {
+        data = masterSvcs.map(s => ({
           id: String(s.id), name: s.title, cat: '',
           dur: s.duration || 60,
-          priceStr: s.price_min ? `от ${s.price_min} ₽` : 'По запросу',
+          priceStr: _fmtPrice(s.price_min, s.price_min),
         }));
       }
     } catch {}
