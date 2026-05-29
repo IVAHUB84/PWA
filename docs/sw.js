@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v50';
+const CACHE_VERSION = 'v51';
 const STATIC_CACHE  = `studio-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `studio-runtime-${CACHE_VERSION}`;
 

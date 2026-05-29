@@ -118,12 +118,9 @@ export function renderHomeHero() {
       ${upcoming.length >= 2 ? `<button class="btn-ghost" onclick="go('s-upcoming')">Все →</button>` : ''}
     </div>
     <div class="hero-card" style="cursor:default;margin-bottom:14px;">
-      <div class="hero-master" style="margin-bottom:0;">
-        <div class="hero-avatar">${getInitials(next.masterName)}</div>
-        <div style="min-width:0;">
-          <div class="hero-service" style="font-size:18px;margin-bottom:2px;">${esc(next.svcName)}${next.forName ? ` <span style="font-weight:500;opacity:0.7;">· для ${esc(next.forName)}</span>` : ''}</div>
-          <div class="hero-dt" style="margin-bottom:0;">${esc(next.masterName)} · ${_fmtDatetime(next.datetime)}</div>
-        </div>
+      <div style="min-width:0;">
+        <div class="hero-service" style="font-size:18px;margin-bottom:2px;">${esc(next.svcName)}${next.forName ? ` <span style="font-weight:500;opacity:0.7;">· для ${esc(next.forName)}</span>` : ''}</div>
+        <div class="hero-dt" style="margin-bottom:0;">${esc(next.masterName)} · ${_fmtDatetime(next.datetime)}</div>
       </div>
       <div class="hero-actions" style="margin-top:16px;">
         <button class="hero-btn" data-rid="${esc(String(next.id))}" onclick="rescheduleRecord(this.dataset.rid)">Перенести</button>
