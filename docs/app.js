@@ -8,6 +8,7 @@ import { setAuthRenderFns } from './modules/auth.js';
 import { setBookingRenderFns } from './modules/booking.js';
 import { setGhReadFn, renderClientFeed, renderPostScreen } from './modules/feed.js';
 import { renderServices } from './modules/services.js';
+import { serviceImageUrls } from './modules/serviceImages.js';
 import { renderMasters } from './modules/masters.js';
 import { updateSlotsScreen, loadDates, updateConfirmScreen } from './modules/slots.js';
 import { renderHistoryScreen, renderUpcomingScreen } from './modules/history.js';
@@ -171,6 +172,8 @@ async function initApp() {
         dur: s.duration || 60,
         price_min: s.price_min || 0,
         priceStr: _fmtPrice(s.price_min, s.price_max),
+        comment: s.comment || '',
+        photos: serviceImageUrls(s.image_group),
       })));
       renderServices();
     }

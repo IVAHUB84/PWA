@@ -5,7 +5,7 @@ export const SCREENS = [
   's-install', 's-profile', 's-login', 's-otp', 's-register', 's-cancel',
   's-review', 's-offer', 's-crosssell', 's-consent', 's-feed', 's-admin',
   's-admin-feed', 's-admin-post', 's-admin-clients', 's-admin-push', 's-admin-push-new',
-  's-master', 's-upcoming', 's-post',
+  's-master', 's-service', 's-upcoming', 's-post',
 ];
 
 export const DUR = 380;

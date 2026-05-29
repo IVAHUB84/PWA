@@ -145,14 +145,80 @@ export async function renderServices() {
 }
 
 export function selectService(id) {
-  state.serviceId = id;
   if (state.masterPreSelected) {
+    state.serviceId = id;
     go('s-slots');
   } else {
-    state.masterId = null;
-    state.masterName = null;
-    go('s-masters');
+    openServiceCard(id);
   }
 }
 
-Object.assign(window, { filterCategory, filterSearch, renderServices, selectService, _openCatFilter, _pickCat, _clearMasterFilter });
+export function openServiceCard(id) {
+  state.serviceId = id;
+  const s = SERVICES_DATA.find(sv => sv.id === id);
+  if (!s) return;
+
+  const container = document.getElementById('serviceCardContent');
+  if (!container) return;
+
+  const img = resolveServiceImage(s);
+  let galleryHtml;
+
+  if (s.photos && s.photos.length >= 2) {
+    const slides = s.photos.map(url =>
+      `<div class="svc-carousel-slide"><img src="${esc(url)}" alt="${esc(s.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="svc-card-placeholder" style="background:${esc(img.grad)};display:none">${esc(img.emoji)}</div></div>`
+    ).join('');
+    const dots = s.photos.map((_, i) =>
+      `<div class="svc-carousel-dot${i === 0 ? ' active' : ''}" data-idx="${i}"></div>`
+    ).join('');
+    galleryHtml = `<div class="svc-card-gallery">
+      <div class="svc-carousel" id="svcCarousel">${slides}</div>
+      <div class="svc-carousel-dots" id="svcDots">${dots}</div>
+    </div>`;
+  } else if (s.photos && s.photos.length === 1) {
+    galleryHtml = `<div class="svc-card-gallery">
+      <img class="svc-card-single-img" src="${esc(s.photos[0])}" alt="${esc(s.name)}" loading="lazy"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="svc-card-placeholder" style="background:${esc(img.grad)};display:none">${esc(img.emoji)}</div>
+    </div>`;
+  } else {
+    galleryHtml = `<div class="svc-card-gallery">
+      <div class="svc-card-placeholder" style="background:${esc(img.grad)}">${esc(img.emoji)}</div>
+    </div>`;
+  }
+
+  const descHtml = s.comment
+    ? `<div class="svc-card-desc">${esc(s.comment)}</div>`
+    : '';
+
+  container.innerHTML = `${galleryHtml}
+    <div class="svc-card-body">
+      <div class="svc-card-name">${esc(s.name)}</div>
+      <div class="svc-card-meta">${esc(s.priceStr)} · ${s.dur} мин</div>
+      ${descHtml}
+    </div>
+    <div class="svc-card-cta">
+      <button class="btn-primary" onclick="chooseMasterFromCard()">Выбрать мастера</button>
+    </div>`;
+
+  if (s.photos && s.photos.length >= 2) {
+    const carousel = container.querySelector('#svcCarousel');
+    const dots = container.querySelectorAll('#svcDots .svc-carousel-dot');
+    if (carousel && dots.length) {
+      carousel.addEventListener('scroll', () => {
+        const idx = Math.min(s.photos.length - 1, Math.max(0, Math.round(carousel.scrollLeft / carousel.offsetWidth)));
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+      }, { passive: true });
+    }
+  }
+
+  go('s-service');
+}
+
+export function chooseMasterFromCard() {
+  state.masterId = null;
+  state.masterName = null;
+  go('s-masters');
+}
+
+Object.assign(window, { filterCategory, filterSearch, renderServices, selectService, openServiceCard, chooseMasterFromCard, _openCatFilter, _pickCat, _clearMasterFilter });
