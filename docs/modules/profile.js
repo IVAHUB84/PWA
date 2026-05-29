@@ -113,23 +113,23 @@ export function renderHomeHero() {
     return;
   }
 
-  el.innerHTML = `<div class="hero-card" onclick="go('s-upcoming')" style="padding:14px 16px;margin-bottom:14px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-      <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.5);">Ближайший визит</span>
-      <div style="display:flex;gap:6px;align-items:center;">
-        ${upcoming.length >= 2 ? `<button class="btn-ghost" style="font-size:12px;padding:0 8px;height:26px;background:rgba(255,255,255,0.15);color:#fff;border-color:rgba(255,255,255,0.3);" onclick="event.stopPropagation();go('s-upcoming')">Все →</button>` : ''}
-        <button class="hero-btn" style="flex:none;padding:0 10px;height:26px;font-size:12px;" data-rid="${esc(String(next.id))}" onclick="event.stopPropagation();rescheduleRecord(this.dataset.rid)">Перенести</button>
-        <button class="hero-btn" style="flex:none;padding:0 10px;height:26px;font-size:12px;" data-cid="${next.id}" data-chash="${next.hash || ''}" onclick="event.stopPropagation();cancelRecord(this.dataset.cid,this.dataset.chash)">Отменить</button>
-      </div>
+  el.innerHTML = `<div class="section-header">
+      <span class="section-title">Ближайший визит</span>
+      ${upcoming.length >= 2 ? `<button class="btn-ghost" onclick="go('s-upcoming')">Все →</button>` : ''}
     </div>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.18);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;color:#fff;">${getInitials(next.masterName)}</div>
-      <div>
-        <div style="font-size:15px;font-weight:800;margin-bottom:2px;">${esc(next.svcName)}${next.forName ? ` <span style="font-weight:500;opacity:0.7;">· для ${esc(next.forName)}</span>` : ''}</div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.6);">${esc(next.masterName)} · ${_fmtDatetime(next.datetime)}</div>
+    <div class="hero-card" style="cursor:default;margin-bottom:14px;">
+      <div class="hero-master" style="margin-bottom:0;">
+        <div class="hero-avatar">${getInitials(next.masterName)}</div>
+        <div style="min-width:0;">
+          <div class="hero-service" style="font-size:18px;margin-bottom:2px;">${esc(next.svcName)}${next.forName ? ` <span style="font-weight:500;opacity:0.7;">· для ${esc(next.forName)}</span>` : ''}</div>
+          <div class="hero-dt" style="margin-bottom:0;">${esc(next.masterName)} · ${_fmtDatetime(next.datetime)}</div>
+        </div>
       </div>
-    </div>
-  </div>`;
+      <div class="hero-actions" style="margin-top:16px;">
+        <button class="hero-btn" data-rid="${esc(String(next.id))}" onclick="rescheduleRecord(this.dataset.rid)">Перенести</button>
+        <button class="hero-btn" data-cid="${next.id}" data-chash="${next.hash || ''}" onclick="cancelRecord(this.dataset.cid,this.dataset.chash)">Отменить</button>
+      </div>
+    </div>`;
 }
 
 export function _renderHomeFeedPreview() {
