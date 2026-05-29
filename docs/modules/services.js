@@ -1,5 +1,5 @@
 import { state, SERVICES_DATA, staffServicePrice } from './state.js';
-import { go } from './navigation.js';
+import { go, registerOnEnter } from './navigation.js';
 import { esc, _fmtPrice } from './utils.js';
 import { YC } from './api.js';
 import { resolveServiceImage } from './serviceImages.js';
@@ -153,6 +153,133 @@ export function selectService(id) {
   }
 }
 
+let _carouselResizeHandler = null;
+
+function _carouselCleanup() {
+  if (_carouselResizeHandler) {
+    window.removeEventListener('resize', _carouselResizeHandler);
+    _carouselResizeHandler = null;
+  }
+}
+
+function _initCarousel(container, s) {
+  _carouselCleanup();
+
+  const track = container.querySelector('#svcTrack');
+  const dotEls = container.querySelectorAll('#svcDots .svc-carousel-dot');
+  const carousel = container.querySelector('#svcCarousel');
+
+  if (!track || !carousel) return;
+
+  const SLIDE_GAP = 8; // sync with .svc-carousel-track gap in style.css
+  const n = s.photos.length;
+  let logIdx = 0;
+  let transitioning = false;
+  let settled = true;
+  let transitionGuard = null;
+
+  function slideWidth() {
+    const slide = track.firstElementChild;
+    return slide ? slide.offsetWidth : 0;
+  }
+
+  function translateForIdx(idx) {
+    const sw = slideWidth();
+    if (!sw) return 0;
+    const peek = (carousel.offsetWidth - sw) / 2;
+    return -((idx + 1) * (sw + SLIDE_GAP)) + peek;
+  }
+
+  function setPos(idx, animate) {
+    if (!animate) {
+      track.style.transition = 'none';
+      track.style.transform = `translateX(${translateForIdx(idx)}px)`;
+      track.getBoundingClientRect();
+      track.style.transition = '';
+    } else {
+      track.style.transform = `translateX(${translateForIdx(idx)}px)`;
+    }
+  }
+
+  function updateDots() {
+    const visual = ((logIdx % n) + n) % n;
+    dotEls.forEach((d, i) => d.classList.toggle('active', i === visual));
+  }
+
+  function settle() {
+    if (settled) return;
+    settled = true;
+    transitioning = false;
+    clearTimeout(transitionGuard);
+    transitionGuard = null;
+    if (logIdx < 0) {
+      logIdx = n - 1;
+      setPos(logIdx, false);
+      updateDots();
+    } else if (logIdx >= n) {
+      logIdx = 0;
+      setPos(logIdx, false);
+      updateDots();
+    }
+  }
+
+  setPos(logIdx, false);
+  updateDots();
+
+  track.addEventListener('transitionend', () => {
+    if (!transitioning) return;
+    settle();
+  });
+
+  function goTo(newIdx) {
+    if (transitioning) {
+      settle();
+    }
+    transitioning = true;
+    settled = false;
+    logIdx = newIdx;
+    updateDots();
+    setPos(logIdx, true);
+    clearTimeout(transitionGuard);
+    transitionGuard = setTimeout(() => {
+      settle();
+    }, 500);
+  }
+
+  _carouselResizeHandler = () => setPos(logIdx, false);
+  window.addEventListener('resize', _carouselResizeHandler);
+
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchMoved = false;
+
+  track.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    touchMoved = false;
+  }, { passive: true });
+
+  track.addEventListener('touchmove', () => {
+    touchMoved = true;
+  }, { passive: true });
+
+  track.addEventListener('touchend', e => {
+    if (!touchMoved) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) < 30 || Math.abs(dx) < Math.abs(dy)) return;
+    if (dx < 0) {
+      goTo(logIdx + 1);
+    } else {
+      goTo(logIdx - 1);
+    }
+  }, { passive: true });
+
+  // Run once per card open: deregister so returning to s-service (e.g. back from
+  // masters) doesn't re-bind listeners on the same track. openServiceCard re-registers.
+  registerOnEnter('s-service', null);
+}
+
 export function openServiceCard(id) {
   state.serviceId = id;
   const s = SERVICES_DATA.find(sv => sv.id === id);
@@ -205,106 +332,12 @@ export function openServiceCard(id) {
       <button class="btn-primary" onclick="chooseMasterFromCard()">Выбрать мастера</button>
     </div>`;
 
+  _carouselCleanup();
+
   if (s.photos && s.photos.length >= 2) {
-    const track = container.querySelector('#svcTrack');
-    const dots = container.querySelectorAll('#svcDots .svc-carousel-dot');
-
-    if (track) {
-      const SLIDE_GAP = 8; // must match gap of .svc-carousel-track in style.css
-      const n = s.photos.length;
-      let logIdx = 0;
-      let transitioning = false;
-      let transitionGuard = null;
-
-      const carousel = container.querySelector('#svcCarousel');
-
-      function slideWidth() {
-        const slide = track.firstElementChild;
-        return slide ? slide.offsetWidth : carousel.offsetWidth - 44; // 44 must match calc(100% - 44px) slide width in CSS
-      }
-
-      function translateForIdx(idx) {
-        const sw = slideWidth();
-        const peek = (carousel.offsetWidth - sw) / 2;
-        return -((idx + 1) * (sw + SLIDE_GAP)) + peek;
-      }
-
-      function setPos(idx, animate) {
-        if (!animate) track.style.transition = 'none';
-        track.style.transform = `translateX(${translateForIdx(idx)}px)`;
-        if (!animate) {
-          track.getBoundingClientRect();
-          track.style.transition = '';
-        }
-      }
-
-      function updateDots() {
-        const visual = ((logIdx % n) + n) % n;
-        dots.forEach((d, i) => d.classList.toggle('active', i === visual));
-      }
-
-      function settle() {
-        transitioning = false;
-        if (logIdx < 0) {
-          logIdx = n - 1;
-          setPos(logIdx, false);
-          updateDots();
-        } else if (logIdx >= n) {
-          logIdx = 0;
-          setPos(logIdx, false);
-          updateDots();
-        }
-      }
-
-      setPos(logIdx, false);
-      updateDots();
-
-      track.addEventListener('transitionend', () => {
-        if (!transitioning) return;
-        clearTimeout(transitionGuard);
-        settle();
-      });
-
-      function goTo(newIdx) {
-        if (transitioning) return;
-        transitioning = true;
-        logIdx = newIdx;
-        track.style.transition = '';
-        track.style.transform = `translateX(${translateForIdx(logIdx)}px)`;
-        updateDots();
-        clearTimeout(transitionGuard);
-        transitionGuard = setTimeout(() => { // 500ms > CSS transition duration (0.35s)
-          if (!transitioning) return;
-          settle();
-        }, 500);
-      }
-
-      let touchStartX = 0;
-      let touchStartY = 0;
-      let touchMoved = false;
-
-      track.addEventListener('touchstart', e => {
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
-        touchMoved = false;
-      }, { passive: true });
-
-      track.addEventListener('touchmove', () => {
-        touchMoved = true;
-      }, { passive: true });
-
-      track.addEventListener('touchend', e => {
-        if (!touchMoved) return;
-        const dx = e.changedTouches[0].clientX - touchStartX;
-        const dy = e.changedTouches[0].clientY - touchStartY;
-        if (Math.abs(dx) < 30 || Math.abs(dx) < Math.abs(dy)) return;
-        if (dx < 0) {
-          goTo(logIdx + 1);
-        } else {
-          goTo(logIdx - 1);
-        }
-      }, { passive: true });
-    }
+    registerOnEnter('s-service', _initCarousel.bind(null, container, s));
+  } else {
+    registerOnEnter('s-service', null);
   }
 
   go('s-service');

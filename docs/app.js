@@ -3,7 +3,7 @@ import { getSession } from './modules/storage.js';
 import { state, MASTERS_DATA, SERVICES_DATA, setMastersData, setServicesData, servicePriceRange, staffServicePrice } from './modules/state.js';
 import { _GRADS } from './modules/constants.js';
 import { _fmtPrice, _fmtPriceRange, _makeShort } from './modules/utils.js';
-import { registerOnEnter } from './modules/navigation.js';
+import { registerOnEnter, navHistory } from './modules/navigation.js';
 import { setAuthRenderFns } from './modules/auth.js';
 import { setBookingRenderFns } from './modules/booking.js';
 import { setGhReadFn, renderClientFeed, renderPostScreen } from './modules/feed.js';
@@ -44,6 +44,8 @@ registerOnEnter('s-services', () => {
     if (si) si.value = '';
   }
   state._masterJustSelected = false;
+  const backBtn = document.getElementById('servicesBackBtn');
+  if (backBtn) backBtn.style.visibility = navHistory.length >= 2 ? 'visible' : 'hidden';
   renderServices();
 });
 registerOnEnter('s-masters',  () => renderMasters());
