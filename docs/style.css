@@ -850,7 +850,13 @@ body {
   gap: 8px;
   transition: transform 0.35s ease;
   will-change: transform;
+  touch-action: pan-y;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
 }
+.svc-carousel-track:active { cursor: grabbing; }
+.svc-carousel-slide img { pointer-events: none; -webkit-user-drag: none; user-drag: none; }
 
 .svc-carousel-slide {
   flex: 0 0 calc(100% - 44px);
@@ -873,6 +879,7 @@ body {
   width: 6px; height: 6px; border-radius: 50%;
   background: var(--border); transition: background .2s, transform .2s;
   flex-shrink: 0;
+  cursor: pointer;
 }
 .svc-carousel-dot.active {
   background: var(--accent); transform: scale(1.3);

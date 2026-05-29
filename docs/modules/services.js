@@ -250,31 +250,93 @@ function _initCarousel(container, s) {
   _carouselResizeHandler = () => setPos(logIdx, false);
   window.addEventListener('resize', _carouselResizeHandler);
 
-  let touchStartX = 0;
-  let touchStartY = 0;
-  let touchMoved = false;
+  // Pointer-based swipe: works for touch, mouse and pen.
+  // Live drag-follow + snap on release. Vertical-dominant moves are released
+  // to the parent .scroll (touch-action: pan-y on the track in CSS).
+  let dragStartX = 0;
+  let dragStartY = 0;
+  let dragBaseTx = 0;
+  let dragActive = false;
+  let dragMoved = false;
+  let dragAxis = null; // 'x' | 'y' | null
+  let activePointerId = null;
+  const DRAG_AXIS_LOCK = 8;
+  const SWIPE_TRIGGER_PX = 40;
 
-  track.addEventListener('touchstart', e => {
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-    touchMoved = false;
-  }, { passive: true });
-
-  track.addEventListener('touchmove', () => {
-    touchMoved = true;
-  }, { passive: true });
-
-  track.addEventListener('touchend', e => {
-    if (!touchMoved) return;
-    const dx = e.changedTouches[0].clientX - touchStartX;
-    const dy = e.changedTouches[0].clientY - touchStartY;
-    if (Math.abs(dx) < 30 || Math.abs(dx) < Math.abs(dy)) return;
-    if (dx < 0) {
-      goTo(logIdx + 1);
+  function endDrag(commit, dxFinal) {
+    if (!dragActive) return;
+    dragActive = false;
+    try { track.releasePointerCapture(activePointerId); } catch {}
+    activePointerId = null;
+    track.style.transition = '';
+    if (commit && dragAxis === 'x' && Math.abs(dxFinal) >= SWIPE_TRIGGER_PX) {
+      goTo(logIdx + (dxFinal < 0 ? 1 : -1));
     } else {
-      goTo(logIdx - 1);
+      setPos(logIdx, true);
     }
-  }, { passive: true });
+    dragAxis = null;
+  }
+
+  track.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (transitioning) settle();
+    dragActive = true;
+    dragMoved = false;
+    dragAxis = null;
+    activePointerId = e.pointerId;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    dragBaseTx = translateForIdx(logIdx);
+    track.style.transition = 'none';
+    try { track.setPointerCapture(e.pointerId); } catch {}
+  });
+
+  track.addEventListener('pointermove', e => {
+    if (!dragActive || e.pointerId !== activePointerId) return;
+    const dx = e.clientX - dragStartX;
+    const dy = e.clientY - dragStartY;
+    if (!dragAxis) {
+      if (Math.abs(dx) > DRAG_AXIS_LOCK || Math.abs(dy) > DRAG_AXIS_LOCK) {
+        dragAxis = Math.abs(dx) >= Math.abs(dy) ? 'x' : 'y';
+      }
+    }
+    if (dragAxis === 'x') {
+      dragMoved = true;
+      e.preventDefault?.();
+      track.style.transform = `translateX(${dragBaseTx + dx}px)`;
+    } else if (dragAxis === 'y') {
+      endDrag(false, 0);
+    }
+  });
+
+  track.addEventListener('pointerup', e => {
+    if (!dragActive || e.pointerId !== activePointerId) return;
+    const dx = e.clientX - dragStartX;
+    endDrag(dragMoved, dx);
+  });
+
+  track.addEventListener('pointercancel', e => {
+    if (!dragActive || e.pointerId !== activePointerId) return;
+    endDrag(false, 0);
+  });
+
+  // Suppress click-through from a drag (e.g. on the slide image).
+  track.addEventListener('click', e => {
+    if (dragMoved) {
+      e.preventDefault();
+      e.stopPropagation();
+      dragMoved = false;
+    }
+  }, true);
+
+  // Dots are interactive: tap to navigate directly to the target slide.
+  dotEls.forEach((dot, i) => {
+    dot.addEventListener('click', () => {
+      const visual = ((logIdx % n) + n) % n;
+      if (i === visual) return;
+      goTo(logIdx + (i - visual));
+    });
+  });
 
   // Run once per card open: deregister so returning to s-service (e.g. back from
   // masters) doesn't re-bind listeners on the same track. openServiceCard re-registers.
