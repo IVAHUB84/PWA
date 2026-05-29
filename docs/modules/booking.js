@@ -4,7 +4,7 @@ import { getSession } from './storage.js';
 import { setAuthContext } from './storage.js';
 import { YC, _findClientByPhone } from './api.js';
 import { _loadStoredRecords } from './storage.js';
-import { getInitials, esc, _fmtDatetime, _normalizePhone } from './utils.js';
+import { getInitials, esc, _fmtDatetime, _normalizePhone, _hasRealAvatar } from './utils.js';
 
 // Callback for renderHomeHero — registered by app.js once profile.js is loaded
 let _renderHomeHeroFn = () => {};
@@ -170,9 +170,12 @@ export function cancelRecord(id, hash) {
   const cancelCard = document.querySelector('#s-cancel .cancel-card');
   if (cancelCard) {
     if (rec) {
+      const master = MASTERS_DATA.find(m => String(m.id) === String(rec.masterId) || (rec.ycStaffId != null && String(m.ycId) === String(rec.ycStaffId)));
+      const avatarSrc = master && _hasRealAvatar(master) ? (master.avatar_big || master.avatar) : '';
+      const showPhoto = avatarSrc && /^https?:\/\//.test(avatarSrc);
       cancelCard.innerHTML = `
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-          <div style="width:44px;height:44px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--accent);flex-shrink:0;">${esc(getInitials(rec.masterName))}</div>
+          <div style="width:44px;height:44px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--accent);flex-shrink:0;overflow:hidden;">${showPhoto ? `<img src="${esc(avatarSrc)}" style="width:100%;height:100%;object-fit:cover;" onerror="this.remove()">` : esc(getInitials(rec.masterName))}</div>
           <div><div style="font-size:15px;font-weight:700;">${esc(rec.masterName)}</div><div style="font-size:12px;color:var(--text-2);">Мастер</div></div>
         </div>
         <div style="font-size:17px;font-weight:800;margin-bottom:6px;">${esc(rec.svcName)}</div>
