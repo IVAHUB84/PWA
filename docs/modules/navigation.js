@@ -81,6 +81,12 @@ export function go(id, mode) {
     setTx(toEl, 0, true);
     setTx(fromEl, -28, true);
 
+    if (mode === 'replace') {
+      navHistory[navHistory.length - 1] = id;
+    } else {
+      navHistory.push(id);
+    }
+
     const targetId = id;
     _animTimers.push(setTimeout(() => {
       if (navHistory[navHistory.length - 1] !== targetId) return;
@@ -89,7 +95,6 @@ export function go(id, mode) {
       _cleanEl(toEl);
       onEnterScreen(targetId);
     }, DUR + 20));
-    navHistory.push(id);
   }
 
   _updateDotsFn();

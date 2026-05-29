@@ -6,7 +6,7 @@ import { _fmtPrice, _makeShort } from './modules/utils.js';
 import { registerOnEnter } from './modules/navigation.js';
 import { setAuthRenderFns } from './modules/auth.js';
 import { setBookingRenderFns } from './modules/booking.js';
-import { setGhReadFn, renderClientFeed } from './modules/feed.js';
+import { setGhReadFn, renderClientFeed, renderPostScreen } from './modules/feed.js';
 import { renderServices } from './modules/services.js';
 import { renderMasters } from './modules/masters.js';
 import { updateSlotsScreen, loadDates, updateConfirmScreen } from './modules/slots.js';
@@ -64,6 +64,7 @@ registerOnEnter('s-home', () => {
 });
 registerOnEnter('s-profile',  () => { renderProfileScreen(); renderLoyaltyBlock(); });
 registerOnEnter('s-feed',           () => renderClientFeed());
+registerOnEnter('s-post',           () => renderPostScreen());
 registerOnEnter('s-review',         () => renderReviewScreen());
 registerOnEnter('s-pin',            () => refreshPinScreen());
 registerOnEnter('s-offer',          () => _initOfferUrgency());

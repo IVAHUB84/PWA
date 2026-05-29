@@ -39,6 +39,7 @@ export const state = {
   _bookAfterLogin: false,
   _bookOtherName: '',
   _bookOtherPhone: '',
+  _openPostId: null,
   _cancelId: null,
   _cancelHash: null,
   _rescheduleId: null,

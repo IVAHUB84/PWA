@@ -1,5 +1,6 @@
 import { go } from './navigation.js';
 import { esc } from './utils.js';
+import { state } from './state.js';
 
 const _CAT_GRADS = {
   'Брови': 'linear-gradient(135deg,#F4C2A1,#C9956C)',
@@ -50,20 +51,14 @@ export async function renderClientFeed() {
   }
 }
 
-export function _paintFeed(el, posts) {
-  if (!posts.length) {
-    el.innerHTML = '<div style="padding:60px 20px;text-align:center;color:var(--text-2);font-size:14px;">Публикаций пока нет.<br>Следите за обновлениями!</div>';
-    return;
-  }
-  el.innerHTML = posts.map((p, i) => {
-    const grad = _CAT_GRADS[p.cat] || 'linear-gradient(135deg,#eee,#ccc)';
-    const icon = _CAT_ICONS2[p.cat] || '📝';
-    const mb = i === posts.length - 1 ? ' style="margin-bottom:24px;"' : '';
-    const safeSrc = p.image && /^data:image\/|^https?:\/\//.test(p.image) ? p.image : null;
-    const photoContent = safeSrc
-      ? `<img src="${esc(safeSrc)}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:0;">`
-      : `<div class="feed-photo-inner"><div class="feed-photo-icon">${icon}</div></div><div class="feed-photo-overlay"></div>`;
-    return `<div class="feed-card"${mb}>
+export function _feedCardHtml(p) {
+  const grad = _CAT_GRADS[p.cat] || 'linear-gradient(135deg,#eee,#ccc)';
+  const icon = _CAT_ICONS2[p.cat] || '📝';
+  const safeSrc = p.image && /^data:image\/|^https?:\/\//.test(p.image) ? p.image : null;
+  const photoContent = safeSrc
+    ? `<img src="${esc(safeSrc)}" style="width:100%;height:100%;object-fit:cover;display:block;border-radius:0;">`
+    : `<div class="feed-photo-inner"><div class="feed-photo-icon">${icon}</div></div><div class="feed-photo-overlay"></div>`;
+  return `<div class="feed-card">
       <div class="feed-photo" style="${p.image ? 'overflow:hidden;' : 'background:' + grad + ';'}">
         ${photoContent}
       </div>
@@ -76,6 +71,16 @@ export function _paintFeed(el, posts) {
         <div class="feed-meta">${esc(p.date)}</div>
       </div>
     </div>`;
+}
+
+export function _paintFeed(el, posts) {
+  if (!posts.length) {
+    el.innerHTML = '<div style="padding:60px 20px;text-align:center;color:var(--text-2);font-size:14px;">Публикаций пока нет.<br>Следите за обновлениями!</div>';
+    return;
+  }
+  el.innerHTML = posts.map((p, i) => {
+    const mb = i === posts.length - 1 ? ' style="margin-bottom:24px;"' : '';
+    return _feedCardHtml(p).replace('<div class="feed-card">', `<div class="feed-card"${mb}>`);
   }).join('');
 }
 
@@ -108,4 +113,27 @@ function _feedGoBook(cat) {
   go('s-services');
 }
 
-Object.assign(window, { renderClientFeed, _paintFeed, _renderFeedCats, _feedFilterCat, _feedGoBook, go });
+export function _openFeedPost(id) {
+  const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => !p.draft);
+  const post = posts.find(p => String(p.id) === String(id));
+  if (post) {
+    state._openPostId = post.id;
+    go('s-post');
+  } else {
+    go('s-feed');
+  }
+}
+
+export function renderPostScreen() {
+  const el = document.getElementById('postCard');
+  if (!el) return;
+  const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => !p.draft);
+  const post = posts.find(p => String(p.id) === String(state._openPostId));
+  if (!post) {
+    go('s-feed', 'replace');
+    return;
+  }
+  el.innerHTML = _feedCardHtml(post);
+}
+
+Object.assign(window, { renderClientFeed, _paintFeed, _renderFeedCats, _feedFilterCat, _feedGoBook, _openFeedPost, go });
