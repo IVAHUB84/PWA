@@ -976,3 +976,12 @@ body {
   font-size: 11px; color: var(--text-2);
 }
 .svc-card-cta { padding: 12px 20px 32px; }
+.rate-dismiss-btn {
+  position: absolute; top: 8px; right: 8px;
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  background: none; border: none; cursor: pointer;
+  color: var(--text-2); font-size: 18px; line-height: 1;
+  padding: 0; border-radius: 50%;
+}
+.rate-dismiss-btn::before { content: '×'; }

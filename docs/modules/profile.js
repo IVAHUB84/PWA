@@ -3,7 +3,7 @@ import { getPreferences } from './push.js';
 import { _loadClientLoyalty } from './api.js';
 import { MASTERS_DATA } from './state.js';
 import { getInitials, esc, _fmtDatetime, _hasRealAvatar } from './utils.js';
-import { _loadReviewedIds } from './review.js';
+import { _loadReviewedIds, _loadDismissedRateIds, _saveDismissedRateId } from './review.js';
 
 export function renderProfileScreen() {
   const s = getSession();
@@ -91,15 +91,18 @@ export function renderHomeHero() {
 
   if (!next) {
     const reviewedIds = new Set(_loadReviewedIds());
+    const dismissedIds = new Set(_loadDismissedRateIds());
     const sevenDaysAgo = new Date(now - 7 * 86400000);
     const lastUnreviewed = records
       .filter(r => r.status !== 'cancelled')
       .filter(r => { const dt = new Date(r.datetime.replace(' ', 'T')); return dt <= now && dt >= sevenDaysAgo; })
       .filter(r => !reviewedIds.has(String(r.id)))
+      .filter(r => !dismissedIds.has(String(r.id)))
       .sort((a, b) => new Date(b.datetime) - new Date(a.datetime))[0] || null;
     if (lastUnreviewed) {
-      el.innerHTML = `<div style="margin:0 20px 16px;padding:16px;background:var(--surface);border-radius:18px;box-shadow:0 2px 12px rgba(0,0,0,0.09);border:1px solid var(--border);">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-2);margin-bottom:10px;">Оцените прошлый визит</div>
+      el.innerHTML = `<div style="position:relative;margin:0 20px 16px;padding:16px;background:var(--surface);border-radius:18px;box-shadow:0 2px 12px rgba(0,0,0,0.09);border:1px solid var(--border);">
+        <button type="button" class="rate-dismiss-btn" aria-label="Скрыть" data-rid="${esc(String(lastUnreviewed.id))}" onclick="dismissRateVisit(this.dataset.rid)"></button>
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-2);margin-bottom:10px;padding-right:32px;">Оцените прошлый визит</div>
         <div style="font-size:14px;font-weight:700;margin-bottom:2px;">${esc(lastUnreviewed.svcName)}</div>
         <div style="font-size:12px;color:var(--text-2);margin-bottom:12px;">${esc(lastUnreviewed.masterName)} · ${_fmtDatetime(lastUnreviewed.datetime)}</div>
         <button class="btn-ghost" style="width:100%;font-size:14px;" data-rid="${esc(String(lastUnreviewed.id))}" data-mid="${esc(String(lastUnreviewed.ycStaffId || lastUnreviewed.masterId))}" data-mname="${esc(lastUnreviewed.masterName)}" data-sname="${esc(lastUnreviewed.svcName)}" data-dt="${esc(lastUnreviewed.datetime)}" onclick="openRateVisit(this.dataset.rid,this.dataset.mid,this.dataset.mname,this.dataset.sname,this.dataset.dt)">Оставить отзыв →</button>
@@ -315,4 +318,9 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () 
   if ((localStorage.getItem('yc_theme') || 'system') === 'system') _setTheme('system');
 });
 
-Object.assign(window, { renderProfileScreen, renderHomeHero, _renderHomeFeedPreview, renderLoyaltyBlock, _toggleNotifSettings, _loadNotifToggles, _toggleThemeSettings, _setTheme, _initThemeUI, _csToggle, _reviewCount, _initOfferUrgency });
+function dismissRateVisit(recordId) {
+  _saveDismissedRateId(recordId);
+  renderHomeHero();
+}
+
+Object.assign(window, { renderProfileScreen, renderHomeHero, _renderHomeFeedPreview, renderLoyaltyBlock, _toggleNotifSettings, _loadNotifToggles, _toggleThemeSettings, _setTheme, _initThemeUI, _csToggle, _reviewCount, _initOfferUrgency, dismissRateVisit });

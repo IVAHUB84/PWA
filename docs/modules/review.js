@@ -20,6 +20,21 @@ export function _saveReviewedId(recordId) {
   }
 }
 
+export function _loadDismissedRateIds() {
+  try {
+    const v = JSON.parse(localStorage.getItem('yc_dismissed_rate_ids') || '[]');
+    return Array.isArray(v) ? v : [];
+  } catch { return []; }
+}
+
+export function _saveDismissedRateId(recordId) {
+  const ids = _loadDismissedRateIds();
+  if (!ids.includes(String(recordId))) {
+    ids.push(String(recordId));
+    try { localStorage.setItem('yc_dismissed_rate_ids', JSON.stringify(ids)); } catch {}
+  }
+}
+
 export function setStar(n) {
   document.querySelectorAll('#starsRow .star').forEach((s, i) => s.classList.toggle('on', i < n));
 }
