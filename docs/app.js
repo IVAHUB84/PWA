@@ -15,7 +15,7 @@ import { renderHistoryScreen, renderUpcomingScreen } from './modules/history.js'
 import { renderHomeHero, renderProfileScreen, renderLoyaltyBlock, _renderHomeFeedPreview, _initOfferUrgency } from './modules/profile.js';
 import { hasPinSet, openPinEnter, refreshPinScreen } from './modules/pin.js';
 import { renderReviewScreen } from './modules/review.js';
-import { renderAdminDashboard, renderAdminFeed, _clearPostImage, renderAdminClients, renderAdminPush, updatePushAudience } from './modules/admin.js';
+import { renderAdminDashboard, renderAdminFeed, _clearPostImage, initPostForm, renderAdminClients, renderAdminPush, updatePushAudience } from './modules/admin.js';
 import { _ghRead } from './modules/github.js';
 import { initPush } from './modules/push.js';
 
@@ -88,7 +88,7 @@ registerOnEnter('s-crosssell', () => {
 });
 registerOnEnter('s-admin',          () => renderAdminDashboard());
 registerOnEnter('s-admin-feed',     () => renderAdminFeed());
-registerOnEnter('s-admin-post',     () => _clearPostImage());
+registerOnEnter('s-admin-post',     () => { _clearPostImage(); initPostForm(); });
 registerOnEnter('s-admin-clients',  () => renderAdminClients());
 registerOnEnter('s-admin-push', () => {
   renderAdminPush();
@@ -301,11 +301,6 @@ window.selectTip = function(btn) {
   btn.closest('.tips-row').querySelectorAll('.tip-btn').forEach(b => b.classList.remove('sel'));
   btn.classList.add('sel');
 };
-window.adminCat = function(el) {
-  el.closest('.hscroll').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-};
-
 // ── BUILD INFO ──
 fetch('./version.json?_=' + Date.now())
   .then(r => r.ok ? r.json() : null)

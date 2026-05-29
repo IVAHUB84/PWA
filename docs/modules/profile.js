@@ -148,16 +148,17 @@ export function _renderHomeFeedPreview() {
   const inner = el.querySelector('.hscroll');
   if (!inner) return;
   inner.innerHTML = posts.slice(0, 6).map(p => {
-    const icon = _ICONS[p.cat] || '📝';
+    const icon = _ICONS[p.cat || ''] || '📝';
     const safeSrc = p.image && /^data:image\/|^https?:\/\//.test(p.image) ? p.image : null;
     const top = safeSrc
       ? `<img src="${esc(safeSrc)}" style="width:100%;height:90px;object-fit:cover;border-radius:10px;display:block;">`
       : `<div style="width:100%;height:90px;border-radius:10px;background:var(--accent-light);display:flex;align-items:center;justify-content:center;font-size:36px;">${icon}</div>`;
     const preview = p.text.length > 45 ? p.text.slice(0, 45) + '…' : p.text;
+    const tagText = p.cat || '';
     return `<div style="width:140px;flex-shrink:0;background:var(--surface);border-radius:16px;padding:10px;box-shadow:var(--shadow);cursor:pointer;border:1px solid var(--border);display:flex;flex-direction:column;gap:6px;" data-pid="${esc(String(p.id))}" onclick="_openFeedPost(this.dataset.pid)">
       ${top}
       <div style="font-size:12px;font-weight:700;line-height:1.3;flex:1;">${esc(preview)}</div>
-      <div style="font-size:11px;color:var(--text-2);">${esc(p.cat)}</div>
+      <div style="font-size:11px;color:var(--text-2);">${esc(tagText)}</div>
     </div>`;
   }).join('');
 }

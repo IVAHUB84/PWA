@@ -738,20 +738,28 @@
           <div style="font-size:11px;color:var(--border);">JPG, PNG до 10 МБ</div>
         </div>
       </div>
-      <div style="padding:0 20px 10px;"><div class="label">Категория</div></div>
+      <div style="padding:0 20px 10px;"><div class="label">Тип публикации</div></div>
       <div class="hscroll-wrap" style="margin-bottom:16px;"><div class="hscroll">
-        <span class="chip active" onclick="adminCat(this)">Брови</span>
-        <span class="chip" onclick="adminCat(this)">Ногти</span>
-        <span class="chip" onclick="adminCat(this)">Лицо</span>
-        <span class="chip" onclick="adminCat(this)">Волосы</span>
-        <span class="chip" onclick="adminCat(this)">Тело</span>
-        <span class="chip" onclick="adminCat(this)">Акции</span>
+        <span class="chip post-type-chip active" data-post-type="free" onclick="selectPostType(this)">Свободный</span>
+        <span class="chip post-type-chip" data-post-type="category" onclick="selectPostType(this)">По категории</span>
+        <span class="chip post-type-chip" data-post-type="service" onclick="selectPostType(this)">По услуге</span>
       </div></div>
+      <div id="postCatRow" style="display:none;padding:0 20px 14px;">
+        <div class="label" style="margin-bottom:8px;">Категория</div>
+        <select id="postCatSelect" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);font-size:14px;font-family:inherit;color:var(--text);"><option value="">Выберите категорию…</option></select>
+      </div>
+      <div id="postSvcRow" style="display:none;padding:0 20px 14px;">
+        <div class="label" style="margin-bottom:8px;">Услуга</div>
+        <input id="postSvcSearch" type="text" placeholder="Поиск услуги…" oninput="filterPostServices(this.value)" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);font-size:14px;font-family:inherit;color:var(--text);margin-bottom:8px;">
+        <div id="postSvcList" style="border-radius:10px;border:1.5px solid var(--border);background:var(--surface);max-height:180px;overflow-y:auto;"></div>
+        <div id="postServiceHidden" data-service-id="" data-service-name="" data-service-cat="" style="display:none;"></div>
+        <div style="margin-top:8px;font-size:13px;color:var(--text-2);">Выбрано: <span id="postServiceLabel">Услуга не выбрана</span></div>
+      </div>
       <div style="padding:0 20px 10px;"><div class="label">Текст публикации</div></div>
       <textarea class="admin-textarea" rows="4" placeholder="Расскажите об услуге, мастере или акции…"></textarea>
       <div style="padding:0 20px;display:flex;flex-direction:column;gap:10px;">
         <button class="btn-primary" onclick="publishPost()">Опубликовать</button>
-        <button class="btn-secondary" onclick="back()">Сохранить черновик</button>
+        <button class="btn-secondary" onclick="publishPost(true)">Сохранить черновик</button>
       </div>
     </div>
   </div>

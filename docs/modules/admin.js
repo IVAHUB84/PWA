@@ -4,6 +4,7 @@ import { esc } from './utils.js';
 import { PUSH_TEMPLATES } from './constants.js';
 import { sendAdminPush, subscribePush, initPush } from './push.js';
 import { _ghPullToLocal, _ghSyncPosts } from './github.js';
+import { SERVICES_DATA } from './state.js';
 
 function _ls(key) {
   try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch { return []; }
@@ -101,18 +102,41 @@ export async function renderAdminDashboard() {
 
 export async function publishPost(draft) {
   if (_publishInProgress) return;
-  const cat = document.querySelector('#s-admin-post .hscroll .chip.active');
-  const ta  = document.querySelector('#s-admin-post .admin-textarea');
+  const ta   = document.querySelector('#s-admin-post .admin-textarea');
   const text = ta ? ta.value.trim() : '';
   if (!text) { alert('Добавьте текст публикации'); return; }
+
+  const typeEl = document.querySelector('#s-admin-post .post-type-chip.active');
+  const postType = typeEl ? typeEl.dataset.postType : 'free';
+
+  let cat = '';
+  let serviceId;
+  let serviceName;
+
+  if (postType === 'category') {
+    const catEl = document.getElementById('postCatSelect');
+    cat = catEl ? catEl.value : '';
+    if (!cat) { alert('Выберите категорию'); return; }
+  } else if (postType === 'service') {
+    const svcEl = document.getElementById('postServiceHidden');
+    serviceId   = svcEl ? svcEl.dataset.serviceId : '';
+    serviceName = svcEl ? svcEl.dataset.serviceName : '';
+    cat         = svcEl ? (svcEl.dataset.serviceCat || '') : '';
+    if (!serviceId) { alert('Выберите услугу'); return; }
+  }
+
   _publishInProgress = true;
-  const catName = cat ? cat.textContent.trim() : 'Другое';
   const post = {
-    id: Date.now(), cat: catName, text,
+    id: Date.now(), type: postType, cat, text,
     image: _postImageBase64 || null,
     date: new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }),
     draft: !!draft,
   };
+  if (postType === 'service') {
+    post.serviceId   = serviceId;
+    post.serviceName = serviceName;
+  }
+
   try {
     await _ghPullToLocal();
     const posts = _ls('yc_feed_posts');
@@ -120,6 +144,7 @@ export async function publishPost(draft) {
     localStorage.setItem('yc_feed_posts', JSON.stringify(posts));
     if (ta) ta.value = '';
     _clearPostImage();
+    _resetPostForm();
     go('s-admin-feed', 'tab');
     if (!draft) {
       const published = posts.filter(p => !p.draft);
@@ -131,6 +156,80 @@ export async function publishPost(draft) {
   } finally {
     _publishInProgress = false;
   }
+}
+
+export function initPostForm() {
+  _fillPostCatSelect();
+  _resetPostForm();
+}
+
+function _fillPostCatSelect() {
+  const sel = document.getElementById('postCatSelect');
+  if (!sel) return;
+  const cats = [...new Set(SERVICES_DATA.map(s => s.cat).filter(Boolean))].sort();
+  sel.innerHTML = `<option value="">Выберите категорию…</option>` +
+    cats.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+}
+
+export function selectPostType(el) {
+  const wrap = document.getElementById('s-admin-post');
+  if (!wrap) return;
+  wrap.querySelectorAll('.post-type-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  const type = el.dataset.postType;
+  const catRow  = document.getElementById('postCatRow');
+  const svcRow  = document.getElementById('postSvcRow');
+  if (catRow) catRow.style.display = type === 'category' ? '' : 'none';
+  if (svcRow) svcRow.style.display = type === 'service'  ? '' : 'none';
+}
+
+export function filterPostServices(q) {
+  const list = document.getElementById('postSvcList');
+  if (!list) return;
+  const lq = (q || '').toLowerCase();
+  const matched = lq
+    ? SERVICES_DATA.filter(s => s.name.toLowerCase().includes(lq))
+    : SERVICES_DATA;
+  const limit = 30;
+  const items = lq ? matched : matched.slice(0, limit);
+  const truncated = !lq && matched.length > limit;
+  const rowHtml = item =>
+    `<div class="post-svc-item" data-sid="${esc(item.id)}" data-sname="${esc(item.name)}" data-scat="${esc(item.cat || '')}" onclick="pickPostService(this.dataset.sid,this.dataset.sname,this.dataset.scat)">${esc(item.name)} <span style="color:var(--text-2);font-size:12px;">${esc(item.cat || '')}</span></div>`;
+  const hint = truncated
+    ? `<div style="padding:6px 10px;font-size:12px;color:var(--text-2);">Показаны первые 30 — уточните поиск</div>`
+    : '';
+  list.innerHTML = items.map(rowHtml).join('') + hint;
+}
+
+export function pickPostService(id, name, cat) {
+  const hidden = document.getElementById('postServiceHidden');
+  const label  = document.getElementById('postServiceLabel');
+  if (hidden) { hidden.dataset.serviceId = id; hidden.dataset.serviceName = name; hidden.dataset.serviceCat = cat; }
+  if (label)  label.textContent = name;
+  const list = document.getElementById('postSvcList');
+  if (list) list.innerHTML = '';
+  const search = document.getElementById('postSvcSearch');
+  if (search) search.value = '';
+}
+
+function _resetPostForm() {
+  const wrap = document.getElementById('s-admin-post');
+  if (!wrap) return;
+  wrap.querySelectorAll('.post-type-chip').forEach((c, i) => c.classList.toggle('active', i === 0));
+  const catRow  = document.getElementById('postCatRow');
+  const svcRow  = document.getElementById('postSvcRow');
+  if (catRow) catRow.style.display = 'none';
+  if (svcRow) svcRow.style.display = 'none';
+  const catSel  = document.getElementById('postCatSelect');
+  if (catSel) catSel.value = '';
+  const hidden  = document.getElementById('postServiceHidden');
+  if (hidden) { hidden.dataset.serviceId = ''; hidden.dataset.serviceName = ''; hidden.dataset.serviceCat = ''; }
+  const label   = document.getElementById('postServiceLabel');
+  if (label) label.textContent = 'Услуга не выбрана';
+  const svcList = document.getElementById('postSvcList');
+  if (svcList) svcList.innerHTML = '';
+  const svcSrch = document.getElementById('postSvcSearch');
+  if (svcSrch) svcSrch.value = '';
 }
 
 export async function deletePost(id) {
@@ -157,17 +256,23 @@ function _renderAdminFeedFromCache() {
     listEl.innerHTML = '<div style="padding:40px 20px;text-align:center;color:rgba(255,255,255,0.4);font-size:14px;">Публикаций пока нет.<br>Нажмите «+ Новый» чтобы создать.</div>';
     return;
   }
-  const _CAT_ICONS = { 'Брови': '✨', 'Ногти': '💅', 'Лицо': '🌿', 'Волосы': '💆', 'Тело': '🧖', 'Акции': '🎁' };
+  const _CAT_ICONS = {
+    'Брови': '✨', 'Ногти': '💅', 'Лицо': '🌿', 'Волосы': '💆', 'Тело': '🧖', 'Акции': '🎁',
+    'Губы': '💋', 'Глаза': '👁️', 'Эпиляция': '🌸',
+  };
+  const _TYPE_LABELS = { 'free': 'Свободный', 'category': 'Категория', 'service': 'Услуга' };
   listEl.innerHTML = posts.map((p, i) => {
-    const icon = _CAT_ICONS[p.cat] || '📝';
+    const icon = _CAT_ICONS[p.cat || ''] || '📝';
     const last = i === posts.length - 1 ? 'border-bottom:none;' : '';
     const safeImg = p.image && /^data:image\//.test(p.image) ? p.image : null;
     const thumb = safeImg
       ? `<img src="${esc(safeImg)}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`
       : icon;
+    const typeLabel = _TYPE_LABELS[p.type || 'free'] || 'Свободный';
+    const subtitle = p.serviceName || p.cat || typeLabel;
     return `<div class="post-row" style="${last}">
       <div class="post-thumb" style="background:var(--surface);font-size:22px;overflow:hidden;">${thumb}</div>
-      <div class="post-info"><div class="post-cap">${esc(p.text.slice(0, 60))}</div><div class="post-date">${esc(p.date)} · ${esc(p.cat)}</div></div>
+      <div class="post-info"><div class="post-cap">${esc(p.text.slice(0, 60))}</div><div class="post-date">${esc(p.date)} · ${esc(subtitle)}</div></div>
       <span class="post-status ${p.draft ? 'draft' : 'pub'}">${p.draft ? 'Черновик' : 'Опубл.'}</span>
       <button data-pid="${p.id}" onclick="deletePost(+this.dataset.pid)" style="background:none;border:none;color:var(--text-2);font-size:16px;cursor:pointer;padding:4px;flex-shrink:0;">✕</button>
     </div>`;
@@ -446,4 +551,5 @@ Object.assign(window, {
   updatePushAudience, sendNewPush, sendPush,
   _onPostImagePicked, _clearPostImage, _togglePushSentCollapsed,
   adminSubscribeSelf,
+  initPostForm, selectPostType, filterPostServices, pickPostService,
 });
