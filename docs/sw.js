@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v52';
+const CACHE_VERSION = 'v53';
 const STATIC_CACHE  = `studio-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `studio-runtime-${CACHE_VERSION}`;
 
@@ -44,15 +44,12 @@ const NETWORK_ONLY_HOSTS = ['api.yclients.com'];
 
 // ── INSTALL: кэшируем app shell ──────────────────────────────────────────────
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then(cache => cache.addAll(APP_SHELL))
       .catch(err => console.error('SW install cache failed', err))
   );
-});
-
-self.addEventListener('message', event => {
-  if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
 
 // ── ACTIVATE: удаляем старые кэши ───────────────────────────────────────────

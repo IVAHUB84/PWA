@@ -252,40 +252,22 @@ fetch('./version.json?_=' + Date.now())
 
 // ── SERVICE WORKER ──
 if ('serviceWorker' in navigator) {
+  let _swRefreshing = false;
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js').then(reg => {
-      reg.addEventListener('updatefound', () => {
-        const sw = reg.installing;
-        sw.addEventListener('statechange', () => {
-          if (sw.state === 'installed' && navigator.serviceWorker.controller) {
-            _showUpdateBanner(reg);
-          }
-        });
-      });
-      if (reg.waiting && navigator.serviceWorker.controller) {
-        _showUpdateBanner(reg);
-      }
       setInterval(() => reg.update(), 60 * 60 * 1000);
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') reg.update();
       });
     }).catch(() => {});
 
+    // Новый SW активируется сразу (skipWaiting) и забирает управление —
+    // здесь ловим смену контроллера и тихо перезагружаем на свежую версию.
     navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (_swRefreshing) return;
+      _swRefreshing = true;
       window.location.reload();
     });
-  });
-}
-
-function _showUpdateBanner(reg) {
-  if (document.getElementById('sw-update-banner')) return;
-  const el = document.createElement('div');
-  el.id = 'sw-update-banner';
-  el.innerHTML = '<span>Доступно обновление</span><button id="sw-update-btn">Обновить</button>';
-  document.body.appendChild(el);
-  document.getElementById('sw-update-btn').addEventListener('click', () => {
-    if (reg && reg.waiting) reg.waiting.postMessage('SKIP_WAITING');
-    else window.location.reload();
   });
 }
 
