@@ -162,13 +162,18 @@ async function initApp() {
       YC.get(`/service_categories/${YC.company}`),
       YC.get(`/services/${YC.company}`),
       YC.get(`/book_staff/${YC.company}`),
-      YC.get(`/company/${YC.company}/services/`).catch(() => ({})),
+      YC.get(`/book_services/${YC.company}`).catch(() => ({})),
     ]);
     const gallery = {};
     try {
-      if (galleryRes.success !== false && galleryRes.data && Array.isArray(galleryRes.data)) {
-        galleryRes.data.forEach(svc => {
-          const urls = serviceImageUrls(svc.image_group);
+      const galleryList = galleryRes && galleryRes.success !== false && galleryRes.data
+        ? galleryRes.data.services
+        : null;
+      if (Array.isArray(galleryList)) {
+        galleryList.forEach(svc => {
+          const urls = Array.isArray(svc.images)
+            ? svc.images.filter(u => typeof u === 'string' && u)
+            : [];
           if (urls.length) gallery[String(svc.id)] = urls;
         });
       }
