@@ -811,24 +811,30 @@ body {
 
 .svc-card-single-img {
   width: 100%; height: 280px; object-fit: cover; display: block;
+  border-radius: 16px;
 }
 .svc-card-placeholder {
   width: 100%; height: 280px; display: flex; align-items: center;
   justify-content: center; font-size: 64px;
+  border-radius: 16px;
 }
 
 .svc-carousel {
   display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+  overflow: hidden;
 }
-.svc-carousel::-webkit-scrollbar { display: none; }
+
+.svc-carousel-track {
+  display: flex;
+  gap: 8px;
+  transition: transform 0.35s ease;
+  will-change: transform;
+}
 
 .svc-carousel-slide {
-  flex: 0 0 100%;
-  scroll-snap-align: center;
+  flex: 0 0 calc(100% - 44px);
+  border-radius: 16px;
+  overflow: hidden;
 }
 .svc-carousel-slide img {
   width: 100%; height: 280px; object-fit: cover; display: block;
