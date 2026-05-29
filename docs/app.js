@@ -10,7 +10,7 @@ import { setGhReadFn, renderClientFeed } from './modules/feed.js';
 import { renderServices } from './modules/services.js';
 import { renderMasters } from './modules/masters.js';
 import { updateSlotsScreen, loadDates, updateConfirmScreen } from './modules/slots.js';
-import { renderHistoryScreen } from './modules/history.js';
+import { renderHistoryScreen, renderUpcomingScreen } from './modules/history.js';
 import { renderHomeHero, renderProfileScreen, renderLoyaltyBlock, _renderHomeFeedPreview, _initOfferUrgency } from './modules/profile.js';
 import { hasPinSet, openPinEnter, refreshPinScreen } from './modules/pin.js';
 import { renderReviewScreen } from './modules/review.js';
@@ -48,6 +48,7 @@ registerOnEnter('s-masters',  () => renderMasters());
 registerOnEnter('s-slots',    () => { updateSlotsScreen(); loadDates(); });
 registerOnEnter('s-confirm',  () => updateConfirmScreen());
 registerOnEnter('s-history',  () => renderHistoryScreen());
+registerOnEnter('s-upcoming', () => renderUpcomingScreen());
 registerOnEnter('s-home', () => {
   renderHomeHero();
   const sess = getSession();
