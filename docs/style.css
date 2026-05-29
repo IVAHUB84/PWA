@@ -6,6 +6,7 @@ a, button, [onclick], .tab, .chip, .svc-catalog-card, .master-card, .slot, .hero
 }
 /* Prevent iOS Safari auto-zoom on input focus (triggers when font-size < 16px) */
 input, textarea, select { font-size: max(16px, 1em); }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
 :root {
   --bg: #FAF7F3;
@@ -620,7 +621,7 @@ body {
 .fab { display:none; }
 .sheet-overlay { display:none; }
 
-@media (max-width:500px) {
+@media (max-width: 500px), (max-height: 500px) and (pointer: coarse) {
   body { background:#fff; padding:0; gap:0; display:block; }
   .scenario-bar, .scenario-hint, .step-indicator { display:none !important; }
   .phone-wrap { position:fixed; top:0; right:0; bottom:0; left:0; }
