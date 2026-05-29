@@ -113,10 +113,11 @@ export function renderHomeHero() {
     return;
   }
 
-  el.innerHTML = `<div class="hero-card" onclick="go('s-history')" style="padding:14px 16px;margin-bottom:14px;">
+  el.innerHTML = `<div class="hero-card" onclick="go('s-upcoming')" style="padding:14px 16px;margin-bottom:14px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
       <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.5);">Ближайший визит</span>
-      <div style="display:flex;gap:6px;">
+      <div style="display:flex;gap:6px;align-items:center;">
+        ${upcoming.length >= 2 ? `<button class="btn-ghost" style="font-size:12px;padding:0 8px;height:26px;background:rgba(255,255,255,0.15);color:#fff;border-color:rgba(255,255,255,0.3);" onclick="event.stopPropagation();go('s-upcoming')">Все →</button>` : ''}
         <button class="hero-btn" style="flex:none;padding:0 10px;height:26px;font-size:12px;" data-rid="${esc(String(next.id))}" onclick="event.stopPropagation();rescheduleRecord(this.dataset.rid)">Перенести</button>
         <button class="hero-btn" style="flex:none;padding:0 10px;height:26px;font-size:12px;" data-cid="${next.id}" data-chash="${next.hash || ''}" onclick="event.stopPropagation();cancelRecord(this.dataset.cid,this.dataset.chash)">Отменить</button>
       </div>
