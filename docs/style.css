@@ -324,6 +324,7 @@ body {
 .master-avail { font-size: 12px; font-weight: 600; }
 .avail-yes { color: var(--green); }
 .avail-no  { color: var(--text-2); }
+.master-price { font-size: 14px; font-weight: 700; color: var(--accent); flex-shrink: 0; white-space: nowrap; }
 .chevron { font-size: 20px; color: var(--border); }
 .any-master {
   margin: 0 20px 16px; background: var(--accent-light); border-radius: 16px;

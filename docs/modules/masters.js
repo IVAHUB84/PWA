@@ -1,13 +1,13 @@
-import { state, MASTERS_DATA, getService } from './state.js';
+import { state, MASTERS_DATA, getService, staffServicePrice } from './state.js';
 import { go } from './navigation.js';
 import { YC, fetchStaffByService } from './api.js';
-import { _hasRealAvatar, getInitials, esc } from './utils.js';
+import { _hasRealAvatar, getInitials, esc, _fmtPrice } from './utils.js';
 import { bookWithMaster } from './booking.js';
 
 const _staffByServiceCache = new Map();
 let _masterTapMode = 'browse'; // 'browse' — безопасный дефолт: тап ведёт в профиль, а не на прямой переход к брони
 
-function _masterCardHtml(m, i, total) {
+function _masterCardHtml(m, i, total, priceStr) {
   const last = i === total - 1;
   const favBadge = m.fav ? '<div class="fav-badge">❤️</div>' : '';
   const favChip = m.fav ? ' <span class="fav-chip">Избранная</span>' : '';
@@ -19,6 +19,7 @@ function _masterCardHtml(m, i, total) {
   const avatarInner = _hasRealAvatar(m)
     ? `<img src="${esc(m.avatar_big || m.avatar)}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<div class=&quot;av-initials&quot;>${initStr}</div>')">`
     : `<div class="av-initials">${initStr}</div>`;
+  const priceHtml = priceStr ? `<div class="master-price">${esc(priceStr)}</div>` : '';
   return `<div class="master-card${m.fav ? ' fav' : ''}"${styleAttr}${click}>
     <div class="master-av" style="background:${m.grad};">${avatarInner}${favBadge}</div>
     <div class="master-info">
@@ -26,9 +27,15 @@ function _masterCardHtml(m, i, total) {
       <div class="master-role">${esc(m.role)}${m.exp ? ' · стаж ' + esc(m.exp) : ''}</div>
       <div class="master-avail ${availCls}">${esc(m.availText)}</div>
     </div>
+    ${priceHtml}
     <button data-mid="${esc(m.id)}" onclick="event.stopPropagation();toggleFav(this.dataset.mid)" style="background:none;border:none;cursor:pointer;font-size:20px;padding:4px 6px;flex-shrink:0;" title="В избранное">${m.fav ? '❤️' : '🤍'}</button>
     <div class="chevron">›</div>
   </div>`;
+}
+
+function _masterServicePrice(m, serviceId) {
+  const p = staffServicePrice[m.id]?.[serviceId];
+  return p ? _fmtPrice(p, p) : '';
 }
 
 export function _intersectWithMasters(staffResult, mastersData) {
@@ -96,11 +103,12 @@ export async function renderMasters() {
   }
 
   masters.sort((a, b) => (b.fav ? 1 : 0) - (a.fav ? 1 : 0));
-  const fp = masters.map(m => `${m.id}|${m.fav ? 1 : 0}|${m.avatar_big || m.avatar || ''}`).join(',');
+  const prices = masters.map(m => _masterServicePrice(m, serviceId));
+  const fp = masters.map((m, i) => `${m.id}|${m.fav ? 1 : 0}|${m.avatar_big || m.avatar || ''}|${prices[i]}`).join(',');
   if (list.dataset.fp === fp) return;
   list.dataset.fp = fp;
   _masterTapMode = 'book';
-  list.innerHTML = masters.map((m, i) => _masterCardHtml(m, i, masters.length)).join('');
+  list.innerHTML = masters.map((m, i) => _masterCardHtml(m, i, masters.length, prices[i])).join('');
 }
 
 export function toggleFav(masterId) {
