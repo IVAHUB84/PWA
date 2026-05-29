@@ -27,6 +27,7 @@ export function renderProfileScreen() {
     if (favNameEl) favNameEl.textContent = fav.name;
     if (favRoleEl) favRoleEl.textContent = fav.role;
     if (favBookBtn) {
+      favBookBtn.style.display = '';
       favBookBtn.setAttribute('data-mid', fav.id);
       favBookBtn.setAttribute('onclick', `bookWithMaster(this.dataset.mid)`);
     }
@@ -46,6 +47,7 @@ export function renderProfileScreen() {
       }
     }
   } else {
+    if (favBookBtn) favBookBtn.style.display = 'none';
     if (favNameEl) favNameEl.textContent = 'Не выбран';
     if (favRoleEl) favRoleEl.textContent = 'Выберите на экране мастеров';
     if (favAvEl) {
