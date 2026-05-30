@@ -169,7 +169,7 @@ export async function renderLoyaltyBlock() {
   const sess = getSession();
   if (!sess) { el.style.display = 'none'; return; }
   el.style.display = '';
-  el.innerHTML = `<div style="font-size:13px;color:var(--text-2);">Загрузка данных…</div>`;
+  el.innerHTML = `<div class="skel skel-line" style="height:44px;border-radius:12px;width:100%;"></div>`;
   const data = await _loadClientLoyalty();
 
   if (!data) { el.style.display = 'none'; return; }

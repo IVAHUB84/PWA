@@ -81,7 +81,14 @@ export async function renderMasters() {
   if (_staffByServiceCache.has(serviceId)) {
     staffResult = _staffByServiceCache.get(serviceId);
   } else {
-    list.innerHTML = '<div style="padding:48px 20px;text-align:center;color:var(--text-2);font-size:14px;">Загрузка мастеров…</div>';
+    list.innerHTML = Array.from({ length: 4 }).map(() => `
+      <div class="skel-master-card">
+        <div class="skel skel-av"></div>
+        <div class="skel-master-info">
+          <div class="skel skel-line skel-w50"></div>
+          <div class="skel skel-line skel-w80"></div>
+        </div>
+      </div>`).join('');
     staffResult = await fetchStaffByService(serviceId);
     if (state.serviceId !== serviceId) return;
     if (staffResult !== null) {
@@ -127,7 +134,11 @@ export function selectMaster(id) {
 export async function openMasterCard(id) {
   go('s-master');
   const content = document.getElementById('masterCardContent');
-  content.innerHTML = '<div style="padding:48px 20px;text-align:center;color:var(--text-2);font-size:14px;">Загрузка…</div>';
+  content.innerHTML = `<div style="padding:24px 20px 16px;display:flex;flex-direction:column;align-items:center;gap:12px;">
+      <div class="skel skel-av-lg"></div>
+      <div class="skel skel-line" style="width:140px;height:18px;"></div>
+      <div class="skel skel-line" style="width:90px;"></div>
+    </div>`;
 
   const localMaster = MASTERS_DATA.find(m => m.id === id);
   const ycId = (localMaster?.ycId != null ? String(localMaster.ycId) : null) || (String(id).match(/^\d+$/) ? id : null);

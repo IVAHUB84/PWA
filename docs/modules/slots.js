@@ -100,7 +100,7 @@ export async function loadDates() {
   const m = getMaster();
   const el = document.getElementById('datesRow');
   if (!el) return;
-  el.innerHTML = '<div style="padding:12px;color:var(--text-2);font-size:13px;">Загрузка…</div>';
+  el.innerHTML = Array.from({ length: 6 }).map(() => '<div class="skel skel-date"></div>').join('');
   const params = { service_ids: svc.id };
   if (m) params.staff_id = m.id;
   try {
@@ -174,7 +174,7 @@ export async function loadTimes(iso) {
   const dateStr = d.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
   state.dateFull = dateStr;
   if (lbl) lbl.textContent = 'Доступное время — ' + dateStr;
-  el.innerHTML = '<div style="padding:12px;color:var(--text-2);font-size:13px;">Загрузка…</div>';
+  el.innerHTML = Array.from({ length: 9 }).map(() => '<div class="skel skel-slot"></div>').join('');
   _setConfirmBtnEnabled(false);
   const staffId = m ? m.id : 0;
   const params = {};

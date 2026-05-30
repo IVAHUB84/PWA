@@ -104,7 +104,14 @@ export async function renderServices() {
   if (!list) return;
 
   if (state.masterPreSelected && state.masterId) {
-    list.innerHTML = '<div style="padding:32px 20px;text-align:center;color:var(--text-2);font-size:14px;">Загрузка услуг мастера…</div>';
+    list.innerHTML = `<div class="svc-catalog">` + Array.from({ length: 3 }).map(() => `
+      <div class="skel-svc-card">
+        <div class="skel skel-svc-cover"></div>
+        <div class="skel-svc-info">
+          <div class="skel skel-line skel-w80"></div>
+          <div class="skel skel-line skel-w50"></div>
+        </div>
+      </div>`).join('') + `</div>`;
     _updateMasterBanner();
     let data = [];
     try {
