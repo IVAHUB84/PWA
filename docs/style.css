@@ -365,29 +365,73 @@ body {
 .fav-chip { font-size: 10px; font-weight: 700; background: var(--accent-light); color: var(--on-accent-light); border-radius: 20px; padding: 2px 8px; margin-left: 6px; }
 
 /* ── SLOTS ── */
-.master-select-strip {
-  margin: 0 20px 20px; background: var(--bg); border-radius: 16px;
-  box-shadow: var(--shadow); padding: 14px 16px;
-  display: flex; align-items: center; gap: 12px;
+.cal-card {
+  margin: 0 20px 20px; background: var(--surface); border-radius: 16px;
+  box-shadow: var(--shadow); padding: 16px;
 }
-.heart { font-size: 22px; margin-left: auto; cursor: pointer; }
-
-.date-picker { padding: 0 20px 20px; }
-.date-picker-lbl { font-size: 13px; color: var(--text-2); margin-bottom: 12px; font-weight: 500; }
-.dates-row { display: flex; gap: 8px; }
-.date-item {
-  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 10px 4px; border-radius: 12px; cursor: pointer;
+.cal-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
 }
-.date-item.sel { background: var(--primary); }
-.date-day { font-size: 11px; font-weight: 600; color: var(--text-2); }
-.date-num { font-size: 17px; font-weight: 700; color: var(--text); }
-.date-item.sel .date-day { color: rgba(255,255,255,0.55); }
-.date-item.sel .date-num { color: var(--on-primary); }
+.cal-month-lbl { font-size: 15px; font-weight: 700; color: var(--text); }
+.cal-nav-btn {
+  width: 32px; height: 32px; border: none; background: none;
+  font-size: 22px; color: var(--text); cursor: pointer; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: inherit; transition: background 0.1s;
+}
+.cal-nav-btn:active { background: var(--border); }
+.cal-nav-disabled { opacity: 0.3; pointer-events: none; }
+.cal-weekdays {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 6px;
+}
+.cal-weekdays div {
+  text-align: center; font-size: 11px; font-weight: 600;
+  color: var(--text-2); padding: 4px 0;
+}
+.cal-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
+}
+.cal-cell {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 500; color: var(--text);
+  border-radius: 50%; cursor: pointer; transition: background 0.12s;
+}
+.cal-cell:not(.unavail):not(.cal-cell-empty):not(.sel):hover { background: var(--border); }
+.cal-cell.today { text-decoration: underline; text-underline-offset: 3px; }
+.cal-cell.sel { background: var(--primary); color: var(--on-primary); }
+.cal-cell.unavail { color: var(--text-2); opacity: 0.45; cursor: default; pointer-events: none; }
+.cal-cell.sel.unavail { opacity: 1; }
+.cal-cell-empty { pointer-events: none; }
+.cal-no-dates {
+  grid-column: 1 / -1; padding: 10px 0; text-align: center;
+  font-size: 13px; color: var(--text-2);
+}
+.skel-cal-cell { border-radius: 50%; }
 
 .slots-section { padding: 0 20px 24px; }
 .slots-lbl { font-size: 13px; color: var(--text-2); margin-bottom: 12px; font-weight: 500; }
-.slots-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+
+.slot-period { margin-bottom: 4px; }
+.slot-period-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 0; cursor: pointer; user-select: none;
+}
+.slot-period-hdr span { font-size: 13px; font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: .04em; }
+.slot-period-chevron {
+  width: 18px; height: 18px; stroke: var(--text-2);
+  transition: transform 0.2s; flex-shrink: 0;
+}
+.slot-period.collapsed .slot-period-chevron { transform: rotate(180deg); }
+.slot-period-body {
+  overflow: hidden;
+  max-height: 500px;
+  transition: max-height 0.25s ease, opacity 0.2s;
+  opacity: 1;
+}
+.slot-period.collapsed .slot-period-body { max-height: 0; opacity: 0; }
+
+.slots-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 12px; }
 .slot {
   height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
   font-size: 15px; font-weight: 600; cursor: pointer;

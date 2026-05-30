@@ -85,7 +85,7 @@ async function _bookWithSession(session) {
     }
   } finally {
     _bookInProgress = false;
-    if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = 'Подтвердить запись'; }
+    if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = state._rescheduleId ? 'Перенести запись' : 'Записаться'; }
   }
 }
 
