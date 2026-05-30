@@ -146,10 +146,7 @@ body {
 }
 .status-bar .time { display: none; }
 .status-bar .icons { display: none; }
-.dynamic-island {
-  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-  width: 120px; height: 35px; background: #000; border-radius: 20px;
-}
+.dynamic-island { display: none; }
 
 /* ── SCROLL ── */
 .scroll { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
