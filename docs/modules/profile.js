@@ -237,10 +237,22 @@ export function _initOfferUrgency() {
 export function _setTheme(theme) {
   localStorage.setItem('yc_theme', theme);
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  if (theme === 'dark' || (theme === 'system' && prefersDark)) {
+  const isDark = theme === 'dark' || (theme === 'system' && prefersDark);
+  if (isDark) {
     document.documentElement.setAttribute('data-theme', 'dark');
   } else {
     document.documentElement.removeAttribute('data-theme');
+  }
+  const lightMeta = document.querySelector('meta[name="theme-color"][media*="light"]');
+  const darkMeta  = document.querySelector('meta[name="theme-color"][media*="dark"]');
+  if (theme === 'system') {
+    // вернуть «родные» значения, чтобы media-запросы сами следовали за системной темой
+    if (lightMeta) lightMeta.content = '#FAF7F3';
+    if (darkMeta)  darkMeta.content  = '#1C1C1E';
+  } else {
+    // явный выбор перекрывает оба тега цветом активной темы
+    if (lightMeta) lightMeta.content = isDark ? '#1C1C1E' : '#FAF7F3';
+    if (darkMeta)  darkMeta.content  = isDark ? '#1C1C1E' : '#FAF7F3';
   }
   _initThemeUI();
 }
@@ -250,7 +262,7 @@ export function _initThemeUI() {
   document.querySelectorAll('#themeSegment button').forEach(btn => {
     const active = btn.dataset.themeVal === t;
     btn.style.background = active ? 'var(--accent)' : 'var(--surface)';
-    btn.style.color = active ? '#fff' : 'var(--text-2)';
+    btn.style.color = active ? 'var(--on-accent)' : 'var(--text-2)';
   });
 }
 
