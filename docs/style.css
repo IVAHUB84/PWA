@@ -973,6 +973,20 @@ body {
   color: var(--text-2); font-size: 15px; text-align: center;
 }
 
+.inbox-mark-all-row {
+  display: flex; justify-content: flex-end;
+  padding: 10px 16px 0;
+}
+.inbox-mark-all-btn {
+  background: none; border: none;
+  color: var(--accent, #C9956C); font-size: 14px; font-weight: 600;
+  cursor: pointer; padding: 8px 4px;
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.inbox-mark-all-btn:active { opacity: 0.6; }
+
 .inbox-item {
   position: relative;
   margin: 10px 16px;
@@ -981,7 +995,11 @@ body {
   border: 1px solid var(--border);
   border-radius: 14px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
+.inbox-item:active { opacity: 0.75; }
 .inbox-item:first-child { margin-top: 14px; }
 .inbox-item.menu-open { z-index: 20; }
 .inbox-dots {

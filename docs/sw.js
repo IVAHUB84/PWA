@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v83';
+const CACHE_VERSION = 'v84';
 const STATIC_CACHE  = `studio-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `studio-runtime-${CACHE_VERSION}`;
 
@@ -34,6 +34,7 @@ const APP_SHELL = [
   './modules/install.js',
   './modules/inboxStore.js',
   './modules/inbox.js',
+  './modules/inboxTarget.js',
   './manifest.json',
   './logo.png',
   './logobest.png',
@@ -159,7 +160,8 @@ self.addEventListener('fetch', event => {
 
 // ── INBOX (inline) ───────────────────────────────────────────────────────────
 // Контракт должен точно совпадать с docs/modules/inboxStore.js:
-// DB_NAME, DB_VERSION, STORE, keyPath, формат id, структура записи, LIMIT.
+// DB_NAME, DB_VERSION, STORE, keyPath, формат id, структура записи {id,title,body,icon?,ts,read,target?}, LIMIT.
+// target = {type,id?} (нормализованный) или null/отсутствует (= «без цели»).
 const _IDB_NAME    = 'studio-inbox';
 const _IDB_VERSION = 1;
 const _IDB_STORE   = 'notifications';
@@ -206,10 +208,10 @@ function _idbTrimOldest(db) {
   });
 }
 
-async function _idbAddNotification({ title, body, icon, ts }) {
+async function _idbAddNotification({ title, body, icon, ts, target }) {
   const db = await _idbOpen();
   const id  = _idbMakeId(title, body, ts);
-  const record = { id, title: String(title ?? ''), body: String(body ?? ''), icon: icon || null, ts, read: false };
+  const record = { id, title: String(title ?? ''), body: String(body ?? ''), icon: icon || null, ts, read: false, target: target ?? null };
   const inserted = await new Promise((resolve, reject) => {
     const tx    = db.transaction(_IDB_STORE, 'readwrite');
     const store = tx.objectStore(_IDB_STORE);
@@ -232,17 +234,18 @@ self.addEventListener('push', event => {
   let data = {};
   try { data = event.data ? event.data.json() : {}; } catch {}
   const title = data.title || 'Реснички';
+  const target = data.target || null;
   const opts = {
     body: data.body || '',
     icon: data.icon || './icon-192.png',
     badge: './icon-192.png',
     vibrate: [300, 100, 300],
-    data: { url: './' },
+    data: { target },
   };
 
   const ts = Date.now();
 
-  const storeHistory = _idbAddNotification({ title, body: data.body || '', icon: data.icon || null, ts })
+  const storeHistory = _idbAddNotification({ title, body: data.body || '', icon: data.icon || null, ts, target })
     .catch(() => {});
 
   const notifyClients = self.clients
@@ -261,12 +264,19 @@ self.addEventListener('push', event => {
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  const url = event.notification.data?.url || './';
+  const target = event.notification.data?.target || null;
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
       const existing = list.find(c => c.url.includes(self.location.origin));
-      if (existing) return existing.focus();
-      return clients.openWindow(url);
+      if (existing) {
+        return existing.focus().then(() => {
+          existing.postMessage({ type: 'NOTIFICATION_TARGET', target });
+        });
+      }
+      if (target) {
+        return clients.openWindow('./?n=' + encodeURIComponent(JSON.stringify(target)));
+      }
+      return clients.openWindow('./');
     })
   );
 });

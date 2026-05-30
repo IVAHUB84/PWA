@@ -860,6 +860,20 @@
       <textarea class="admin-textarea" id="pushNewText" rows="3" oninput="pushPreviewUpdate(this.value)" placeholder="Введите текст уведомления…">Напоминаем о вашей записи завтра. Ждём вас в студии!</textarea>
       <div style="padding:0 20px 10px;"><div class="label">Предпросмотр</div></div>
       <div class="push-preview"><div class="push-p-icon" id="pushNewIcon">📅</div><div style="flex:1;"><div class="push-p-title" id="pushNewTitle">Реснички · Напоминание о визите</div><div class="push-p-body" id="pushNewPreview">Напоминаем о вашей записи завтра. Ждём вас в студии!</div></div></div>
+      <div style="padding:16px 20px 6px;"><div class="label">Цель (диплинк)</div></div>
+      <div style="padding:0 20px 10px;">
+        <select id="pushTargetType" onchange="pushTargetTypeChange(this.value)" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);font-size:14px;font-family:inherit;color:var(--text);">
+          <option value="none">Без цели</option>
+          <option value="service">Услуга</option>
+          <option value="category">Категория</option>
+        </select>
+      </div>
+      <div id="pushTargetServiceRow" style="display:none;padding:0 20px 10px;">
+        <select id="pushTargetService" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);font-size:14px;font-family:inherit;color:var(--text);"></select>
+      </div>
+      <div id="pushTargetCategoryRow" style="display:none;padding:0 20px 10px;">
+        <select id="pushTargetCategory" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);font-size:14px;font-family:inherit;color:var(--text);"></select>
+      </div>
       <div style="padding:16px 20px 0;"><button class="btn-primary" id="pushNewSendBtn" onclick="sendNewPush()">Отправить всем сейчас</button></div>
     </div>
   </div>
@@ -871,8 +885,8 @@
       <div class="nav-bar" style="padding-bottom:8px;">
         <button class="back-btn" onclick="back()" style="color:#fff;">‹ Назад</button>
         <span style="flex:1;font-size:17px;font-weight:800;color:#fff;text-align:center;">Уведомления</span>
-        <button class="inbox-clear-btn" onclick="clearInboxHistory()" aria-label="Очистить историю уведомлений">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4 12 12"/><path d="M9.5 9.5 14.5 14.5 9 21 3 15Z"/><path d="M6.2 12.2 8.8 18.6"/><path d="M9.4 11 11.6 17"/></svg>
+        <button class="inbox-clear-btn" onclick="clearInboxHistory()" aria-label="Удалить всю историю уведомлений">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
         </button>
       </div>
     </div>
@@ -881,6 +895,7 @@
         <div style="font-size:40px;margin-bottom:12px;">🔔</div>
         <div>Уведомлений пока нет</div>
       </div>
+      <div class="inbox-mark-all-row"><button class="inbox-mark-all-btn" id="inboxMarkAllBtn" onclick="inboxMarkAllRead()">Прочитать всё</button></div>
       <div id="inboxList"></div>
     </div>
   </div>

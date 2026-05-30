@@ -1,6 +1,7 @@
 // Схема IndexedDB: DB_NAME='studio-inbox', DB_VERSION=1, STORE='notifications',
 // keyPath='id', формат id: "<bucket>:<title>|<body>" (bucket = floor(ts/60000)),
-// структура записи: {id, title, body, icon?, ts, read}, LIMIT=50.
+// структура записи: {id, title, body, icon?, ts, read, target?}, LIMIT=50.
+// target = {type,id?} (нормализованный) или null/отсутствует (= «без цели»).
 // Инлайн-копия этого контракта хранится в docs/sw.js (_IDB_*) — при изменении синхронизировать.
 const DB_NAME = 'studio-inbox';
 const DB_VERSION = 1;
@@ -28,11 +29,11 @@ function _makeId(title, body, ts) {
   return bucket + ':' + content;
 }
 
-export async function addNotification({ title, body, icon, ts }) {
+export async function addNotification({ title, body, icon, ts, target }) {
   try {
     const db = await _openDB();
     const id = _makeId(title, body, ts);
-    const record = { id, title: String(title ?? ''), body: String(body ?? ''), icon: icon || null, ts, read: false };
+    const record = { id, title: String(title ?? ''), body: String(body ?? ''), icon: icon || null, ts, read: false, target: target ?? null };
 
     const inserted = await new Promise((resolve, reject) => {
       const tx = db.transaction(STORE, 'readwrite');

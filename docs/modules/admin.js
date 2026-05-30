@@ -457,6 +457,38 @@ function _togglePushSentCollapsed() {
   renderAdminPush();
 }
 
+export function pushTargetTypeChange(val) {
+  const svcRow = document.getElementById('pushTargetServiceRow');
+  const catRow = document.getElementById('pushTargetCategoryRow');
+  if (svcRow) svcRow.style.display = val === 'service'  ? '' : 'none';
+  if (catRow) catRow.style.display = val === 'category' ? '' : 'none';
+}
+
+function _fillPushTargetSelects() {
+  const svcSel = document.getElementById('pushTargetService');
+  const catSel = document.getElementById('pushTargetCategory');
+  if (svcSel) {
+    svcSel.innerHTML = SERVICES_DATA.map(s =>
+      `<option value="${esc(s.id)}">${esc(s.name)} — ${esc(s.cat || '')}</option>`
+    ).join('');
+  }
+  if (catSel) {
+    const cats = [...new Set(SERVICES_DATA.map(s => s.cat).filter(Boolean))].sort();
+    catSel.innerHTML = cats.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
+  }
+}
+
+function _resetPushTarget() {
+  const typeSel = document.getElementById('pushTargetType');
+  if (typeSel) typeSel.value = 'none';
+  pushTargetTypeChange('none');
+}
+
+export function initPushNewScreen() {
+  _fillPushTargetSelects();
+  _resetPushTarget();
+}
+
 export function pushTplChip(el, key) {
   el.closest('.hscroll').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
@@ -482,6 +514,17 @@ export function sendNewPush() {
   const icon  = document.getElementById('pushNewIcon')?.textContent || '📅';
   if (!text) { alert('Введите текст уведомления'); return; }
   hapticTap('submit');
+
+  const targetType = document.getElementById('pushTargetType')?.value || 'none';
+  let target = null;
+  if (targetType === 'service') {
+    const svcId = document.getElementById('pushTargetService')?.value;
+    if (svcId && String(svcId).trim() !== '') target = { type: 'service', id: String(svcId) };
+  } else if (targetType === 'category') {
+    const cat = document.getElementById('pushTargetCategory')?.value;
+    if (cat) target = { type: 'category', id: cat };
+  }
+
   const campaigns = _ls('yc_push_campaigns');
   campaigns.unshift({
     id: Date.now(), icon, title: text.slice(0, 50),
@@ -493,7 +536,7 @@ export function sendNewPush() {
 
   const screen = document.getElementById('s-admin-push-new');
   const title = document.getElementById('pushNewTitle')?.textContent || 'Реснички';
-  sendAdminPush(title, text).then(res => {
+  sendAdminPush(title, text, null, target).then(res => {
     let msg;
     if (!res.ok) msg = 'Ошибка: укажите Worker URL и Admin Secret';
     else if (res.sent === 0) msg = `Отправлено: 0 — нет подписчиков`;
@@ -545,7 +588,7 @@ Object.assign(window, {
   renderAdminClients, filterAdminClients,
   renderAdminPush, deletePushCampaign, clearAllSentPush,
   selectAudience,
-  pushTplChip, pushPreviewUpdate,
+  pushTplChip, pushPreviewUpdate, pushTargetTypeChange,
   sendNewPush, sendPush,
   _onPostImagePicked, _clearPostImage, _togglePushSentCollapsed,
   adminSubscribeSelf,

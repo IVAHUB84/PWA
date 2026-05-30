@@ -1,5 +1,6 @@
 import { getAllNotifications, getUnreadCount, markAllRead, clearAll, deleteNotification, setRead } from './inboxStore.js';
 import { esc } from './utils.js';
+import { routeToTarget } from './inboxTarget.js';
 
 let _items = [];
 
@@ -31,10 +32,16 @@ export async function updateInboxBadge() {
 export async function renderInbox() {
   const container = document.getElementById('inboxList');
   const empty     = document.getElementById('inboxEmpty');
+  const markAllBtn = document.getElementById('inboxMarkAllBtn');
   if (!container) return;
 
   try {
     _items = await getAllNotifications();
+    const hasUnread = _items.some(n => !n.read);
+    if (markAllBtn) {
+      markAllBtn.disabled = !_items.length || !hasUnread;
+      markAllBtn.style.visibility = (!_items.length || !hasUnread) ? 'hidden' : 'visible';
+    }
     if (!_items.length) {
       container.innerHTML = '';
       if (empty) empty.style.display = 'block';
@@ -42,11 +49,11 @@ export async function renderInbox() {
     }
     if (empty) empty.style.display = 'none';
     container.innerHTML = _items.map((n, i) => `
-      <div class="inbox-item${n.read ? '' : ' inbox-item--unread'}">
+      <div class="inbox-item${n.read ? '' : ' inbox-item--unread'}" onclick="inboxItemClick(event, ${i})">
         <button class="inbox-dots" onclick="inboxToggleMenu(event, ${i})" aria-label="Действия">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
         </button>
-        <div class="inbox-menu" id="inboxMenu-${i}">
+        <div class="inbox-menu" id="inboxMenu-${i}" onclick="event.stopPropagation()">
           <button onclick="inboxMarkUnreadAt(${i})">Сделать непрочитанным</button>
           <button class="inbox-menu-danger" onclick="inboxDeleteAt(${i})">Удалить</button>
         </div>
@@ -91,9 +98,31 @@ export async function inboxMarkUnreadAt(idx) {
   await updateInboxBadge();
 }
 
+export async function inboxItemClick(event, idx) {
+  const item = _items[idx];
+  if (!item) return;
+  await setRead(item.id, true);
+  item.read = true;
+  routeToTarget(item.target);
+  await updateInboxBadge();
+  const el = document.querySelectorAll('.inbox-item')[idx];
+  if (el) el.classList.remove('inbox-item--unread');
+  const markAllBtn = document.getElementById('inboxMarkAllBtn');
+  if (markAllBtn) {
+    const hasUnread = _items.some(n => !n.read);
+    markAllBtn.disabled = !hasUnread;
+    markAllBtn.style.visibility = hasUnread ? 'visible' : 'hidden';
+  }
+}
+
 document.addEventListener('click', _closeMenus);
 
 export async function enterInbox() {
+  await renderInbox();
+  await updateInboxBadge();
+}
+
+export async function inboxMarkAllRead() {
   await markAllRead();
   await renderInbox();
   await updateInboxBadge();
@@ -118,4 +147,4 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-Object.assign(window, { updateInboxBadge, renderInbox, enterInbox, clearInboxHistory, inboxToggleMenu, inboxDeleteAt, inboxMarkUnreadAt });
+Object.assign(window, { updateInboxBadge, renderInbox, enterInbox, clearInboxHistory, inboxToggleMenu, inboxDeleteAt, inboxMarkUnreadAt, inboxItemClick, inboxMarkAllRead });

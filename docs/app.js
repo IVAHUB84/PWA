@@ -15,7 +15,7 @@ import { renderHistoryScreen, renderUpcomingScreen } from './modules/history.js'
 import { renderHomeHero, renderProfileScreen, renderLoyaltyBlock, _renderHomeFeedPreview, _initOfferUrgency } from './modules/profile.js';
 import { hasPinSet, openPinEnter, refreshPinScreen } from './modules/pin.js';
 import { renderReviewScreen } from './modules/review.js';
-import { renderAdminDashboard, renderAdminFeed, _clearPostImage, initPostForm, renderAdminClients, renderAdminPush } from './modules/admin.js';
+import { renderAdminDashboard, renderAdminFeed, _clearPostImage, initPostForm, renderAdminClients, renderAdminPush, initPushNewScreen } from './modules/admin.js';
 import { _ghRead } from './modules/github.js';
 import { initPush } from './modules/push.js';
 import { setCompanyData } from './modules/studio.js';
@@ -27,6 +27,7 @@ import './modules/search.js';
 import './modules/scenarios.js';
 import { attachInstallListeners, maybeShowInstallOverlay } from './modules/install.js';
 import { updateInboxBadge, enterInbox } from './modules/inbox.js';
+import { routeToTarget, parseTargetParam, applyPendingTarget } from './modules/inboxTarget.js';
 
 // ── CROSS-MODULE CALLBACKS ──
 setAuthRenderFns({ renderHomeHero, renderProfileScreen, renderAdminDashboard });
@@ -90,6 +91,7 @@ registerOnEnter('s-crosssell', () => {
 registerOnEnter('s-admin',          () => renderAdminDashboard());
 registerOnEnter('s-admin-feed',     () => renderAdminFeed());
 registerOnEnter('s-admin-post',     () => { _clearPostImage(); initPostForm(); });
+registerOnEnter('s-admin-push-new', () => initPushNewScreen());
 registerOnEnter('s-admin-clients',  () => renderAdminClients());
 registerOnEnter('s-admin-push', () => {
   renderAdminPush();
@@ -202,6 +204,7 @@ async function initApp() {
       });
       renderServices();
     }
+    applyPendingTarget();
     if (staffRes.success && staffRes.data && staffRes.data.length) {
       const storedFavs = new Set(JSON.parse(localStorage.getItem('yc_favs') || '[]'));
       const staticByName = {};
@@ -280,6 +283,7 @@ document.addEventListener('touchstart', () => {}, { passive: true });
 
 // ── BOOT ──
 attachInstallListeners();
+parseTargetParam();
 renderServices();
 (function checkSession() {
   const sess = getSession();
@@ -320,6 +324,12 @@ fetch('./version.json?_=' + Date.now())
 
 // ── SERVICE WORKER ──
 if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', event => {
+    if (event.data && event.data.type === 'NOTIFICATION_TARGET') {
+      routeToTarget(event.data.target);
+    }
+  });
+
   let _swRefreshing = false;
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js').then(reg => {

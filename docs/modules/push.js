@@ -111,13 +111,14 @@ export async function savePreferences(clientId, { promo, remind }) {
   }
 }
 
-export async function sendAdminPush(title, body, targetClientId) {
+export async function sendAdminPush(title, body, targetClientId, target) {
   const url = _workerUrl();
   const secret = localStorage.getItem(_KEY_SECRET);
   if (!url || !secret) return { ok: false, sent: 0, error: 'no_config' };
   try {
     const payload = { title, body };
     if (targetClientId) payload.targetClientId = String(targetClientId);
+    if (target) payload.target = target;
     const r = await fetch(`${url}/send`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Admin-Secret': secret },
