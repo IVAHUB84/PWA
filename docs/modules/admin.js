@@ -12,7 +12,6 @@ function _ls(key) {
 
 let _postImageBase64 = null;
 let _adminAllClients = [];
-let _pushAudienceData = [];
 let _publishInProgress = false;
 let _pushSentCollapsed = false;
 
@@ -338,17 +337,8 @@ export function renderAdminPush() {
     listEl.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--text-2);font-size:14px;">Рассылок пока нет.<br>Нажмите «+ Новая» чтобы создать.</div>';
     return;
   }
-  const sched = campaigns.filter(c => c.scheduled);
   const sent  = campaigns.filter(c => !c.scheduled).sort((a, b) => b.id - a.id);
   let html = '';
-  if (sched.length) {
-    html += `<div class="section-header" style="padding-top:14px;"><span class="section-title">Запланированные</span><span style="font-size:12px;color:var(--green);font-weight:700;">${sched.length} активных</span></div>`;
-    html += sched.map(c => `<div class="push-hist-row">
-      <div class="push-hist-icon sched">⏰</div>
-      <div class="push-hist-info"><div class="push-hist-name">${esc(c.title)}</div><div class="push-hist-meta">${esc(c.date)} · ${esc(c.audience)}</div></div>
-      <button data-cid="${c.id}" onclick="deletePushCampaign(+this.dataset.cid)" style="background:var(--surface);border:none;border-radius:8px;font-size:12px;font-weight:700;padding:6px 10px;cursor:pointer;color:var(--red);font-family:inherit;flex-shrink:0;">Удал.</button>
-    </div>`).join('');
-  }
   if (sent.length) {
     const arrow = _pushSentCollapsed ? '›' : '⌄';
     html += `<div class="section-header" style="padding-top:20px;">
@@ -376,25 +366,12 @@ export function deletePushCampaign(id) {
 }
 
 export function clearAllSentPush() {
-  const campaigns = _ls('yc_push_campaigns').filter(c => c.scheduled);
-  localStorage.setItem('yc_push_campaigns', JSON.stringify(campaigns));
+  localStorage.setItem('yc_push_campaigns', JSON.stringify([]));
   renderAdminPush();
 }
 
 export function selectAudience(id) {
   ['aud1', 'aud2', 'aud3'].forEach(aid => {
-    const row = document.getElementById(aid);
-    const chk = document.getElementById(aid + '-chk');
-    if (!row || !chk) return;
-    const sel = aid === id;
-    row.classList.toggle('sel', sel);
-    chk.classList.toggle('on', sel);
-    chk.textContent = sel ? '✓' : '';
-  });
-}
-
-export function selectNewAudience(id) {
-  ['naud1', 'naud2', 'naud3'].forEach(aid => {
     const row = document.getElementById(aid);
     const chk = document.getElementById(aid + '-chk');
     if (!row || !chk) return;
@@ -430,86 +407,30 @@ export function pushPreviewUpdate(val) {
   if (prev) prev.textContent = val || '…';
 }
 
-export function pushSchedToggle(mode) {
-  document.getElementById('segNow').classList.toggle('active', mode === 'now');
-  document.getElementById('segLater').classList.toggle('active', mode === 'later');
-  const row = document.getElementById('schedTimeRow');
-  if (row) row.style.display = mode === 'later' ? 'block' : 'none';
-  const btn = document.getElementById('pushNewSendBtn');
-  if (btn) btn.textContent = mode === 'later' ? 'Запланировать' : 'Отправить сейчас';
-}
-
-export async function updatePushAudience() {
-  const n1 = document.getElementById('naud1-count');
-  const n2 = document.getElementById('naud2-count');
-  const n3 = document.getElementById('naud3-count');
-  if (!n1) return;
-  if (_pushAudienceData.length) {
-    _setPushCounts(n1, n2, n3);
-    return;
-  }
-  const r = await YC.get(`/records/${YC.company}`, { count: 200 });
-  if (r.success && r.data) {
-    const seen = new Map();
-    r.data.forEach(rec => {
-      const c = rec.client; if (!c || !c.id) return;
-      if (!seen.has(c.id)) seen.set(c.id, { visits: 0, lastDate: null });
-      const entry = seen.get(c.id);
-      entry.visits++;
-      const d = new Date(rec.date || '');
-      if (!entry.lastDate || d > entry.lastDate) entry.lastDate = d;
-    });
-    _pushAudienceData = [...seen.entries()].map(([id, v]) => ({ id, ...v }));
-  }
-  _setPushCounts(n1, n2, n3);
-}
-
-function _setPushCounts(n1, n2, n3) {
-  const total = _pushAudienceData.length;
-  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 30);
-  const active = _pushAudienceData.filter(c => c.lastDate && new Date(c.lastDate) >= cutoff).length;
-  if (n1) n1.textContent = total ? total + ' получателей' : 'Нет данных';
-  if (n2) n2.textContent = active ? active + ' получателей' : 'Нет данных';
-  if (n3) {
-    const booked = _ls('yc_records')
-      .filter(r => r.status !== 'cancelled' && r.datetime && new Date(r.datetime.replace(' ', 'T')) > new Date()).length;
-    n3.textContent = booked ? booked + ' клиентов' : 'Нет предстоящих записей';
-  }
-}
-
-
 export function sendNewPush() {
-  const isScheduled = document.getElementById('segLater')?.classList.contains('active');
   const text  = document.getElementById('pushNewText')?.value.trim() || '';
   const icon  = document.getElementById('pushNewIcon')?.textContent || '📅';
   if (!text) { alert('Введите текст уведомления'); return; }
   hapticTap('submit');
-  const audEl = document.querySelector('#s-admin-push-new .audience-row.sel [style*="font-weight:700"]');
-  const audience = audEl?.textContent || 'Все клиенты';
   const campaigns = _ls('yc_push_campaigns');
   campaigns.unshift({
     id: Date.now(), icon, title: text.slice(0, 50),
     date: new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }),
     time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
-    audience, scheduled: isScheduled,
+    audience: 'Все клиенты',
   });
   localStorage.setItem('yc_push_campaigns', JSON.stringify(campaigns));
 
   const screen = document.getElementById('s-admin-push-new');
-  if (isScheduled) {
-    _showAdminToast(screen, 'Рассылка запланирована ✓');
-    setTimeout(() => go('s-admin-push', 'tab'), 1800);
-  } else {
-    const title = document.getElementById('pushNewTitle')?.textContent || 'Реснички';
-    sendAdminPush(title, text).then(res => {
-      let msg;
-      if (!res.ok) msg = 'Ошибка: укажите Worker URL и Admin Secret';
-      else if (res.sent === 0) msg = `Отправлено: 0 — нет подписчиков`;
-      else msg = `Отправлено ${res.sent} уведомл. ✓`;
-      _showAdminToast(screen, msg);
-      setTimeout(() => go('s-admin-push', 'tab'), 2500);
-    });
-  }
+  const title = document.getElementById('pushNewTitle')?.textContent || 'Реснички';
+  sendAdminPush(title, text).then(res => {
+    let msg;
+    if (!res.ok) msg = 'Ошибка: укажите Worker URL и Admin Secret';
+    else if (res.sent === 0) msg = `Отправлено: 0 — нет подписчиков`;
+    else msg = `Отправлено ${res.sent} уведомл. ✓`;
+    _showAdminToast(screen, msg);
+    setTimeout(() => go('s-admin-push', 'tab'), 2500);
+  });
 }
 
 export function sendPush() {
@@ -549,9 +470,9 @@ Object.assign(window, {
   renderAdminDashboard, renderAdminFeed, publishPost, deletePost,
   renderAdminClients, filterAdminClients,
   renderAdminPush, deletePushCampaign, clearAllSentPush,
-  selectAudience, selectNewAudience,
-  pushTplChip, pushPreviewUpdate, pushSchedToggle,
-  updatePushAudience, sendNewPush, sendPush,
+  selectAudience,
+  pushTplChip, pushPreviewUpdate,
+  sendNewPush, sendPush,
   _onPostImagePicked, _clearPostImage, _togglePushSentCollapsed,
   adminSubscribeSelf,
   initPostForm, selectPostType, filterPostServices, pickPostService,

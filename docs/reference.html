@@ -147,7 +147,7 @@
     <tr><td><span class="screen">s-admin-post</span></td><td>Админ / Новый пост</td><td>Категория, текст, изображение (сжатие до 800px / JPEG 75%), черновик / публикация</td><td>Из ленты admin</td></tr>
     <tr><td><span class="screen">s-admin-clients</span></td><td>Админ / Клиенты</td><td>Список всех клиентов из YCLIENTS с поиском по имени / телефону</td><td>Из панели админа</td></tr>
     <tr><td><span class="screen">s-admin-push</span></td><td>Админ / Рассылки</td><td>История push-рассылок, шаблоны, запланированные</td><td>Из панели админа</td></tr>
-    <tr><td><span class="screen">s-admin-push-new</span></td><td>Админ / Новая рассылка</td><td>Текст, иконка, аудитория, мгновенная / отложенная отправка</td><td>Из рассылок</td></tr>
+    <tr><td><span class="screen">s-admin-push-new</span></td><td>Админ / Новая рассылка</td><td>Шаблон, текст, предпросмотр, отправка всем подписчикам немедленно</td><td>Из рассылок</td></tr>
   </tbody>
 </table>
 
@@ -317,7 +317,7 @@
     <tr><td><code>yc_reviews</code></td><td>JSON array</td><td>Оценки визитов (до 100): masterId, stars, text, date</td></tr>
     <tr><td><code>yc_feed_posts</code></td><td>JSON array</td><td>Посты ленты (кэш из GitHub). id, cat, text, image, date, draft</td></tr>
     <tr><td><code>yc_feed_likes</code></td><td>JSON array</td><td>ID понравившихся постов</td></tr>
-    <tr><td><code>yc_push_campaigns</code></td><td>JSON array</td><td>История push-рассылок: icon, title, date, audience, scheduled</td></tr>
+    <tr><td><code>yc_push_campaigns</code></td><td>JSON array</td><td>История push-рассылок: icon, title, date, time, audience</td></tr>
     <tr><td><code>yc_profile_photo</code></td><td>string</td><td>Base64 data:image/jpeg фото профиля (200×200)</td></tr>
     <tr><td><code>yc_install_seen</code></td><td>string</td><td><code>"1"</code> — баннер установки уже показан</td></tr>
     <tr><td><code>yc_consent</code></td><td>string</td><td><code>"1"</code> — согласие на ПД принято</td></tr>

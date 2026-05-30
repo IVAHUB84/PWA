@@ -839,22 +839,17 @@ body {
 .push-p-icon  { width:32px; height:32px; border-radius:8px; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
 .push-p-title { font-size:13px; font-weight:700; color:#fff; margin-bottom:2px; }
 .push-p-body  { font-size:12px; color:rgba(255,255,255,.6); line-height:1.4; }
-.audience-row { display:flex; align-items:center; margin:0 20px 8px; padding:12px 14px; background:var(--bg); border-radius:12px; box-shadow:var(--shadow); gap:12px; cursor:pointer; border:2px solid transparent; transition:border-color .15s; }
-.audience-row.sel { border-color:var(--accent); }
-.aud-check { width:22px; height:22px; border-radius:50%; border:2px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:11px; transition:all .15s; }
-.aud-check.on { background:var(--accent); border-color:var(--accent); color:var(--on-accent); }
+
 .push-hist-row  { display:flex; align-items:flex-start; gap:12px; padding:14px 20px; border-bottom:1px solid var(--border); }
 .push-hist-icon { width:40px; height:40px; border-radius:12px; background:var(--surface); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; margin-top:2px; }
-.push-hist-icon.sched { background:var(--accent-light); }
+
 .push-hist-info { flex:1; min-width:0; }
 .push-hist-name { font-size:14px; font-weight:700; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .push-hist-meta { font-size:12px; color:var(--text-2); }
 .push-hist-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:4px; margin-top:6px; }
 .push-hs-val { font-size:12px; font-weight:700; }
 .push-hs-lbl { font-size:10px; color:var(--text-2); }
-.seg-control { display:flex; background:var(--surface); border-radius:10px; padding:3px; margin:0 20px 14px; }
-.seg-btn { flex:1; height:34px; border-radius:8px; border:none; background:none; font-size:13px; font-weight:600; color:var(--text-2); cursor:pointer; font-family:inherit; transition:all .15s; }
-.seg-btn.active { background:var(--bg); color:var(--text); box-shadow:0 1px 4px rgba(0,0,0,0.1); }
+
 
 .pin-dot { width:16px; height:16px; border-radius:50%; border:2.5px solid var(--border); background:transparent; transition:all .12s; }
 .pin-dot.filled { background:var(--accent); border-color:var(--accent); transform:scale(1.1); }
@@ -1075,9 +1070,9 @@ button:not(.tab-center-btn):not(.tab):active {
 /* Мелкие контролы — лёгкий scale без тинта. Плашки-контейнеры
    (hero-card/feed-card/строки) НЕ масштабируем: :active всплывает с
    вложенной кнопки и ужимал бы всю плашку. */
-.chip, .feed-cat-chip, .seg-btn, .consent-check, .slot,
+.chip, .feed-cat-chip, .consent-check, .slot,
 .tab:not(.tab-center) { transition: transform var(--press-duration); }
-.chip:active, .feed-cat-chip:active, .seg-btn:active, .consent-check:active,
+.chip:active, .feed-cat-chip:active, .consent-check:active,
 .slot:active, .tab:not(.tab-center):active { transform: scale(var(--press-scale-chip)); }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1093,12 +1088,12 @@ button:not(.tab-center-btn):not(.tab):active {
   .tip-btn:active, .review-ext-btn:active, .review-ext-platform:active,
   .cs-add:active, .inbox-bell-btn:active, .inbox-clear-btn:active { opacity: 1; }
   .svc-catalog-card, .master-card, .hero-card, .feed-card,
-  .audience-row, .push-template, .consent-item, .slot,
-  .chip, .feed-cat-chip, .seg-btn, .consent-check,
+  .push-template, .consent-item, .slot,
+  .chip, .feed-cat-chip, .consent-check,
   .tab:not(.tab-center), .pin-key { transition: none; }
   .svc-catalog-card:active, .master-card:active, .hero-card:active, .feed-card:active,
-  .audience-row:active, .push-template:active, .consent-item:active, .slot:active,
-  .chip:active, .feed-cat-chip:active, .seg-btn:active, .consent-check:active,
+  .push-template:active, .consent-item:active, .slot:active,
+  .chip:active, .feed-cat-chip:active, .consent-check:active,
   .tab:not(.tab-center):active, .pin-key:active { transform: none; }
   .tab-center-btn:active .tab-fab { transform: none; }
 }

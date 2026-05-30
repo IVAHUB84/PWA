@@ -829,26 +829,9 @@
       </div></div>
       <div style="padding:0 20px 10px;"><div class="label">Текст уведомления</div></div>
       <textarea class="admin-textarea" id="pushNewText" rows="3" oninput="pushPreviewUpdate(this.value)" placeholder="Введите текст уведомления…">Напоминаем о вашей записи завтра. Ждём вас в студии!</textarea>
-      <div style="padding:0 20px 10px;"><div class="label">Аудитория</div></div>
-      <div class="audience-row sel" id="naud1" onclick="selectNewAudience('naud1')"><div class="aud-check on" id="naud1-chk">✓</div><div><div style="font-size:14px;font-weight:700;">Все клиенты</div><div id="naud1-count" style="font-size:12px;color:var(--text-2);">Загрузка…</div></div></div>
-      <div class="audience-row" id="naud2" onclick="selectNewAudience('naud2')"><div class="aud-check" id="naud2-chk"></div><div><div style="font-size:14px;font-weight:700;">Активные (последние 30 дней)</div><div id="naud2-count" style="font-size:12px;color:var(--text-2);">Загрузка…</div></div></div>
-      <div class="audience-row" id="naud3" onclick="selectNewAudience('naud3')"><div class="aud-check" id="naud3-chk"></div><div><div style="font-size:14px;font-weight:700;">Только с предстоящей записью</div><div id="naud3-count" style="font-size:12px;color:var(--text-2);">Загрузка…</div></div></div>
-      <div style="padding:14px 20px 10px;"><div class="label">Когда отправить</div></div>
-      <div class="seg-control">
-        <button class="seg-btn active" id="segNow" onclick="pushSchedToggle('now')">Сейчас</button>
-        <button class="seg-btn" id="segLater" onclick="pushSchedToggle('later')">Запланировать</button>
-      </div>
-      <div id="schedTimeRow" style="display:none;margin:0 20px 16px;background:var(--surface);border-radius:12px;padding:14px 16px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div><div style="font-size:11px;color:var(--text-2);margin-bottom:3px;">Дата</div><div style="font-size:16px;font-weight:700;">26 мая, вт</div></div>
-          <div style="width:1px;height:32px;background:var(--border);"></div>
-          <div><div style="font-size:11px;color:var(--text-2);margin-bottom:3px;">Время</div><div style="font-size:16px;font-weight:700;">10:00</div></div>
-          <button style="background:var(--accent-light);color:var(--accent);border:none;border-radius:8px;font-size:12px;font-weight:700;padding:6px 12px;cursor:pointer;font-family:inherit;">Изменить</button>
-        </div>
-      </div>
       <div style="padding:0 20px 10px;"><div class="label">Предпросмотр</div></div>
       <div class="push-preview"><div class="push-p-icon" id="pushNewIcon">📅</div><div style="flex:1;"><div class="push-p-title" id="pushNewTitle">Реснички · Напоминание о визите</div><div class="push-p-body" id="pushNewPreview">Напоминаем о вашей записи завтра. Ждём вас в студии!</div></div></div>
-      <div style="padding:16px 20px 0;"><button class="btn-primary" id="pushNewSendBtn" onclick="sendNewPush()">Отправить сейчас</button></div>
+      <div style="padding:16px 20px 0;"><button class="btn-primary" id="pushNewSendBtn" onclick="sendNewPush()">Отправить всем сейчас</button></div>
     </div>
   </div>
 

@@ -15,7 +15,7 @@ import { renderHistoryScreen, renderUpcomingScreen } from './modules/history.js'
 import { renderHomeHero, renderProfileScreen, renderLoyaltyBlock, _renderHomeFeedPreview, _initOfferUrgency } from './modules/profile.js';
 import { hasPinSet, openPinEnter, refreshPinScreen } from './modules/pin.js';
 import { renderReviewScreen } from './modules/review.js';
-import { renderAdminDashboard, renderAdminFeed, _clearPostImage, initPostForm, renderAdminClients, renderAdminPush, updatePushAudience } from './modules/admin.js';
+import { renderAdminDashboard, renderAdminFeed, _clearPostImage, initPostForm, renderAdminClients, renderAdminPush } from './modules/admin.js';
 import { _ghRead } from './modules/github.js';
 import { initPush } from './modules/push.js';
 import { setCompanyData } from './modules/studio.js';
@@ -98,7 +98,6 @@ registerOnEnter('s-admin-push', () => {
   if (wu) wu.value = localStorage.getItem('yc_worker_url') || '';
   if (ps) ps.value = localStorage.getItem('yc_push_secret') || '';
 });
-registerOnEnter('s-admin-push-new', () => updatePushAudience());
 registerOnEnter('s-register', () => {
   const phone = localStorage.getItem('yc_reg_phone') || '';
   const el = document.getElementById('regPhone');
