@@ -128,7 +128,7 @@
     <tr><td><span class="screen">s-home</span></td><td>Главная</td><td>Ближайшая запись, горизонтальный список мастеров, превью ленты, баннер установки PWA</td><td>Таб / после бронирования</td></tr>
     <tr><td><span class="screen">s-services</span></td><td>Услуги</td><td>Список услуг с фильтрацией по категории и поиском</td><td>Таб «Запись»</td></tr>
     <tr><td><span class="screen">s-masters</span></td><td>Мастера</td><td>Карточки мастеров с рейтингом, доступностью, кнопкой «Избранное»</td><td>После выбора услуги</td></tr>
-    <tr><td><span class="screen">s-slots</span></td><td>Дата / Время</td><td>Выбор даты (полоса на 21 день) и времени (слоты из API)</td><td>После выбора мастера</td></tr>
+    <tr><td><span class="screen">s-slots</span></td><td>Дата / Время</td><td>Месячный календарь с навигацией по месяцам (book_dates), слоты сгруппированы по периодам суток (Утро/День/Вечер) со сворачиваемыми секциями</td><td>После выбора мастера</td></tr>
     <tr><td><span class="screen">s-confirm</span></td><td>Подтверждение</td><td>Итоговая карточка записи или сообщение об успехе после бронирования</td><td>После выбора слота</td></tr>
     <tr><td><span class="screen">s-history</span></td><td>История</td><td>Предстоящие и прошедшие визиты. Действия: перенести, отменить, оценить</td><td>Таб «История»</td></tr>
     <tr><td><span class="screen">s-profile</span></td><td>Профиль</td><td>Имя, фото (загрузка/кроп), избранный мастер, последние визиты, уровень лояльности</td><td>Таб «Профиль»</td></tr>
@@ -284,7 +284,7 @@
     <tr><td class="module-col">auth.js</td><td>sendCodeByPhone, verifyOtp, registerClient, logout, enterAdmin, retryEmail, _otpClear</td><td>sendCodeByPhone, verifyOtp, registerClient, logout, enterAdmin, retryEmail</td></tr>
     <tr><td class="module-col">consent.js</td><td>acceptConsent, consentToggle, confirmConsentOff, toggleConsent, closeConsentModal</td><td>все публичные функции</td></tr>
     <tr><td class="module-col">booking.js</td><td>startBooking, rescheduleRecord, cancelRecord, confirmCancel, quickBook, rebook, bookWithMaster</td><td>все публичные функции</td></tr>
-    <tr><td class="module-col">slots.js</td><td>loadDates, loadTimes, selectDate, selectSlot, updateSlotsScreen, updateStickyBottom, updateConfirmScreen</td><td>selectDate, selectSlot</td></tr>
+    <tr><td class="module-col">slots.js</td><td>loadDates, loadTimes, calSelectDate, calNavMonth, toggleSlotPeriod, selectSlot, updateSlotsScreen, updateStickyBottom, updateConfirmScreen</td><td>calSelectDate, calNavMonth, toggleSlotPeriod, selectSlot</td></tr>
     <tr><td class="module-col">services.js</td><td>renderServices, filterCategory, filterSearch, selectService, _updateCatChips</td><td>filterCategory, filterSearch, renderServices, selectService</td></tr>
     <tr><td class="module-col">masters.js</td><td>renderMasters, toggleFav, selectMaster, selectAnyMaster</td><td>все публичные функции</td></tr>
     <tr><td class="module-col">history.js</td><td>renderHistoryScreen, _renderHistoryFromCache</td><td>—</td></tr>
