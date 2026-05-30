@@ -72,7 +72,7 @@ export function getCompanyContacts() {
   return { title, address, phone, schedule, lat, lon, mapYandex, map2gis };
 }
 
-function _telHref(phone) {
+export function _telHref(phone) {
   return 'tel:' + String(phone || '').replace(/[^+\d]/g, '');
 }
 

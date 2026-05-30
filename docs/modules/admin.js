@@ -5,15 +5,81 @@ import { PUSH_TEMPLATES } from './constants.js';
 import { sendAdminPush, subscribePush, initPush } from './push.js';
 import { _ghPullToLocal, _ghSyncPosts } from './github.js';
 import { SERVICES_DATA } from './state.js';
+import { _telHref } from './studio.js';
 
 function _ls(key) {
   try { return JSON.parse(localStorage.getItem(key) || '[]'); } catch { return []; }
 }
 
+function _pluralVisits(n) {
+  return n + ' визит' + (n === 1 ? '' : n < 5 ? 'а' : 'ов');
+}
+
 let _postImageBase64 = null;
 let _adminAllClients = [];
+let _adminLastRecs = [];
+let _adminLastFilteredClients = [];
 let _publishInProgress = false;
 let _pushSentCollapsed = false;
+
+function _openSheet(bodyHtml) {
+  const existing = document.querySelector('[data-admin-sheet="1"]');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;display:flex;align-items:flex-end;';
+  overlay.dataset.adminSheet = '1';
+  overlay.innerHTML = `<div style="background:var(--bg);width:100%;border-radius:24px 24px 0 0;padding:20px 20px 32px;max-width:393px;margin:0 auto;">
+    <div style="width:36px;height:4px;background:var(--border);border-radius:4px;margin:0 auto 20px;"></div>
+    ${bodyHtml}
+    <button onclick="this.closest('[data-admin-sheet]').remove()" style="width:100%;margin-top:16px;background:var(--surface);border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:600;color:var(--text);cursor:pointer;">Закрыть</button>
+  </div>`;
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+export function _openBookingSheet(index) {
+  const rec = _adminLastRecs[index];
+  if (!rec) return;
+  const client = rec.client || {};
+  const svc = rec.services && rec.services[0];
+  const staff = rec.staff || {};
+  const phone = client.phone || '';
+  const dt = (rec.date || '').slice(11, 16) || '—';
+  const price = svc && svc.cost ? svc.cost.toLocaleString('ru-RU') + ' ₽' : '—';
+  const callBlock = phone
+    ? `<a href="${esc(_telHref(phone))}" class="sheet-phone" style="display:block;margin-top:16px;text-align:center;background:var(--primary);color:#fff;border-radius:14px;padding:14px;font-size:15px;font-weight:700;text-decoration:none;">Позвонить ${esc(phone)}</a>`
+    : '';
+  const body = `
+    <div style="font-size:17px;font-weight:800;margin-bottom:16px;">Запись</div>
+    <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;">
+      <div><span style="color:var(--text-2);">Клиент</span><div style="color:var(--text);margin-top:2px;">${esc(client.name || '—')}</div></div>
+      <div><span style="color:var(--text-2);">Услуга</span><div style="color:var(--text);margin-top:2px;">${esc(svc ? svc.title : '—')}</div></div>
+      <div><span style="color:var(--text-2);">Мастер</span><div style="color:var(--text);margin-top:2px;">${esc(staff.name || '—')}</div></div>
+      <div><span style="color:var(--text-2);">Время</span><div style="color:var(--text);margin-top:2px;">${esc(dt)}</div></div>
+      <div><span style="color:var(--text-2);">Стоимость</span><div style="color:var(--text);margin-top:2px;">${esc(price)}</div></div>
+    </div>
+    ${callBlock}`;
+  _openSheet(body);
+}
+
+export function _openClientSheet(index) {
+  const c = _adminLastFilteredClients[index];
+  if (!c) return;
+  const phone = c.phone || '';
+  const visits = _pluralVisits(c.visits);
+  const callBlock = phone
+    ? `<a href="${esc(_telHref(phone))}" class="sheet-phone" style="display:block;margin-top:16px;text-align:center;background:var(--primary);color:#fff;border-radius:14px;padding:14px;font-size:15px;font-weight:700;text-decoration:none;">Позвонить ${esc(phone)}</a>`
+    : '';
+  const body = `
+    <div style="font-size:17px;font-weight:800;margin-bottom:16px;">Клиент</div>
+    <div style="display:flex;flex-direction:column;gap:10px;font-size:14px;">
+      <div><span style="color:var(--text-2);">Имя</span><div style="color:var(--text);margin-top:2px;">${esc(c.name)}</div></div>
+      <div><span style="color:var(--text-2);">Телефон</span><div class="sheet-phone" style="color:var(--text);margin-top:2px;">${esc(phone || '—')}</div></div>
+      <div><span style="color:var(--text-2);">Визиты</span><div style="color:var(--text);margin-top:2px;">${esc(visits)}</div></div>
+    </div>
+    ${callBlock}`;
+  _openSheet(body);
+}
 
 export function _onPostImagePicked(input) {
   const file = input.files[0];
@@ -84,6 +150,7 @@ export async function renderAdminDashboard() {
       bookingList.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-2);">Записей на сегодня нет</div>';
       return;
     }
+    _adminLastRecs = recs;
     bookingList.innerHTML = recs.map((rec, i) => {
       const svc = rec.services && rec.services[0];
       const dt = (rec.date || '').slice(11, 16);
@@ -94,7 +161,7 @@ export async function renderAdminDashboard() {
       const price = svc && svc.cost ? svc.cost.toLocaleString('ru-RU') + ' ₽' : '—';
       const grad = _GRADS2[i % _GRADS2.length];
       const borderStyle = i === recs.length - 1 ? 'border-bottom:none;' : '';
-      return `<div class="booking-row" style="${borderStyle}"><div class="booking-time">${esc(dt)}</div><div class="booking-av" style="background:${grad};">${esc(initials)}</div><div class="booking-info"><div class="booking-name">${esc(name)}</div><div class="booking-svc">${esc(svc ? svc.title : '—')} · ${esc(staff.name || '—')}</div></div><div class="booking-price">${esc(price)}</div></div>`;
+      return `<div class="booking-row" data-idx="${i}" onclick="_openBookingSheet(+this.dataset.idx)" style="${borderStyle}"><div class="booking-time">${esc(dt)}</div><div class="booking-av" style="background:${grad};">${esc(initials)}</div><div class="booking-info"><div class="booking-name">${esc(name)}</div><div class="booking-svc">${esc(svc ? svc.title : '—')} · ${esc(staff.name || '—')}</div></div><div class="booking-price">${esc(price)}</div></div>`;
     }).join('');
   }
 }
@@ -297,6 +364,7 @@ export async function renderAdminClients() {
 }
 
 function _renderClientRows(clients) {
+  _adminLastFilteredClients = clients;
   const listEl = document.getElementById('adminClientsList');
   if (!listEl) return;
   if (!clients.length) {
@@ -307,9 +375,9 @@ function _renderClientRows(clients) {
   listEl.innerHTML = clients.map((c, i) => {
     const initials = c.name.trim().split(/\s+/).map(w => w[0] || '').join('').slice(0, 2).toUpperCase() || '?';
     const grad = _GRADS[i % _GRADS.length];
-    const visits = c.visits + ' визит' + (c.visits === 1 ? '' : c.visits < 5 ? 'а' : 'ов');
+    const visits = _pluralVisits(c.visits);
     const border = i === clients.length - 1 ? 'border-bottom:none;' : '';
-    return `<div class="client-row" style="${border}">
+    return `<div class="client-row" data-idx="${i}" onclick="_openClientSheet(+this.dataset.idx)" style="${border}">
       <div class="client-av" style="background:${grad};">${esc(initials)}</div>
       <div class="client-info">
         <div class="client-name">${esc(c.name)}</div>
@@ -476,4 +544,5 @@ Object.assign(window, {
   _onPostImagePicked, _clearPostImage, _togglePushSentCollapsed,
   adminSubscribeSelf,
   initPostForm, selectPostType, filterPostServices, pickPostService,
+  _openBookingSheet, _openClientSheet,
 });
