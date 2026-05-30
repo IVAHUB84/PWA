@@ -8,6 +8,26 @@ a, button, [onclick], .tab, .chip, .svc-catalog-card, .master-card, .slot, .hero
 input, textarea, select { font-size: max(16px, 1em); }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
+body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+input, textarea, [contenteditable] {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+img {
+  -webkit-user-drag: none;
+  user-drag: none;
+  -webkit-touch-callout: none;
+}
+
 :root {
   --bg: #FAF7F3;
   --surface: #FFFFFF;
