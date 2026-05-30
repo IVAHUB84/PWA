@@ -25,13 +25,10 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   --green: #34C759;
   --shadow: 0 2px 12px rgba(0,0,0,0.07);
   --tab-bg: rgba(250,247,243,0.94);
-  --press-scale-card: 0.94;
-
   --press-scale-chip: 0.93;
   --press-scale-key: 0.91;
   --press-opacity-button: 0.85;
   --press-opacity-soft: 0.75;
-  --press-bg: var(--accent-light);
   --press-brightness: 0.88;
   --press-duration: 120ms;
 }
@@ -286,10 +283,9 @@ body {
   box-shadow: var(--shadow);
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.12s, background var(--press-duration);
+  transition: transform 0.12s;
   border: 1px solid var(--border);
 }
-.svc-catalog-card:active { transform: scale(var(--press-scale-card)); background: var(--press-bg); }
 .svc-cover {
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -322,9 +318,8 @@ body {
   margin: 0 20px 10px; background: var(--bg); border-radius: 16px;
   box-shadow: var(--shadow); padding: 16px;
   display: flex; align-items: center; gap: 14px;
-  cursor: pointer; transition: transform 0.12s, background var(--press-duration); border: 1.5px solid transparent;
+  cursor: pointer; transition: transform 0.12s; border: 1.5px solid transparent;
 }
-.master-card:active { transform: scale(var(--press-scale-card)); background: var(--press-bg); }
 .master-card.fav { border-color: var(--accent); }
 .master-av { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; position: relative; overflow: hidden; }
 .master-info { flex: 1; }
@@ -1034,16 +1029,13 @@ button:not(.tab-center-btn):not(.tab):active {
 .feed-book:active, .tip-btn:active, .review-ext-btn:active, .cs-add:active
 { opacity: var(--press-opacity-button); }
 
-.hero-card, .feed-card, .audience-row, .push-template,
-.consent-item, .slot { transition: transform var(--press-duration), background var(--press-duration); }
-.hero-card:active, .feed-card:active, .audience-row:active, .push-template:active,
-.consent-item:active, .slot:active { transform: scale(var(--press-scale-card)); background: var(--press-bg); }
-
-.chip, .feed-cat-chip, .seg-btn, .consent-check { transition: transform var(--press-duration), background var(--press-duration), color var(--press-duration); }
-.chip:active, .feed-cat-chip:active, .seg-btn:active, .consent-check:active
-{ transform: scale(var(--press-scale-chip)); background: var(--press-bg); }
+/* Мелкие контролы — лёгкий scale без тинта. Плашки-контейнеры
+   (hero-card/feed-card/строки) НЕ масштабируем: :active всплывает с
+   вложенной кнопки и ужимал бы всю плашку. */
+.chip, .feed-cat-chip, .seg-btn, .consent-check, .slot,
 .tab:not(.tab-center) { transition: transform var(--press-duration); }
-.tab:not(.tab-center):active { transform: scale(var(--press-scale-chip)); }
+.chip:active, .feed-cat-chip:active, .seg-btn:active, .consent-check:active,
+.slot:active, .tab:not(.tab-center):active { transform: scale(var(--press-scale-chip)); }
 
 @media (prefers-reduced-motion: reduce) {
   .inbox-badge--pulse { animation: none; }
