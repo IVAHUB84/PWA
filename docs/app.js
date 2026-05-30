@@ -270,6 +270,12 @@ async function _trySubscribeExistingSession() {
   window.subscribePush?.(sess.client_id, sess.phone || '');
 }
 
+// ── iOS :active ENABLER ──
+// iOS Safari применяет CSS :active к элементу только если на документе есть
+// обработчик касания. Без этого весь press feedback (scale/brightness/opacity)
+// на iPhone не срабатывает. Пустой passive-слушатель включает :active глобально.
+document.addEventListener('touchstart', () => {}, { passive: true });
+
 // ── BOOT ──
 attachInstallListeners();
 renderServices();
