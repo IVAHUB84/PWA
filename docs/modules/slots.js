@@ -4,17 +4,12 @@ import { esc, _fmtDatetime, hapticTap, _localISODate } from './utils.js';
 import { _loadStoredRecords } from './storage.js';
 import { renderStudioContacts } from './studio.js';
 
-function _setConfirmBtnEnabled(enabled) {
-  const btn = document.querySelector('#s-slots .sticky-bottom .btn-primary');
-  if (!btn) return;
-  btn.disabled = !enabled;
-  btn.style.opacity = enabled ? '' : '0.45';
-}
-
 // ── CALENDAR STATE ──
 const _calCache = new Map(); // YYYY-MM → Set<iso>
 let _calYear = 0;
 let _calMonth = 0; // 0-based
+let _calCollapsed = false;
+let _swipeListenersAttached = false;
 
 function _calKey(y, m) { return `${y}-${String(m + 1).padStart(2, '0')}`; }
 
@@ -50,6 +45,14 @@ async function _fetchDatesForMonth(y, m) {
   return _FETCH_ERROR;
 }
 
+function _getWeekStart(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  const dow = d.getDay();
+  const monOffset = dow === 0 ? -6 : 1 - dow;
+  d.setDate(d.getDate() + monOffset);
+  return d;
+}
+
 function _renderCalGrid(availSetOrError) {
   const availSet = availSetOrError === _FETCH_ERROR ? new Set() : availSetOrError;
   const grid = document.getElementById('calGrid');
@@ -65,7 +68,6 @@ function _renderCalGrid(availSetOrError) {
   const todayM = parseInt(today.slice(5, 7), 10) - 1;
   const todayD = parseInt(today.slice(8, 10), 10);
 
-  // Navigation button states
   const prevBtn = document.getElementById('calPrev');
   const nextBtn = document.getElementById('calNext');
   const isCurrentMonth = _calYear === todayY && _calMonth === todayM;
@@ -74,7 +76,6 @@ function _renderCalGrid(availSetOrError) {
     prevBtn.classList.toggle('cal-nav-disabled', isCurrentMonth);
   }
 
-  // Determine forward limit: check if any date in next month exists in cache
   const nextY = _calMonth === 11 ? _calYear + 1 : _calYear;
   const nextM = _calMonth === 11 ? 0 : _calMonth + 1;
   const nextKey = _calKey(nextY, nextM);
@@ -87,41 +88,17 @@ function _renderCalGrid(availSetOrError) {
     nextBtn.classList.toggle('cal-nav-disabled', !hasNext);
   }
 
-  // Build grid: Monday-based weeks
-  const firstDay = new Date(_calYear, _calMonth, 1);
-  let startDow = firstDay.getDay(); // 0=Sun
-  startDow = startDow === 0 ? 6 : startDow - 1; // convert to Mon-based (0=Mon)
-  const daysInMonth = new Date(_calYear, _calMonth + 1, 0).getDate();
-  const totalCells = Math.ceil((startDow + daysInMonth) / 7) * 7;
+  // Update collapsed class on cal-card for animation
+  const calCard = document.querySelector('#s-slots .cal-card');
+  if (calCard) calCard.classList.toggle('cal-collapsed', _calCollapsed);
 
-  let html = '';
-  const selISO = state.dateISO || '';
-  for (let i = 0; i < totalCells; i++) {
-    const dayNum = i - startDow + 1;
-    if (dayNum < 1 || dayNum > daysInMonth) {
-      html += '<div class="cal-cell cal-cell-empty"></div>';
-      continue;
-    }
-    const iso = `${_calYear}-${String(_calMonth + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
-    const isToday = _calYear === todayY && _calMonth === todayM && dayNum === todayD;
-    const isPast = iso < today;
-    const isAvail = availSet.has(iso);
-    const isSel = iso === selISO;
-
-    let cls = 'cal-cell';
-    if (isSel) cls += ' sel';
-    else if (isToday) cls += ' today';
-    if (!isAvail || isPast) cls += ' unavail';
-
-    if (isAvail && !isPast) {
-      html += `<div class="${cls}" onclick="calSelectDate('${iso}')">${dayNum}</div>`;
-    } else {
-      html += `<div class="${cls}">${dayNum}</div>`;
-    }
+  if (_calCollapsed) {
+    _renderWeekRow(grid, availSet, today, todayY, todayM, todayD);
+  } else {
+    _renderMonthGrid(grid, availSet, today, todayY, todayM, todayD);
   }
-  grid.innerHTML = html;
 
-  if (availSetOrError === _FETCH_ERROR || availSet.size === 0) {
+  if (!_calCollapsed && (availSetOrError === _FETCH_ERROR || availSet.size === 0)) {
     const noSlots = document.createElement('div');
     noSlots.className = 'cal-no-dates';
     noSlots.textContent = availSetOrError === _FETCH_ERROR
@@ -131,8 +108,86 @@ function _renderCalGrid(availSetOrError) {
   }
 }
 
+function _renderMonthGrid(grid, availSet, today, todayY, todayM, todayD) {
+  const firstDay = new Date(_calYear, _calMonth, 1);
+  let startDow = firstDay.getDay();
+  startDow = startDow === 0 ? 6 : startDow - 1;
+  const daysInMonth = new Date(_calYear, _calMonth + 1, 0).getDate();
+  const totalCells = Math.ceil((startDow + daysInMonth) / 7) * 7;
+
+  const selISO = state.dateISO || '';
+  let html = '';
+  for (let i = 0; i < totalCells; i++) {
+    const dayNum = i - startDow + 1;
+    if (dayNum < 1 || dayNum > daysInMonth) {
+      html += '<div class="cal-cell cal-cell-empty"></div>';
+      continue;
+    }
+    html += _buildCell(_calYear, _calMonth, dayNum, availSet, today, todayY, todayM, todayD, selISO);
+  }
+  grid.innerHTML = html;
+}
+
+function _renderWeekRow(grid, availSet, today, todayY, todayM, todayD) {
+  const anchorISO = state.dateISO || today;
+  const weekStart = _getWeekStart(anchorISO);
+
+  const selISO = state.dateISO || '';
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(weekStart);
+    d.setDate(d.getDate() + i);
+    const y = d.getFullYear();
+    const m = d.getMonth();
+    const dayNum = d.getDate();
+
+    // Gather availSet for the day's month (may differ from _calMonth)
+    const dayKey = _calKey(y, m);
+    let dayAvailSet = availSet;
+    if (dayKey !== _calKey(_calYear, _calMonth)) {
+      if (!_calCache.has(dayKey)) {
+        const snapY = _calYear, snapM = _calMonth;
+        _fetchDatesForMonth(y, m).then(() => {
+          if (_calYear === snapY && _calMonth === snapM && _calCollapsed) {
+            const cur = _calCache.get(_calKey(snapY, snapM));
+            _renderCalGrid(cur !== undefined ? cur : new Set());
+          }
+        });
+      }
+      const cached = _calCache.get(dayKey);
+      dayAvailSet = cached && cached !== _FETCH_ERROR ? cached : new Set();
+    }
+
+    html += _buildCell(y, m, dayNum, dayAvailSet, today, todayY, todayM, todayD, selISO);
+  }
+  grid.innerHTML = html;
+}
+
+function _buildCell(y, m, dayNum, availSet, today, todayY, todayM, todayD, selISO) {
+  const iso = `${y}-${String(m + 1).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+  const isToday = y === todayY && m === todayM && dayNum === todayD;
+  const isPast = iso < today;
+  const isAvail = availSet.has(iso);
+  const isSel = iso === selISO;
+
+  let cls = 'cal-cell';
+  if (isSel) cls += ' sel';
+  else if (isToday) cls += ' today';
+  if (!isAvail || isPast) cls += ' unavail';
+
+  if (isAvail && !isPast) {
+    return `<div class="${cls}" onclick="calSelectDate('${iso}')">${dayNum}</div>`;
+  }
+  return `<div class="${cls}">${dayNum}</div>`;
+}
+
 export async function loadDates() {
   _calCache.clear();
+  _calCollapsed = false;
+  state.dateISO = '';
+  state.slot = '';
+  state.dateFull = '';
+
   const today = new Date();
   _calYear = today.getFullYear();
   _calMonth = today.getMonth();
@@ -144,7 +199,6 @@ export async function loadDates() {
 
   const availSet = await _fetchDatesForMonth(_calYear, _calMonth);
 
-  // If current month has no dates, try next month
   if (availSet !== _FETCH_ERROR && availSet.size === 0) {
     const ny = _calMonth === 11 ? _calYear + 1 : _calYear;
     const nm = _calMonth === 11 ? 0 : _calMonth + 1;
@@ -153,8 +207,6 @@ export async function loadDates() {
       _calYear = ny;
       _calMonth = nm;
       _renderCalGrid(nextSet);
-      _autoSelectFirstDate(nextSet);
-      // prefetch the month after to know forward nav limit
       const ny2 = nm === 11 ? ny + 1 : ny;
       const nm2 = nm === 11 ? 0 : nm + 1;
       if (!_calCache.has(_calKey(ny2, nm2))) {
@@ -171,9 +223,7 @@ export async function loadDates() {
   }
 
   _renderCalGrid(availSet);
-  _autoSelectFirstDate(availSet !== _FETCH_ERROR ? availSet : new Set());
 
-  // Background prefetch of next month to correctly disable/enable forward nav
   const ny = _calMonth === 11 ? _calYear + 1 : _calYear;
   const nm = _calMonth === 11 ? 0 : _calMonth + 1;
   const nextKey = _calKey(ny, nm);
@@ -185,14 +235,6 @@ export async function loadDates() {
         _renderCalGrid(cur !== undefined ? cur : new Set());
       }
     });
-  }
-}
-
-function _autoSelectFirstDate(availSet) {
-  const today = _localISODate();
-  const sorted = Array.from(availSet).filter(d => d >= today).sort();
-  if (sorted.length) {
-    calSelectDate(sorted[0]);
   }
 }
 
@@ -218,7 +260,6 @@ export async function calNavMonth(delta) {
   const snapY = y, snapM = m;
   const availSet = await _fetchDatesForMonth(y, m);
 
-  // Pre-fetch next month to know if forward nav is available
   const ny = m === 11 ? y + 1 : y;
   const nm = m === 11 ? 0 : m + 1;
   if (!_calCache.has(_calKey(ny, nm))) {
@@ -242,12 +283,72 @@ export function calSelectDate(iso) {
   loadTimes(iso);
 }
 
+export function toggleCalCollapsed() {
+  hapticTap('select');
+  _calCollapsed = !_calCollapsed;
+  const key = _calKey(_calYear, _calMonth);
+  const cached = _calCache.get(key);
+  const availSet = cached && cached !== _FETCH_ERROR ? cached : new Set();
+  _renderCalGrid(availSet);
+}
+
+function _initCalSwipe() {
+  if (_swipeListenersAttached) return;
+  const zone = document.querySelector('#s-slots .slots-cal-zone');
+  if (!zone) return;
+  let startX = 0;
+  let startY = 0;
+  let startTime = 0;
+
+  zone.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    startTime = Date.now();
+  }, { passive: true });
+
+  zone.addEventListener('touchend', e => {
+    if (e.target.closest('.cal-cell')) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    const dt = Date.now() - startTime;
+    const absDy = Math.abs(dy);
+    const absDx = Math.abs(dx);
+    // Require predominantly vertical gesture that isn't a tap
+    if (absDy < 30 || dt > 400 || absDy <= absDx * 1.5) return;
+    if (dy < 0 && !_calCollapsed) {
+      _calCollapsed = true;
+    } else if (dy > 0 && _calCollapsed) {
+      _calCollapsed = false;
+    } else {
+      return;
+    }
+    const key = _calKey(_calYear, _calMonth);
+    const cached = _calCache.get(key);
+    const availSet = cached && cached !== _FETCH_ERROR ? cached : new Set();
+    _renderCalGrid(availSet);
+  }, { passive: true });
+
+  _swipeListenersAttached = true;
+}
+
+function _initHandleKeyboard() {
+  const handle = document.getElementById('calDragHandle');
+  if (!handle || handle.dataset.keyBound) return;
+  handle.dataset.keyBound = '1';
+  handle.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleCalCollapsed();
+    }
+  });
+}
+
 // ── SLOTS SCREEN ──
 export function updateSlotsScreen() {
-  const pageTitle = document.querySelector('#s-slots .page-title');
+  const calZone = document.querySelector('#s-slots .slots-cal-zone');
 
   let reschBanner = document.getElementById('rescheduleBanner');
-  if (state._rescheduleId && pageTitle) {
+  if (state._rescheduleId && calZone) {
     const records = _loadStoredRecords();
     const rec = records.find(r => String(r.id) === String(state._rescheduleId));
     if (rec) {
@@ -255,7 +356,7 @@ export function updateSlotsScreen() {
         reschBanner = document.createElement('div');
         reschBanner.id = 'rescheduleBanner';
         reschBanner.style.cssText = 'margin:8px 20px 0;padding:10px 14px;background:var(--accent-light);border-radius:12px;border-left:3px solid var(--accent);';
-        pageTitle.insertAdjacentElement('afterend', reschBanner);
+        calZone.insertAdjacentElement('beforebegin', reschBanner);
       }
       reschBanner.innerHTML = `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-2);margin-bottom:3px;">Перенос записи</div>
         <div style="font-size:14px;font-weight:600;">${esc(rec.svcName)}</div>
@@ -265,15 +366,25 @@ export function updateSlotsScreen() {
     reschBanner.remove();
   }
 
+  _initCalSwipe();
+  _initHandleKeyboard();
   updateStickyBottom();
 }
 
 export function updateStickyBottom() {
-  const svc = getService();
-  const el = document.getElementById('stickyInfo');
-  if (el) el.innerHTML = `<b>${esc(state.dateFull)} · ${esc(state.slot)}</b> · ${esc(svc.name)}`;
-  const btn = document.querySelector('#s-slots .sticky-bottom .btn-primary');
-  if (btn) btn.textContent = state._rescheduleId ? 'Перенести запись' : 'Записаться';
+  const bottom = document.getElementById('slotsStickyBottom');
+  if (!bottom) return;
+
+  if (state.dateISO && state.slot) {
+    const svc = getService();
+    const el = document.getElementById('stickyInfo');
+    if (el) el.innerHTML = `<b>${esc(state.dateFull)} · ${esc(state.slot)}</b> · ${esc(svc.name)}`;
+    const btn = bottom.querySelector('.btn-primary');
+    if (btn) btn.textContent = state._rescheduleId ? 'Перенести запись' : 'Записаться';
+    bottom.classList.remove('hidden');
+  } else {
+    bottom.classList.add('hidden');
+  }
 }
 
 function _getPriceForConfirm(svc, m) {
@@ -320,12 +431,13 @@ export async function loadTimes(iso) {
   const lbl = document.getElementById('slotsDateLbl');
   if (!el) return;
   state.dateISO = iso;
+  state.slot = '';
   const d = new Date(iso + 'T00:00:00');
   const dateStr = d.toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' });
   state.dateFull = dateStr;
   if (lbl) lbl.textContent = 'Доступное время — ' + dateStr;
   el.innerHTML = Array.from({ length: 9 }).map(() => '<div class="skel skel-slot"></div>').join('');
-  _setConfirmBtnEnabled(false);
+  updateStickyBottom();
   const staffId = m ? m.id : 0;
   const params = {};
   if (svc) params.service_ids = svc.id;
@@ -350,7 +462,6 @@ export async function loadTimes(iso) {
     if (p) buckets[p.key].push(time);
   });
 
-  let firstTime = '';
   let html = '';
   _PERIODS.forEach(period => {
     const times = buckets[period.key];
@@ -363,8 +474,7 @@ export async function loadTimes(iso) {
       <div class="slot-period-body">
         <div class="slots-grid">`;
     times.forEach(time => {
-      if (!firstTime) firstTime = time;
-      html += `<button class="slot${time === firstTime ? ' sel' : ''}" onclick="selectSlot(this,'${time}')">${esc(time)}</button>`;
+      html += `<button class="slot" onclick="selectSlot(this,'${time}')">${esc(time)}</button>`;
     });
     html += `</div></div></div>`;
   });
@@ -375,7 +485,6 @@ export async function loadTimes(iso) {
   }
 
   el.innerHTML = html;
-  if (firstTime) { state.slot = firstTime; updateStickyBottom(); _setConfirmBtnEnabled(true); }
 }
 
 export function toggleSlotPeriod(hdr) {
@@ -392,4 +501,4 @@ export function selectSlot(el, time) {
   updateStickyBottom();
 }
 
-Object.assign(window, { loadDates, loadTimes, calNavMonth, calSelectDate, toggleSlotPeriod, selectSlot, updateSlotsScreen, updateStickyBottom, updateConfirmScreen });
+Object.assign(window, { loadDates, loadTimes, calNavMonth, calSelectDate, toggleSlotPeriod, selectSlot, updateSlotsScreen, updateStickyBottom, updateConfirmScreen, toggleCalCollapsed });

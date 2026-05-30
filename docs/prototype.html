@@ -181,8 +181,7 @@
     <div class="status-bar">
       <span class="time">9:41</span><div class="dynamic-island"></div>    </div>
     <div class="nav-bar"><button class="back-btn" onclick="back()">‹ Назад</button></div>
-    <div class="page-title">Выберите время</div>
-    <div class="scroll">
+    <div class="slots-cal-zone">
       <div class="cal-card">
         <div class="cal-header">
           <button class="cal-nav-btn" id="calPrev" onclick="calNavMonth(-1)">&#8249;</button>
@@ -194,6 +193,11 @@
         </div>
         <div class="cal-grid" id="calGrid"></div>
       </div>
+      <div class="cal-drag-handle" id="calDragHandle" role="button" tabindex="0" aria-label="Свернуть или развернуть календарь" onclick="toggleCalCollapsed()">
+        <div class="cal-drag-handle-bar"></div>
+      </div>
+    </div>
+    <div class="scroll slots-scroll">
       <div class="slots-section">
         <div class="slots-lbl" id="slotsDateLbl">Доступное время</div>
         <div id="slotsGrid">
@@ -201,8 +205,8 @@
         </div>
       </div>
     </div>
-    <div class="sticky-bottom">
-      <div class="sticky-info" id="stickyInfo"><b>Пятница, 24 мая · 14:00</b> · Ламинирование бровей</div>
+    <div class="sticky-bottom hidden" id="slotsStickyBottom">
+      <div class="sticky-info" id="stickyInfo"></div>
       <button class="btn-primary" onclick="startBooking()">Записаться</button>
     </div>
     <div class="tab-bar">

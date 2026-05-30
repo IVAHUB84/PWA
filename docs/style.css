@@ -365,10 +365,44 @@ body {
 .fav-chip { font-size: 10px; font-weight: 700; background: var(--accent-light); color: var(--on-accent-light); border-radius: 20px; padding: 2px 8px; margin-left: 6px; }
 
 /* ── SLOTS ── */
+.slots-cal-zone {
+  flex-shrink: 0;
+  background: var(--bg);
+}
+.slots-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+.slots-scroll::-webkit-scrollbar { display: none; }
+
 .cal-card {
-  margin: 0 20px 20px; background: var(--surface); border-radius: 16px;
+  margin: 0 20px 4px; background: var(--surface); border-radius: 16px;
   box-shadow: var(--shadow); padding: 16px;
 }
+.cal-card .cal-grid {
+  overflow: hidden;
+  max-height: 500px;
+  transition: max-height 0.25s ease, opacity 0.2s;
+  opacity: 1;
+}
+.cal-card.cal-collapsed .cal-grid { max-height: 44px; }
+
+.cal-drag-handle {
+  display: flex; align-items: center; justify-content: center;
+  height: 24px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.cal-drag-handle-bar {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: var(--border);
+  transition: background 0.15s;
+}
+.cal-drag-handle:hover .cal-drag-handle-bar,
+.cal-drag-handle:focus .cal-drag-handle-bar { background: var(--text-2); }
+.cal-drag-handle:focus { outline: none; }
+.cal-drag-handle:focus-visible .cal-drag-handle-bar { outline: 2px solid var(--primary); outline-offset: 4px; border-radius: 2px; }
 .cal-header {
   display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;
 }
@@ -448,6 +482,7 @@ body {
   backdrop-filter: blur(20px);
   border-top: 1px solid var(--border); padding: 12px 20px 16px;
 }
+.sticky-bottom.hidden { display: none; }
 .sticky-info { font-size: 13px; color: var(--text-2); margin-bottom: 10px; }
 .sticky-info b { color: var(--text); font-weight: 700; }
 
