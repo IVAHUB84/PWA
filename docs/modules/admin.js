@@ -139,6 +139,8 @@ export async function renderAdminDashboard() {
   if (statCount) statCount.textContent = recs.length;
   const rev = recs.reduce((s, x) => s + (x.services || []).reduce((a, sv) => a + (sv.cost || 0), 0), 0);
   if (statRevenue) statRevenue.textContent = rev ? rev.toLocaleString('ru-RU') + ' ₽' : '—';
+  const avgEl = document.getElementById('adminStatAvg');
+  if (avgEl) avgEl.textContent = recs.length > 0 ? Math.round(rev / recs.length).toLocaleString('ru-RU') + ' ₽' : '—';
   const clientStatEl = document.getElementById('adminStatClients');
   if (clientStatEl) {
     const uniqueClients = new Set(recs.map(x => x.client && x.client.id).filter(Boolean));
@@ -534,6 +536,10 @@ async function adminSubscribeSelf() {
   if (statusEl) statusEl.textContent = sub ? `Подписан ✓ (id: ${clientId})` : 'Ошибка — проверьте консоль (F12)';
 }
 
+export function _adminLogout() {
+  if (confirm('Выйти из режима студии?')) go('s-login');
+}
+
 Object.assign(window, {
   renderAdminDashboard, renderAdminFeed, publishPost, deletePost,
   renderAdminClients, filterAdminClients,
@@ -545,4 +551,5 @@ Object.assign(window, {
   adminSubscribeSelf,
   initPostForm, selectPostType, filterPostServices, pickPostService,
   _openBookingSheet, _openClientSheet,
+  _adminLogout,
 });
