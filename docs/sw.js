@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v84';
+const CACHE_VERSION = 'v85';
 const STATIC_CACHE  = `studio-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `studio-runtime-${CACHE_VERSION}`;
 
@@ -85,12 +85,19 @@ self.addEventListener('fetch', event => {
     APP_SHELL.some(p => url.pathname.endsWith(p.replace('./', '/')));
 
   if (isJs) {
-    // JS-модули: network-first, fallback на кэш (чтобы фиксы применялись сразу)
+    // JS-модули: stale-while-revalidate — мгновенная отдача из кэша + фоновое
+    // обновление. Свежесть при релизе гарантируется bump CACHE_VERSION (новый
+    // STATIC_CACHE перекачивает APP_SHELL на install) + controllerchange-reload.
     event.respondWith(
-      fetch(request).then(res => {
-        if (res.ok) { const c2 = res.clone(); caches.open(STATIC_CACHE).then(c => c.put(request, c2)); }
-        return res;
-      }).catch(() => caches.match(request))
+      caches.open(STATIC_CACHE).then(cache =>
+        cache.match(request).then(cached => {
+          const networkFetch = fetch(request).then(res => {
+            if (res.ok) cache.put(request, res.clone());
+            return res;
+          }).catch(() => cached);
+          return cached || networkFetch;
+        })
+      )
     );
     return;
   }
