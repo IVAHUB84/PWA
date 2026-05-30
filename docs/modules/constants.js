@@ -32,6 +32,17 @@ export const REVIEW_URLS = {
   'yandex': 'https://yandex.ru/maps/org/byutiflaybar/121813740989/reviews/?add-review=true&ll=37.289422%2C55.466536&mode=search&sll=37.292712%2C55.466700&source=serp_navig&sspn=0.009790%2C0.009650&tab=reviews&text=%D0%91%D1%8C%D1%8E%D1%82%D0%B8%D0%A4%D0%BB%D0%B0%D0%B9%D0%91%D0%B0%D1%80%20%D0%A1%D1%82%D1%83%D0%B4%D0%B8%D1%8F%20%D1%8D%D0%BF%D0%B8%D0%BB%D1%8F%D1%86%D0%B8%D0%B8%20%D0%B8%20%D0%BF%D0%B5%D1%80%D0%BC%D0%B0%D0%BD%D0%B5%D0%BD%D1%82%D0%BD%D0%BE%D0%B3%D0%BE%20%D0%BC%D0%B0%D0%BA%D0%B8%D1%8F%D0%B6%D0%B0%20%D0%A2%D1%80%D0%BE%D0%B8%D1%86%D0%BA%D0%B8%D0%B9%20%D0%B1%D1%83%D0%BB%D1%8C%D0%B2%D0%B0%D1%80%2C%204%20%D0%A1%D0%BE%D0%BB%D0%BD%D0%B5%D1%87%D0%BD%D1%8B%D0%B9%20%D0%BC-%D0%BD%2C%20%D0%A2%D1%80%D0%BE%D0%B8%D1%86%D0%BA%20%D0%B3%D0%BE%D1%80.%20%D0%BE%D0%BA%D1%80%D1%83%D0%B3%2C%20%D0%A2%D1%80%D0%BE%D0%B8%D1%86%D0%BA%2C%20%D0%9C%D0%BE%D1%81%D0%BA%D0%B2%D0%B0&z=17.72',
 };
 
+export const STUDIO = {
+  title:     'Реснички, сестрички',
+  address:   'Троицкий бульвар, 4, Троицк, Москва',
+  lat:       55.466536,
+  lon:       37.289422,
+  phone:     '+7 495 123-45-67', // ПЛЕЙСХОЛДЕР — заменить на реальный телефон
+  schedule:  'Ежедневно 10:00–21:00',
+  mapYandex: REVIEW_URLS.yandex,
+  map2gis:   REVIEW_URLS['2gis'],
+};
+
 export const _GH_API = 'https://api.github.com/repos/IVAHUB84/PWA/contents/docs/posts.json';
 export const _GH_RAW = 'https://ivahub84.github.io/PWA/posts.json';
 

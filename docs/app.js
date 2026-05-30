@@ -18,6 +18,7 @@ import { renderReviewScreen } from './modules/review.js';
 import { renderAdminDashboard, renderAdminFeed, _clearPostImage, initPostForm, renderAdminClients, renderAdminPush, updatePushAudience } from './modules/admin.js';
 import { _ghRead } from './modules/github.js';
 import { initPush } from './modules/push.js';
+import { setCompanyData } from './modules/studio.js';
 
 // side-effect-only imports (registers window.* bindings)
 import './modules/consent.js';
@@ -163,12 +164,14 @@ async function initApp() {
     if (btn) btn.style.display = 'flex';
   }
   try {
-    const [catsRes, svcRes, staffRes, galleryRes] = await Promise.all([
+    const [catsRes, svcRes, staffRes, galleryRes, companyRes] = await Promise.all([
       YC.get(`/service_categories/${YC.company}`),
       YC.get(`/services/${YC.company}`),
       YC.get(`/book_staff/${YC.company}`),
       YC.get(`/book_services/${YC.company}`).catch(() => ({})),
+      YC.get(`/company/${YC.company}`).catch(() => ({})),
     ]);
+    setCompanyData(companyRes);
     const gallery = {};
     try {
       const galleryList = galleryRes && galleryRes.success !== false && galleryRes.data

@@ -2,6 +2,7 @@ import { YC } from './api.js';
 import { state, getService, getMaster, getStaffPrice } from './state.js';
 import { _hasRealAvatar, getInitials, esc, _fmtDatetime, hapticTap } from './utils.js';
 import { _loadStoredRecords } from './storage.js';
+import { renderStudioContacts } from './studio.js';
 
 function _setConfirmBtnEnabled(enabled) {
   const btn = document.querySelector('#s-slots .sticky-bottom .btn-primary');
@@ -92,6 +93,9 @@ export function updateConfirmScreen() {
       <div class="confirm-row-icon">👤</div>
       <div><div class="confirm-row-val">${esc(state._bookOtherName)}</div><div class="confirm-row-lbl">Запись для</div></div>
     </div>` : ''}`;
+
+  const contacts = document.getElementById('confirmContacts');
+  if (contacts) contacts.innerHTML = renderStudioContacts({ variant: 'confirm' });
 }
 
 // ── DATE SELECTION ──

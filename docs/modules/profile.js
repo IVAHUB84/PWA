@@ -4,6 +4,7 @@ import { _loadClientLoyalty } from './api.js';
 import { MASTERS_DATA } from './state.js';
 import { getInitials, esc, _fmtDatetime, _hasRealAvatar } from './utils.js';
 import { _loadReviewedIds, _loadDismissedRateIds, _saveDismissedRateId } from './review.js';
+import { renderStudioContacts } from './studio.js';
 
 export function renderProfileScreen() {
   const s = getSession();
@@ -58,6 +59,9 @@ export function renderProfileScreen() {
   }
 
   _initThemeUI();
+
+  const studioEl = document.getElementById('profileStudioContacts');
+  if (studioEl) studioEl.innerHTML = renderStudioContacts({ variant: 'profile' });
 }
 
 export function renderHomeHero() {
