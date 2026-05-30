@@ -1,6 +1,6 @@
 import { YC } from './api.js';
 import { go } from './navigation.js';
-import { esc, hapticTap } from './utils.js';
+import { esc, hapticTap, _localISODate } from './utils.js';
 import { PUSH_TEMPLATES } from './constants.js';
 import { sendAdminPush, subscribePush, initPush } from './push.js';
 import { _ghPullToLocal, _ghSyncPosts } from './github.js';
@@ -129,7 +129,7 @@ export async function renderAdminDashboard() {
   const dateEl      = document.getElementById('adminTodayDate');
   if (dateEl) dateEl.textContent = new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
   if (bookingList) bookingList.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-2);">Загрузка…</div>';
-  const today = new Date().toISOString().slice(0, 10);
+  const today = _localISODate();
   const r = await YC.get(`/records/${YC.company}`, { start_date: today, end_date: today, count: 50 });
   if (!r.success || !r.data) {
     if (bookingList) bookingList.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-2);">Нет данных</div>';

@@ -4,6 +4,24 @@ export function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
+// Локальная дата YYYY-MM-DD без UTC-сдвига (toISOString даёт UTC → ночью off-by-one).
+export function _localISODate(d = new Date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+// Безопасный разбор JSON из localStorage: битый/отсутствующий ключ не роняет рендер.
+export function _safeParse(str, fallback) {
+  try {
+    const v = JSON.parse(str);
+    return v == null ? fallback : v;
+  } catch {
+    return fallback;
+  }
+}
+
 export function getInitials(name) {
   if (!name) return '?';
   return name.trim().split(/\s+/).map(w => w[0] || '').join('').slice(0, 2).toUpperCase() || '?';

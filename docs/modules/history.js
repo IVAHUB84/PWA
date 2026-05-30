@@ -136,7 +136,7 @@ export function renderUpcomingScreen() {
   const draw = () => {
     const now = new Date();
     const upcoming = _loadStoredRecords()
-      .filter(r => r.status !== 'cancelled' && new Date(r.datetime.replace(' ', 'T')) > now)
+      .filter(r => r.status !== 'cancelled' && r.datetime && new Date(r.datetime.replace(' ', 'T')) > now)
       .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
     el.innerHTML = upcoming.length
       ? _upcomingListHtml(upcoming, { withHeader: false })
@@ -157,9 +157,9 @@ export function _renderHistoryFromCache() {
   const reviewedIds = new Set(_loadReviewedIds());
   const now = new Date();
   const upcoming = records
-    .filter(r => new Date(r.datetime.replace(' ', 'T')) > now)
+    .filter(r => r.datetime && new Date(r.datetime.replace(' ', 'T')) > now)
     .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
-  let past = records.filter(r => new Date(r.datetime.replace(' ', 'T')) <= now);
+  let past = records.filter(r => r.datetime && new Date(r.datetime.replace(' ', 'T')) <= now);
 
   if (_histFrom) past = past.filter(r => new Date(r.datetime.replace(' ', 'T')) >= _histFrom);
   if (_histTo)   past = past.filter(r => new Date(r.datetime.replace(' ', 'T')) <= _histTo);

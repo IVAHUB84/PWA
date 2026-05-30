@@ -1,5 +1,5 @@
 import { go } from './navigation.js';
-import { esc } from './utils.js';
+import { esc, _safeParse } from './utils.js';
 import { state, SERVICES_DATA } from './state.js';
 
 const _CAT_GRADS = {
@@ -34,7 +34,7 @@ export async function renderClientFeed() {
   const el = document.getElementById('feedList');
   if (!el) return;
 
-  const cached = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => !p.draft);
+  const cached = _safeParse(localStorage.getItem('yc_feed_posts'), []).filter(p => !p.draft);
   if (cached.length) {
     _renderFeedCats();
     _paintFeed(el, cached);
@@ -128,7 +128,7 @@ export function _feedFilterCat(filter) {
   });
   const el = document.getElementById('feedList');
   if (!el) return;
-  const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => !p.draft);
+  const posts = _safeParse(localStorage.getItem('yc_feed_posts'), []).filter(p => !p.draft);
   const filtered = _applyFeedFilter(posts, filter);
   _paintFeed(el, filtered);
 }
@@ -160,7 +160,7 @@ export function _feedGoBook(type, ref) {
 }
 
 export function _openFeedPost(id) {
-  const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => !p.draft);
+  const posts = _safeParse(localStorage.getItem('yc_feed_posts'), []).filter(p => !p.draft);
   const post = posts.find(p => String(p.id) === String(id));
   if (post) {
     state._openPostId = post.id;
@@ -173,7 +173,7 @@ export function _openFeedPost(id) {
 export function renderPostScreen() {
   const el = document.getElementById('postCard');
   if (!el) return;
-  const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => !p.draft);
+  const posts = _safeParse(localStorage.getItem('yc_feed_posts'), []).filter(p => !p.draft);
   const post = posts.find(p => String(p.id) === String(state._openPostId));
   if (!post) {
     go('s-feed', 'replace');

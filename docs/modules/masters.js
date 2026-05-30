@@ -1,7 +1,7 @@
 import { state, MASTERS_DATA, getService, staffServicePrice } from './state.js';
 import { go } from './navigation.js';
 import { YC, fetchStaffByService } from './api.js';
-import { _hasRealAvatar, getInitials, esc, _fmtPrice, hapticTap } from './utils.js';
+import { _hasRealAvatar, getInitials, esc, _fmtPrice, hapticTap, _safeParse } from './utils.js';
 import { bookWithMaster } from './booking.js';
 
 const _staffByServiceCache = new Map();
@@ -75,7 +75,7 @@ export async function renderMasters() {
   if (sub) sub.textContent = `${svc.name} · ${svc.dur} мин`;
 
   const serviceId = state.serviceId;
-  const favs = JSON.parse(localStorage.getItem('yc_favs') || '[]');
+  const favs = _safeParse(localStorage.getItem('yc_favs'), []);
 
   let staffResult;
   if (_staffByServiceCache.has(serviceId)) {

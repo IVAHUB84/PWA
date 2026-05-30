@@ -33,6 +33,7 @@ function _saveBookedRecord(rec) {
     ycStaffId, ycSvcId,
     datetime, price: _getBookingPrice(svc, m), dur: svc.dur, status: 'upcoming',
     forName: state._bookOtherName || '',
+    createdAt: Date.now(),
   });
   localStorage.setItem('yc_records', JSON.stringify(records));
 }
@@ -47,6 +48,11 @@ async function _bookWithSession(session) {
   try {
     const svc = getService();
     const m = getMaster();
+    const svcIdNum = parseInt(svc.id, 10);
+    if (!Number.isInteger(svcIdNum) || svcIdNum <= 0) {
+      alert('Услуги ещё загружаются. Подождите пару секунд и попробуйте снова.');
+      return;
+    }
     const datetime = `${state.dateISO || new Date().toISOString().slice(0, 10)} ${state.slot || '10:00'}:00`;
     const isForOther = !!(state._bookOtherName);
     let bookPhone = isForOther ? _normalizePhone(state._bookOtherPhone || '') : (session.phone || '');
@@ -66,7 +72,7 @@ async function _bookWithSession(session) {
       phone: bookPhone,
       fullname: bookName,
       email: bookEmail,
-      appointments: [{ id: 1, services: [parseInt(svc.id) || 0], staff_id: m ? parseInt(m.id) : 0, datetime }],
+      appointments: [{ id: 1, services: [svcIdNum], staff_id: m ? parseInt(m.id) : 0, datetime }],
       notify_by_sms: 1,
     };
     const r = await YC.post(`/book_record/${YC.company}`, body);

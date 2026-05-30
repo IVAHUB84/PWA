@@ -2,7 +2,7 @@ import { getSession, _loadStoredRecords } from './storage.js';
 import { getPreferences } from './push.js';
 import { _loadClientLoyalty } from './api.js';
 import { MASTERS_DATA } from './state.js';
-import { getInitials, esc, _fmtDatetime, _hasRealAvatar } from './utils.js';
+import { getInitials, esc, _fmtDatetime, _hasRealAvatar, _safeParse } from './utils.js';
 import { _loadReviewedIds, _loadDismissedRateIds, _saveDismissedRateId } from './review.js';
 import { renderStudioContacts } from './studio.js';
 
@@ -87,7 +87,7 @@ export function renderHomeHero() {
   const records = _loadStoredRecords();
   const now = new Date();
   const upcoming = records
-    .filter(r => r.status !== 'cancelled' && new Date(r.datetime.replace(' ', 'T')) > now)
+    .filter(r => r.status !== 'cancelled' && r.datetime && new Date(r.datetime.replace(' ', 'T')) > now)
     .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
   const next = upcoming[0] || null;
 
@@ -98,7 +98,7 @@ export function renderHomeHero() {
     const dismissedIds = new Set(_loadDismissedRateIds());
     const sevenDaysAgo = new Date(now - 7 * 86400000);
     const lastUnreviewed = records
-      .filter(r => r.status !== 'cancelled')
+      .filter(r => r.status !== 'cancelled' && r.datetime)
       .filter(r => { const dt = new Date(r.datetime.replace(' ', 'T')); return dt <= now && dt >= sevenDaysAgo; })
       .filter(r => !reviewedIds.has(String(r.id)))
       .filter(r => !dismissedIds.has(String(r.id)))
@@ -140,7 +140,7 @@ export function _renderHomeFeedPreview() {
   const el = document.getElementById('homeFeedPreview');
   const sec = document.getElementById('homeFeedSection');
   if (!el) return;
-  const posts = JSON.parse(localStorage.getItem('yc_feed_posts') || '[]').filter(p => !p.draft);
+  const posts = _safeParse(localStorage.getItem('yc_feed_posts'), []).filter(p => !p.draft);
   if (!posts.length) {
     el.style.display = 'none';
     if (sec) sec.style.display = 'none';

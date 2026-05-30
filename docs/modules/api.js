@@ -95,8 +95,12 @@ export async function _fetchAndMergeServerRecords(clientId) {
     const localCancelledIds = new Set(local.filter(r => r.status === 'cancelled').map(r => String(r.id)));
     const filteredServer = serverRecords.filter(r => !localCancelledIds.has(String(r.id)));
     const serverIds = new Set(filteredServer.map(r => String(r.id)));
+    // Грейс-период: только что созданная бронь может ещё не появиться в /records
+    // (задержка репликации YCLIENTS) — не помечаем её отменённой раньше времени.
+    const FRESH_GRACE_MS = 10 * 60 * 1000;
     const localOnly = local.filter(r => !serverIds.has(String(r.id))).map(r => {
-      if (r.status === 'upcoming' && r.id && !isNaN(Number(r.id))) return { ...r, status: 'cancelled' };
+      const isFresh = r.createdAt && (Date.now() - r.createdAt) < FRESH_GRACE_MS;
+      if (r.status === 'upcoming' && r.id && !isNaN(Number(r.id)) && !isFresh) return { ...r, status: 'cancelled' };
       return r;
     });
     const merged = [...filteredServer, ...localOnly];

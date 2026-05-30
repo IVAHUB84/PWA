@@ -1,6 +1,6 @@
 import { YC } from './api.js';
 import { state, getService, getMaster, getStaffPrice } from './state.js';
-import { _hasRealAvatar, getInitials, esc, _fmtDatetime, hapticTap } from './utils.js';
+import { _hasRealAvatar, getInitials, esc, _fmtDatetime, hapticTap, _localISODate } from './utils.js';
 import { _loadStoredRecords } from './storage.js';
 import { renderStudioContacts } from './studio.js';
 
@@ -140,7 +140,7 @@ function _renderDates(container, availDates) {
   for (let i = 0; i < 21; i++) {
     const d = new Date(today);
     d.setDate(today.getDate() + i);
-    const iso = d.toISOString().slice(0, 10);
+    const iso = _localISODate(d);
     if (!set.has(iso)) continue;
     const day = RU_DAYS[d.getDay()];
     const num = d.getDate();
@@ -152,18 +152,18 @@ function _renderDates(container, availDates) {
 }
 
 function _renderDatesFallback(container) {
-  _updateMonthLabel(new Date().toISOString().slice(0, 10));
+  _updateMonthLabel(_localISODate());
   const RU_DAYS = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
   const today = new Date();
   let html = '';
   for (let i = 0; i < 7; i++) {
     const d = new Date(today);
     d.setDate(today.getDate() + i);
-    const iso = d.toISOString().slice(0, 10);
+    const iso = _localISODate(d);
     html += `<div class="date-item${i === 0 ? ' sel' : ''}" onclick="selectDate(this,'${iso}')"><div class="date-day">${RU_DAYS[d.getDay()]}</div><div class="date-num">${d.getDate()}</div></div>`;
   }
   container.innerHTML = html;
-  loadTimes(new Date().toISOString().slice(0, 10));
+  loadTimes(_localISODate());
 }
 
 // ── TIME SELECTION ──
