@@ -223,10 +223,12 @@ export async function handleSend(req, env, _sendOne = sendOne) {
   if (req.headers.get('X-Admin-Secret') !== env.ADMIN_SECRET) return new Response('Unauthorized', { status: 401 });
   let body;
   try { body = await req.json(); } catch { return json({ error: 'bad_json' }, 400); }
-  const { title, body: text, targetClientId } = body;
+  const { title, body: text, targetClientId, target } = body;
   if (!title || !text) return json({ error: 'missing_fields' }, 400);
 
-  const payload = JSON.stringify({ title, body: text, icon: './icon-192.png' });
+  const payloadData = { title, body: text, icon: './icon-192.png' };
+  if (target !== undefined) payloadData.target = target;
+  const payload = JSON.stringify(payloadData);
   let sent = 0, failed = 0;
 
   const prefsCache = new Map();
@@ -364,6 +366,7 @@ export async function handleCron(env, _sendOne = sendOne, _nowMs = null) {
       title: 'Реснички · Напоминание о визите',
       body: payloadBody,
       icon: './icon-192.png',
+      target: { type: 'records' },
     });
 
     let anySuccess = false;
