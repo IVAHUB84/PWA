@@ -168,7 +168,7 @@ async function initApp() {
       YC.get(`/services/${YC.company}`),
       YC.get(`/book_staff/${YC.company}`),
       YC.get(`/book_services/${YC.company}`).catch(() => ({})),
-      YC.get(`/company/${YC.company}`).catch(() => ({})),
+      YC.get(`/companies?id=${YC.company}`).catch(() => ({})),
     ]);
     setCompanyData(companyRes);
     const gallery = {};

@@ -1111,51 +1111,108 @@ button:not(.tab-center-btn):not(.tab):active {
   font-size: 15px;
   font-weight: 700;
   color: var(--text);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 .studio-contacts__row {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
-  margin-bottom: 6px;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
 }
-.studio-contacts__label {
-  font-size: 12px;
-  color: var(--text-2);
+.studio-contacts__icon {
   flex-shrink: 0;
-  min-width: 56px;
+  width: 18px;
+  height: 18px;
+  color: var(--text-2);
+  margin-top: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.studio-contacts__icon svg {
+  width: 16px;
+  height: 16px;
 }
 .studio-contacts__val {
   font-size: 14px;
   color: var(--text);
+  line-height: 1.45;
 }
-.studio-contacts__phone {
+.studio-contacts__dash {
+  color: var(--text-2);
+}
+.studio-contacts__link {
   font-size: 14px;
   color: var(--accent);
-  font-weight: 600;
   text-decoration: none;
+  word-break: break-all;
+  line-height: 1.45;
 }
-.studio-contacts__phone:active { opacity: 0.7; }
+.studio-contacts__link:active { opacity: 0.7; }
 .studio-contacts__actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 12px;
+  margin-top: 14px;
 }
 .studio-contacts__map-btn {
-  flex: 1;
+  width: 100%;
   text-align: center;
-  text-decoration: none;
-  padding: 10px 0;
+  cursor: pointer;
 }
-.studio-contacts__2gis {
+
+/* ── MAP PICKER SHEET ──────────────────────────────────────────────────────── */
+.map-picker-sheet {
+  background: var(--bg);
+  border-radius: 20px 20px 0 0;
+  padding: 20px 16px 40px;
+  width: 100%;
+}
+.map-picker-title {
   font-size: 13px;
+  font-weight: 600;
   color: var(--text-2);
-  text-decoration: none;
-  padding: 10px 8px;
-  white-space: nowrap;
+  text-align: center;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
-.studio-contacts__2gis:active { opacity: 0.7; }
+.map-picker-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 4px;
+  border-bottom: 1px solid var(--border);
+  font-size: 16px;
+  color: var(--text);
+  text-decoration: none;
+  cursor: pointer;
+}
+.map-picker-item:last-of-type { border-bottom: none; }
+.map-picker-item:active { opacity: 0.6; }
+.map-picker-item__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.map-picker-cancel {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px;
+  border: none;
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--accent);
+  font-size: 16px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: center;
+}
+.map-picker-cancel:active { opacity: 0.7; }
 
 /* ── ADMIN DRILL-DOWN SHEETS ───────────────────────────────────────────────── */
 .sheet-phone {
