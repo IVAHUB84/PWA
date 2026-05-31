@@ -1,6 +1,7 @@
 import { EMAILJS, YC, _fetchAndMergeServerRecords } from './modules/api.js';
 import { getSession } from './modules/storage.js';
-import { state, MASTERS_DATA, SERVICES_DATA, setMastersData, setServicesData, servicePriceRange, staffServicePrice } from './modules/state.js';
+import { state, MASTERS_DATA, SERVICES_DATA, setMastersData, setServicesData, servicePriceRange, staffServicePrice, hydratePrices } from './modules/state.js';
+import { readCatalogSnapshot, writeCatalogSnapshot, readPricesSnapshot, writePricesSnapshot } from './modules/dataCache.js';
 import { _GRADS } from './modules/constants.js';
 import { _fmtPrice, _fmtPriceRange, _makeShort } from './modules/utils.js';
 import { registerOnEnter, navHistory } from './modules/navigation.js';
@@ -34,6 +35,9 @@ setAuthRenderFns({ renderHomeHero, renderProfileScreen, renderAdminDashboard });
 setBookingRenderFns({ renderHomeHero });
 setGhReadFn(_ghRead);
 
+let _lastHomeRefresh = 0;
+const HOME_REFRESH_THROTTLE_MS = 60 * 1000;
+
 // ── ON-ENTER HANDLERS ──
 registerOnEnter('s-services', () => {
   if (!state._masterJustSelected) {
@@ -58,13 +62,16 @@ registerOnEnter('s-upcoming', () => renderUpcomingScreen());
 registerOnEnter('s-home', () => {
   renderHomeHero();
   updateInboxBadge();
+  const now = Date.now();
+  if (now - _lastHomeRefresh < HOME_REFRESH_THROTTLE_MS) return; // рендер из локального состояния выше уже выполнен; пропускается только сеть
+  _lastHomeRefresh = now;
   const sess = getSession();
   if (sess && sess.client_id) {
     _fetchAndMergeServerRecords(sess.client_id).then(() => renderHomeHero());
   }
   _ghRead().then(gh => {
     if (gh && gh.sha !== null && gh.posts.length) {
-      localStorage.setItem('yc_feed_posts', JSON.stringify(gh.posts.filter(p => !p.draft)));
+      try { localStorage.setItem('yc_feed_posts', JSON.stringify(gh.posts.filter(p => !p.draft))); } catch {}
       _renderHomeFeedPreview();
     }
   });
@@ -202,7 +209,6 @@ async function initApp() {
       SERVICES_DATA.forEach(s => {
         if (gallery[s.id] && gallery[s.id].length) s.photos = gallery[s.id];
       });
-      renderServices();
     }
     applyPendingTarget();
     if (staffRes.success && staffRes.data && staffRes.data.length) {
@@ -222,6 +228,9 @@ async function initApp() {
       }));
     } else {
       console.warn('book_staff API failed or empty:', staffRes);
+    }
+    if (svcRes.success && svcRes.data && svcRes.data.length) {
+      writeCatalogSnapshot(SERVICES_DATA, MASTERS_DATA);
     }
     renderHomeHero();
     renderServices();
@@ -262,6 +271,9 @@ async function _collectStaffPrices() {
       s.priceStr = _fmtPriceRange(range.min, range.max);
     }
   });
+  if (Object.keys(servicePriceRange).length > 0) {
+    writePricesSnapshot(servicePriceRange, staffServicePrice);
+  }
   renderServices();
 }
 
@@ -284,6 +296,24 @@ document.addEventListener('touchstart', () => {}, { passive: true });
 // ── BOOT ──
 attachInstallListeners();
 parseTargetParam();
+
+// Синхронная гидрация из снимка — мгновенный первый кадр при повторном старте
+(function _hydrateFromCache() {
+  const catalogSnap = readCatalogSnapshot();
+  if (catalogSnap) {
+    setServicesData(catalogSnap.services);
+    setMastersData(catalogSnap.masters);
+  }
+  const pricesSnap = readPricesSnapshot();
+  if (pricesSnap) {
+    hydratePrices(pricesSnap);
+    SERVICES_DATA.forEach(s => {
+      const range = servicePriceRange[s.id];
+      if (range) s.priceStr = _fmtPriceRange(range.min, range.max);
+    });
+  }
+})();
+
 renderServices();
 (function checkSession() {
   const sess = getSession();
@@ -298,7 +328,7 @@ renderServices();
     updateInboxBadge();
     _ghRead().then(gh => {
       if (gh && gh.sha !== null && gh.posts.length) {
-        localStorage.setItem('yc_feed_posts', JSON.stringify(gh.posts.filter(p => !p.draft)));
+        try { localStorage.setItem('yc_feed_posts', JSON.stringify(gh.posts.filter(p => !p.draft))); } catch {}
         _renderHomeFeedPreview();
       }
     });

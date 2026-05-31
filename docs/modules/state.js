@@ -29,6 +29,16 @@ export function setMastersData(data) { MASTERS_DATA = data; }
 export const servicePriceRange = {};
 export const staffServicePrice = {};
 
+export function hydratePrices(priceSnapshot) {
+  Object.keys(servicePriceRange).forEach(k => { delete servicePriceRange[k]; });
+  Object.keys(staffServicePrice).forEach(k => { delete staffServicePrice[k]; });
+  if (!priceSnapshot) return;
+  Object.entries(priceSnapshot.servicePriceRange).forEach(([k, v]) => {
+    if (v && Number.isFinite(v.min) && Number.isFinite(v.max)) servicePriceRange[k] = v;
+  });
+  Object.assign(staffServicePrice, priceSnapshot.staffServicePrice);
+}
+
 export const state = {
   category: 'Все',
   searchQ: '',
