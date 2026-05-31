@@ -176,9 +176,11 @@ function _buildCell(y, m, dayNum, availSet, today, todayY, todayM, todayD, selIS
   if (!isAvail || isPast) cls += ' unavail';
 
   if (isAvail && !isPast) {
-    return `<div class="${cls}" onclick="calSelectDate('${iso}')">${dayNum}</div>`;
+    const monthNames = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+    const label = `${dayNum} ${monthNames[m]}`;
+    return `<div class="${cls}" role="button" tabindex="0" aria-label="${label}" onclick="calSelectDate('${iso}')">${dayNum}</div>`;
   }
-  return `<div class="${cls}">${dayNum}</div>`;
+  return `<div class="${cls}" aria-hidden="true">${dayNum}</div>`;
 }
 
 export async function loadDates() {
@@ -467,7 +469,7 @@ export async function loadTimes(iso) {
     const times = buckets[period.key];
     if (!times.length) return;
     html += `<div class="slot-period">
-      <div class="slot-period-hdr" onclick="toggleSlotPeriod(this)">
+      <div class="slot-period-hdr" role="button" tabindex="0" aria-label="${esc(period.label)}" onclick="toggleSlotPeriod(this)">
         <span>${esc(period.label)}</span>
         <svg class="slot-period-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
       </div>

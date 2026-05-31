@@ -14,12 +14,13 @@ function _masterCardHtml(m, i, total, priceStr) {
   const styles = [...(m.avail ? [] : ['opacity:0.55']), ...(last ? ['margin-bottom:24px'] : [])];
   const styleAttr = styles.length ? ` style="${styles.join(';')}"` : '';
   const click = m.avail ? ` data-mid="${esc(m.id)}" onclick="tapMaster(this.dataset.mid)"` : '';
+  const roleAttrs = m.avail ? ` role="button" tabindex="0" aria-label="${esc(m.name)}"` : '';
   const initStr = getInitials(m.name);
   const avatarInner = _hasRealAvatar(m)
     ? `<img src="${esc(m.avatar_big || m.avatar)}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<div class=&quot;av-initials&quot;>${initStr}</div>')">`
     : `<div class="av-initials">${initStr}</div>`;
   const priceHtml = priceStr ? `<div class="master-price">${esc(priceStr)}</div>` : '';
-  return `<div class="master-card${m.fav ? ' fav' : ''}"${styleAttr}${click}>
+  return `<div class="master-card${m.fav ? ' fav' : ''}"${styleAttr}${click}${roleAttrs}>
     <div class="master-av" style="background:${m.grad};">${avatarInner}</div>
     <div class="master-info">
       <div class="master-name">${esc(m.name)}${favChip}</div>

@@ -1,6 +1,6 @@
 import { state, SERVICES_DATA, staffServicePrice } from './state.js';
 import { go, registerOnEnter } from './navigation.js';
-import { esc, _fmtPrice, hapticTap } from './utils.js';
+import { esc, _fmtPrice, hapticTap, prefersReducedMotion } from './utils.js';
 import { YC } from './api.js';
 import { resolveServiceImage } from './serviceImages.js';
 
@@ -31,26 +31,47 @@ export function _clearMasterFilter() {
 export function _openCatFilter() {
   const cats = [...new Set(SERVICES_DATA.map(s => s.cat))].filter(Boolean);
   const current = state.category || 'Все';
+  const returnFocusTo = document.activeElement?.focus ? document.activeElement : null;
   const overlay = document.createElement('div');
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;display:flex;align-items:flex-end;';
   overlay.dataset.catOverlay = '1';
+
+  const allLabel = 'Все категории';
   overlay.innerHTML = `<div style="background:var(--bg);width:100%;border-radius:24px 24px 0 0;padding:20px 0 32px;max-width:393px;margin:0 auto;">
     <div style="width:36px;height:4px;background:var(--border);border-radius:4px;margin:0 auto 20px;"></div>
     <div style="font-size:17px;font-weight:800;padding:0 20px 12px;">Категория</div>
     <div class="settings-group" style="margin:0 20px 0;">
-      <div class="s-row" data-cat="Все" onclick="_pickCat(this.dataset.cat)" style="justify-content:space-between;">
-        <span class="s-lbl">Все категории</span>
-        ${current === 'Все' ? '<span style="color:var(--accent);font-size:18px;">✓</span>' : ''}
+      <div class="s-row" role="button" tabindex="0" data-cat="Все" aria-label="${esc(allLabel)}${current === 'Все' ? ', выбрано' : ''}" onclick="_pickCat(this.dataset.cat)" style="justify-content:space-between;">
+        <span class="s-lbl">${esc(allLabel)}</span>
+        ${current === 'Все' ? '<span style="color:var(--accent);font-size:18px;" aria-hidden="true">✓</span>' : ''}
       </div>
       ${cats.map(c => `
-      <div class="s-row" data-cat="${esc(c)}" onclick="_pickCat(this.dataset.cat)" style="justify-content:space-between;">
+      <div class="s-row" role="button" tabindex="0" data-cat="${esc(c)}" aria-label="${esc(c)}${current === c ? ', выбрано' : ''}" onclick="_pickCat(this.dataset.cat)" style="justify-content:space-between;">
         <span class="s-lbl">${esc(c)}</span>
-        ${current === c ? '<span style="color:var(--accent);font-size:18px;">✓</span>' : ''}
+        ${current === c ? '<span style="color:var(--accent);font-size:18px;" aria-hidden="true">✓</span>' : ''}
       </div>`).join('')}
     </div>
   </div>`;
-  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+
+  function close() {
+    overlay.remove();
+    document.removeEventListener('keydown', onKeyDown);
+    try { returnFocusTo?.focus(); } catch {}
+  }
+
+  function onKeyDown(e) {
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      close();
+    }
+  }
+
+  overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+  document.addEventListener('keydown', onKeyDown);
   document.body.appendChild(overlay);
+
+  const firstRow = overlay.querySelector('.s-row');
+  if (firstRow) firstRow.focus();
 }
 
 export function _pickCat(cat) {
@@ -88,7 +109,7 @@ function _renderList(data) {
     const coverHtml = img.type === 'photo'
       ? `<img class="svc-cover-img" src="${esc(img.src)}" alt="${esc(s.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="svc-cover-placeholder" style="background:${esc(img.grad)};display:none">${esc(img.emoji)}</div>`
       : `<div class="svc-cover-placeholder" style="background:${esc(img.grad)}">${esc(img.emoji)}</div>`;
-    return `<div class="svc-catalog-card" data-sid="${esc(s.id)}" onclick="selectService(this.dataset.sid)">
+    return `<div class="svc-catalog-card" role="button" tabindex="0" data-sid="${esc(s.id)}" aria-label="${esc(s.name)}" onclick="selectService(this.dataset.sid)">
       <div class="svc-cover">${coverHtml}</div>
       <div class="svc-info">
         <div class="svc-name">${esc(s.name)}</div>
@@ -199,7 +220,8 @@ function _initCarousel(container, s) {
   }
 
   function setPos(idx, animate) {
-    if (!animate) {
+    const shouldAnimate = animate && !prefersReducedMotion();
+    if (!shouldAnimate) {
       track.style.transition = 'none';
       track.style.transform = `translateX(${translateForIdx(idx)}px)`;
       track.getBoundingClientRect();
