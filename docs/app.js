@@ -20,6 +20,7 @@ import { renderAdminDashboard, renderAdminFeed, _clearPostImage, initPostForm, r
 import { _ghRead } from './modules/github.js';
 import { initPush } from './modules/push.js';
 import { setCompanyData } from './modules/studio.js';
+import { setOfflineBanner } from './modules/ui.js';
 
 // side-effect-only imports (registers window.* bindings)
 import './modules/consent.js';
@@ -231,11 +232,17 @@ async function initApp() {
     }
     if (svcRes.success && svcRes.data && svcRes.data.length) {
       writeCatalogSnapshot(SERVICES_DATA, MASTERS_DATA);
+      if (navigator.onLine) setOfflineBanner(null);
+    } else if (_hydratedFromSnapshot && navigator.onLine) {
+      setOfflineBanner('stale');
     }
     renderHomeHero();
     renderServices();
     _collectStaffPrices();
-  } catch(e) { console.error('initApp failed', e); }
+  } catch(e) {
+    console.error('initApp failed', e);
+    if (_hydratedFromSnapshot && navigator.onLine) setOfflineBanner('stale');
+  }
   initPush();
 }
 
@@ -297,12 +304,19 @@ document.addEventListener('touchstart', () => {}, { passive: true });
 attachInstallListeners();
 parseTargetParam();
 
+if (!navigator.onLine) setOfflineBanner('offline');
+window.addEventListener('offline', () => setOfflineBanner('offline'));
+window.addEventListener('online', () => setOfflineBanner(null));
+
+let _hydratedFromSnapshot = false;
+
 // Синхронная гидрация из снимка — мгновенный первый кадр при повторном старте
 (function _hydrateFromCache() {
   const catalogSnap = readCatalogSnapshot();
   if (catalogSnap) {
     setServicesData(catalogSnap.services);
     setMastersData(catalogSnap.masters);
+    _hydratedFromSnapshot = true;
   }
   const pricesSnap = readPricesSnapshot();
   if (pricesSnap) {
