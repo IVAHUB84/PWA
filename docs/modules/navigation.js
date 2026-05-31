@@ -1,5 +1,6 @@
 import { DUR, EASE } from './constants.js';
 import { state } from './state.js';
+import { prefersReducedMotion } from './utils.js';
 
 export let navHistory = ['s-home'];
 
@@ -23,7 +24,8 @@ function _clearAnimTimers() {
 
 export function setTx(el, x, animated) {
   if (!el) return;
-  const t = animated ? `transform ${DUR}ms ${EASE}` : 'none';
+  const shouldAnimate = animated && !prefersReducedMotion();
+  const t = shouldAnimate ? `transform ${DUR}ms ${EASE}` : 'none';
   const v = x === 0 ? '' : `translateX(${x}%)`;
   el.style.webkitTransition = t;
   el.style.transition = t;
@@ -42,6 +44,21 @@ function _cleanEl(el) {
 function onEnterScreen(id) {
   const handler = _onEnterHandlers[id];
   if (handler) handler();
+}
+
+export function focusTargetSelector(screenEl) {
+  if (!screenEl) return null;
+  const heading = screenEl.querySelector('.page-title, .section-title');
+  if (heading) return heading;
+  return screenEl;
+}
+
+function _transferFocus(toEl) {
+  const target = focusTargetSelector(toEl);
+  if (!target) return;
+  if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+  if (toEl.contains(document.activeElement)) return;
+  target.focus({ preventScroll: true });
 }
 
 export function go(id, mode) {
@@ -74,6 +91,7 @@ export function go(id, mode) {
     _cleanEl(toEl);
     navHistory = [id];
     onEnterScreen(id);
+    _transferFocus(toEl);
   } else {
     setTx(toEl, 100, false);
     toEl.classList.add('active');
@@ -88,13 +106,15 @@ export function go(id, mode) {
     }
 
     const targetId = id;
+    const delay = prefersReducedMotion() ? 0 : DUR + 20;
     _animTimers.push(setTimeout(() => {
       if (navHistory[navHistory.length - 1] !== targetId) return;
       if (fromEl) fromEl.classList.remove('active');
       _cleanEl(fromEl);
       _cleanEl(toEl);
       onEnterScreen(targetId);
-    }, DUR + 20));
+      _transferFocus(toEl);
+    }, delay));
   }
 
   _updateDotsFn();
@@ -118,15 +138,31 @@ export function back() {
   setTx(fromEl, 100, true);
 
   const targetPrev = prev;
+  const delay = prefersReducedMotion() ? 0 : DUR + 20;
   _animTimers.push(setTimeout(() => {
     if (navHistory[navHistory.length - 1] !== targetPrev) return;
     fromEl.classList.remove('active');
     _cleanEl(fromEl);
     _cleanEl(toEl);
     onEnterScreen(targetPrev);
-  }, DUR + 20));
+    _transferFocus(toEl);
+  }, delay));
 
   _updateDotsFn();
+}
+
+if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+  document.addEventListener('DOMContentLoaded', () => {
+    const root = document.getElementById('phone');
+    if (!root) return;
+    root.addEventListener('keydown', e => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const target = e.target.closest('[role="button"]');
+      if (!target) return;
+      if (e.key === ' ') e.preventDefault();
+      target.click();
+    });
+  });
 }
 
 Object.assign(window, { go, back });
