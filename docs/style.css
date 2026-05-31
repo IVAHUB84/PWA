@@ -85,6 +85,22 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
 }
 
+/* ── FOCUS RING (a11y) ── */
+button, a, [role="button"], [tabindex], input, textarea, select {
+  -webkit-tap-highlight-color: transparent;
+}
+button:focus-visible, a:focus-visible, [role="button"]:focus-visible,
+[tabindex]:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+button:focus:not(:focus-visible), a:focus:not(:focus-visible),
+[role="button"]:focus:not(:focus-visible), [tabindex]:focus:not(:focus-visible),
+input:focus:not(:focus-visible), textarea:focus:not(:focus-visible),
+select:focus:not(:focus-visible) {
+  outline: none;
+}
+
 /* ── SCENARIO BAR ── */
 .scenario-bar {
   display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; align-items: flex-start;
@@ -1187,6 +1203,14 @@ button:not(.tab-center-btn):not(.tab):active {
   .chip:active, .feed-cat-chip:active, .consent-check:active,
   .tab:not(.tab-center):active, .pin-key:active { transform: none; }
   .tab-center-btn:active .tab-fab { transform: none; }
+  /* screen transitions */
+  .screen { -webkit-transition: none !important; transition: none !important; }
+  /* scale keyframes */
+  @keyframes pop { from {} to {} }
+  @keyframes tapPulse { from {} to {} }
+  @keyframes inboxBadgePulse { from {} to {} }
+  /* carousel track */
+  .svc-carousel-track { -webkit-transition: none !important; transition: none !important; }
 }
 
 /* ── STUDIO CONTACTS BLOCK ─────────────────────────────────────────────────── */
