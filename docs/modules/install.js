@@ -2,6 +2,21 @@ const INSTALL_KEY    = 'yc_install_state';
 const DISMISS_DAYS   = 30;
 const MOBILE_MAX_WIDTH = 767;
 
+export function isIosStandalone({ standalone, iosPlatform }) {
+  return standalone === true && iosPlatform === true;
+}
+
+export function detectIosStandalone() {
+  const standalone = isStandalone();
+  const ua = typeof navigator !== 'undefined' ? (navigator.userAgent || '') : '';
+  const platform = typeof navigator !== 'undefined' ? (navigator.platform || '') : '';
+  const maxTouch = typeof navigator !== 'undefined' ? (navigator.maxTouchPoints || 0) : 0;
+  const iosPlatform = /iphone|ipad|ipod/i.test(platform)
+    || (/mac/i.test(platform) && maxTouch > 1)
+    || isIOS(ua);
+  return isIosStandalone({ standalone, iosPlatform });
+}
+
 export function isStandalone() {
   const media = typeof window.matchMedia === 'function'
     ? window.matchMedia('(display-mode: standalone)').matches
@@ -46,7 +61,9 @@ export function hideOverlay() {
 }
 
 function _eligible() {
-  return !isStandalone() && shouldOffer() && window.innerWidth <= MOBILE_MAX_WIDTH && (deferredPrompt || isIOS());
+  if (isStandalone() || !shouldOffer()) return false;
+  if (deferredPrompt) return true;
+  return window.innerWidth <= MOBILE_MAX_WIDTH && isIOS();
 }
 
 export function refreshInstallBanner() {
@@ -107,8 +124,11 @@ export function maybeShowInstallOverlay() {
 }
 
 export function initInstall() {
+  if (detectIosStandalone()) {
+    document.documentElement.classList.add('ios-standalone');
+  }
   attachInstallListeners();
   maybeShowInstallOverlay();
 }
 
-Object.assign(window, { initInstall, attachInstallListeners, maybeShowInstallOverlay, isStandalone, isIOS, shouldOffer, readState, writeState, showOverlay, hideOverlay, refreshInstallBanner, triggerInstall, dismissInstall });
+Object.assign(window, { initInstall, attachInstallListeners, maybeShowInstallOverlay, isStandalone, isIOS, isIosStandalone, detectIosStandalone, shouldOffer, readState, writeState, showOverlay, hideOverlay, refreshInstallBanner, triggerInstall, dismissInstall });

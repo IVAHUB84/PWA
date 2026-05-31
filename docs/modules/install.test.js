@@ -32,7 +32,7 @@ Object.defineProperty(globalThis, 'navigator', {
 
 globalThis.window.matchMedia = () => ({ matches: false });
 
-const { isStandalone, isIOS, shouldOffer, dismissInstall, readState, triggerInstall, attachInstallListeners } = await import('./install.js');
+const { isStandalone, isIOS, isIosStandalone, shouldOffer, dismissInstall, readState, triggerInstall, attachInstallListeners } = await import('./install.js');
 
 let passed = 0;
 let failed = 0;
@@ -49,6 +49,14 @@ function assert(condition, label) {
 
 function assertEqual(a, b, label) {
   assert(a === b, `${label} (got: ${JSON.stringify(a)}, expected: ${JSON.stringify(b)})`);
+}
+
+console.log('\n-- isIosStandalone --');
+{
+  assert(isIosStandalone({ standalone: true,  iosPlatform: true  }) === true,  '{standalone:true,  iosPlatform:true}  → true');
+  assert(isIosStandalone({ standalone: true,  iosPlatform: false }) === false, '{standalone:true,  iosPlatform:false} → false');
+  assert(isIosStandalone({ standalone: false, iosPlatform: true  }) === false, '{standalone:false, iosPlatform:true}  → false');
+  assert(isIosStandalone({ standalone: false, iosPlatform: false }) === false, '{standalone:false, iosPlatform:false} → false');
 }
 
 console.log('\n-- isStandalone --');
