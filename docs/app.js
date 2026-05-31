@@ -27,7 +27,7 @@ import './modules/consent.js';
 import './modules/notifications.js';
 import './modules/search.js';
 import './modules/scenarios.js';
-import { attachInstallListeners, maybeShowInstallOverlay } from './modules/install.js';
+import { attachInstallListeners, maybeShowInstallOverlay, detectIosStandalone } from './modules/install.js';
 import { updateInboxBadge, enterInbox } from './modules/inbox.js';
 import { routeToTarget, parseTargetParam, applyPendingTarget } from './modules/inboxTarget.js';
 
@@ -301,6 +301,9 @@ async function _trySubscribeExistingSession() {
 document.addEventListener('touchstart', () => {}, { passive: true });
 
 // ── BOOT ──
+if (detectIosStandalone()) {
+  document.documentElement.classList.add('ios-standalone');
+}
 attachInstallListeners();
 parseTargetParam();
 
