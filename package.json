@@ -11,7 +11,7 @@
     "icons": "node docs/generate-icons.js",
     "lint": "eslint docs/modules docs/app.js",
     "fmt": "prettier --write docs/modules docs/app.js",
-    "test": "node docs/modules/install.test.js && node docs/modules/masters-filter.test.js && node docs/modules/serviceImages.test.js && node docs/modules/review-post.test.js && node docs/modules/post-comment-worker.test.js && node docs/modules/feed-typed-posts.test.js && node docs/modules/inboxTarget.test.js && node cf-worker/test/subscriptions.test.js && node cf-worker/test/preferences.test.js",
+    "test": "node docs/modules/install.test.js && node docs/modules/masters-filter.test.js && node docs/modules/serviceImages.test.js && node docs/modules/review-post.test.js && node docs/modules/post-comment-worker.test.js && node docs/modules/feed-typed-posts.test.js && node docs/modules/inboxTarget.test.js && node docs/modules/dataCache.test.js && node cf-worker/test/subscriptions.test.js && node cf-worker/test/preferences.test.js",
     "e2e": "node e2e/smoke.mjs"
   }
 }
