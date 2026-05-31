@@ -8,7 +8,7 @@ const _VALID_POST = p =>
 
 export async function _ghRead() {
   try {
-    const r = await fetch(_GH_RAW + '?_=' + Date.now());
+    const r = await fetch(_GH_RAW);
     if (r.status === 404) return { posts: [], ok: true };
     if (!r.ok) return null;
     const parsed = await r.json();
