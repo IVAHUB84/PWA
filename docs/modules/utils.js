@@ -120,6 +120,11 @@ export function _importanceLabel(importance) {
   }
 }
 
+export function prefersReducedMotion() {
+  if (typeof window === 'undefined' || !window.matchMedia) return false;
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
 /* ── HAPTIC ── */
 const _HAPTIC_PATTERNS = { select: 10, submit: 12, fab: 12, tap: 10 };
 let _reducedMotionMql = null;
