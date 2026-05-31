@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v87';
+const CACHE_VERSION = 'v88';
 const STATIC_CACHE  = `studio-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `studio-runtime-${CACHE_VERSION}`;
 
@@ -25,6 +25,7 @@ const APP_SHELL = [
   './modules/review.js',
   './modules/feed.js',
   './modules/admin.js',
+  './modules/dataCache.js',
   './modules/github.js',
   './modules/notifications.js',
   './modules/scenarios.js',
