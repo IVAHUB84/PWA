@@ -4,6 +4,8 @@ import { REVIEW_URLS } from './constants.js';
 import { getInitials, _hasRealAvatar, hapticTap } from './utils.js';
 import { postComment } from './api.js';
 import { getSession } from './storage.js';
+import { toast, errorSheet } from './ui.js';
+import { getCompanyContacts } from './studio.js';
 
 export function _loadReviewedIds() {
   try {
@@ -129,7 +131,7 @@ export async function submitReview() {
   const origLabel = btn ? btn.textContent : null;
 
   if (!state._reviewMasterId && !state._reviewRecordId) {
-    alert('Не удалось определить данные визита. Попробуйте снова из истории визитов.');
+    toast('Не удалось определить данные визита. Попробуйте снова из истории визитов.', 'error');
     if (btn) { btn.disabled = false; btn.textContent = origLabel; }
     return;
   }
@@ -147,11 +149,12 @@ export async function submitReview() {
 
   if (result.ok) {
     if (state._reviewRecordId) _saveReviewedId(state._reviewRecordId);
-    alert('Спасибо! Ваш отзыв отправлен.');
+    toast('Спасибо! Ваш отзыв отправлен.', 'success');
     go('s-home', 'tab');
   } else {
     if (btn) { btn.disabled = false; btn.textContent = origLabel; }
-    alert('Не удалось отправить отзыв. Проверьте соединение и попробуйте ещё раз.');
+    const phone = getCompanyContacts().phone;
+    errorSheet({ title: 'Ошибка отправки отзыва', message: 'Проверьте соединение и попробуйте ещё раз.', onRetry: () => submitReview(), phone });
   }
 }
 

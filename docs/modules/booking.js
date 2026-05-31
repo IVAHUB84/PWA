@@ -5,6 +5,8 @@ import { setAuthContext } from './storage.js';
 import { YC, _findClientByPhone } from './api.js';
 import { _loadStoredRecords } from './storage.js';
 import { getInitials, esc, _fmtDatetime, _normalizePhone, _hasRealAvatar, hapticTap } from './utils.js';
+import { toast, errorSheet } from './ui.js';
+import { getCompanyContacts } from './studio.js';
 
 // Callback for renderHomeHero — registered by app.js once profile.js is loaded
 let _renderHomeHeroFn = () => {};
@@ -50,7 +52,7 @@ async function _bookWithSession(session) {
     const m = getMaster();
     const svcIdNum = parseInt(svc.id, 10);
     if (!Number.isInteger(svcIdNum) || svcIdNum <= 0) {
-      alert('Услуги ещё загружаются. Подождите пару секунд и попробуйте снова.');
+      toast('Услуги ещё загружаются…', 'info');
       return;
     }
     const datetime = `${state.dateISO || new Date().toISOString().slice(0, 10)} ${state.slot || '10:00'}:00`;
@@ -81,7 +83,12 @@ async function _bookWithSession(session) {
       if (isForOther) { state._bookOtherName = ''; state._bookOtherPhone = ''; }
       go('s-confirm');
     } else {
-      alert((r.meta?.message || 'Не удалось создать запись. Попробуйте снова.').slice(0, 200));
+      const phone = getCompanyContacts().phone;
+      const message = esc((r.meta?.message || 'Не удалось создать запись. Попробуйте снова.').slice(0, 200));
+      _bookInProgress = false;
+      if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = state._rescheduleId ? 'Перенести запись' : 'Записаться'; }
+      errorSheet({ title: 'Ошибка записи', message, onRetry: () => startBooking(), phone });
+      return;
     }
   } finally {
     _bookInProgress = false;
@@ -122,7 +129,10 @@ async function _rescheduleWithSession(session) {
   try {
     const r = await YC.post(`/record/${YC.company}/${id}`, body, 'PUT');
     if (!r.success) {
-      alert(`Не удалось перенести запись: ${(r.meta?.message || 'ошибка сервера').slice(0, 200)}. Позвоните в студию.`);
+      const phone = getCompanyContacts().phone;
+      const message = esc((r.meta?.message || 'ошибка сервера').slice(0, 200));
+      _rescheduleInProgress = false;
+      errorSheet({ title: 'Не удалось перенести запись', message, onRetry: () => startBooking(), phone });
       return;
     }
     const records = _loadStoredRecords();
@@ -222,17 +232,19 @@ export async function confirmCancel() {
     if (res.status >= 400) {
       clearTimeout(cancelTid);
       if (btn) { btn.disabled = false; btn.textContent = 'Да, отменить запись'; }
-      const msg = (data?.meta?.message || `Ошибка ${res.status}`).slice(0, 200);
-      alert(`Не удалось отменить: ${msg}. Позвоните в студию.`);
+      const msg = esc((data?.meta?.message || `Ошибка ${res.status}`).slice(0, 200));
       _cancelInProgress = false;
+      const phone = getCompanyContacts().phone;
+      errorSheet({ title: 'Не удалось отменить запись', message: msg, onRetry: () => confirmCancel(), phone });
       return;
     }
     clearTimeout(cancelTid);
   } catch {
     clearTimeout(cancelTid);
     if (btn) { btn.disabled = false; btn.textContent = 'Да, отменить запись'; }
-    alert('Нет соединения с сервером. Попробуйте позже.');
     _cancelInProgress = false;
+    const phone = getCompanyContacts().phone;
+    errorSheet({ title: 'Нет соединения', message: 'Проверьте интернет и попробуйте снова.', onRetry: () => confirmCancel(), phone });
     return;
   }
 
@@ -243,6 +255,7 @@ export async function confirmCancel() {
   state._cancelHash = null;
   go('s-home', 'tab');
   _renderHomeHeroFn();
+  toast('Запись отменена', 'success');
   _cancelInProgress = false;
 }
 
@@ -268,11 +281,11 @@ export function _submitCrossSell() {
     .map(btn => btn.closest('.cs-card')?.querySelector('[style*="font-weight:700"]')?.textContent || '')
     .filter(Boolean);
   if (selected.length) {
-    const toast = document.createElement('div');
-    toast.style.cssText = 'position:fixed;bottom:100px;left:16px;right:16px;z-index:9999;background:var(--accent);color:#fff;border-radius:14px;padding:14px 16px;font-size:14px;font-weight:600;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.2);pointer-events:none;';
-    toast.textContent = 'Пожелания переданы — мастер будет в курсе';
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 2800);
+    const csToast = document.createElement('div');
+    csToast.style.cssText = 'position:fixed;bottom:100px;left:16px;right:16px;z-index:9999;background:var(--accent);color:#fff;border-radius:14px;padding:14px 16px;font-size:14px;font-weight:600;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.2);pointer-events:none;';
+    csToast.textContent = 'Пожелания переданы — мастер будет в курсе';
+    document.body.appendChild(csToast);
+    setTimeout(() => csToast.remove(), 2800);
   }
   go('s-home', 'tab');
 }
