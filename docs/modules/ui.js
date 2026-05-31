@@ -9,6 +9,52 @@ const _SHEET_HOST_ID = 'uiSheetHost';
 let _currentToastTimer = null;
 let _offlineMode = null;
 
+const _sheetStack = [];
+
+function _focusableInSheet(sheet) {
+  return Array.from(sheet.querySelectorAll(
+    'button, a[href], input, textarea, select, [tabindex]:not([tabindex="-1"])'
+  )).filter(el => !el.disabled);
+}
+
+function _mountSheet(overlay, { onClose, returnFocusTo }) {
+  const sheet = overlay.querySelector('.ui-sheet');
+
+  function onKeyDown(e) {
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      onClose();
+      return;
+    }
+    if (e.key === 'Tab' && sheet) {
+      const focusable = _focusableInSheet(sheet);
+      if (focusable.length === 0) { e.preventDefault(); return; }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
+  }
+
+  document.addEventListener('keydown', onKeyDown);
+  _sheetStack.push({ overlay, onClose, returnFocusTo, onKeyDown });
+
+  const focusable = sheet ? _focusableInSheet(sheet) : [];
+  if (focusable.length > 0) focusable[0].focus();
+}
+
+function _dismissSheet(overlay) {
+  const idx = _sheetStack.findIndex(s => s.overlay === overlay);
+  if (idx === -1) return;
+  const { onKeyDown, returnFocusTo } = _sheetStack[idx];
+  _sheetStack.splice(idx, 1);
+  document.removeEventListener('keydown', onKeyDown);
+  try { returnFocusTo?.focus(); } catch {}
+}
+
 function _toastHost() {
   let el = document.getElementById(_HOST_ID);
   if (!el) {
@@ -52,6 +98,7 @@ export function toast(message, type = 'info', opts = {}) {
 
 export function confirmSheet({ title, message, confirmText, cancelText = 'Отмена', danger = false }) {
   return new Promise(resolve => {
+    const returnFocusTo = document.activeElement?.focus ? document.activeElement : null;
     const overlay = document.createElement('div');
     overlay.className = 'ui-sheet-overlay';
 
@@ -68,6 +115,7 @@ export function confirmSheet({ title, message, confirmText, cancelText = 'Отм
       </div>`;
 
     function close(result) {
+      _dismissSheet(overlay);
       overlay.remove();
       resolve(result);
     }
@@ -77,10 +125,12 @@ export function confirmSheet({ title, message, confirmText, cancelText = 'Отм
     overlay.querySelector('#_uiSheetCancel').addEventListener('click', () => close(false));
 
     _sheetHost().appendChild(overlay);
+    _mountSheet(overlay, { onClose: () => close(false), returnFocusTo });
   });
 }
 
 export function errorSheet({ title, message, onRetry, phone }) {
+  const returnFocusTo = document.activeElement?.focus ? document.activeElement : null;
   const overlay = document.createElement('div');
   overlay.className = 'ui-sheet-overlay';
 
@@ -101,6 +151,7 @@ export function errorSheet({ title, message, onRetry, phone }) {
     </div>`;
 
   function close() {
+    _dismissSheet(overlay);
     overlay.remove();
   }
 
@@ -112,6 +163,7 @@ export function errorSheet({ title, message, onRetry, phone }) {
   overlay.querySelector('#_uiSheetClose').addEventListener('click', close);
 
   _sheetHost().appendChild(overlay);
+  _mountSheet(overlay, { onClose: close, returnFocusTo });
 }
 
 export function setOfflineBanner(mode) {
