@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v88';
+const CACHE_VERSION = 'v89';
 const STATIC_CACHE  = `studio-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `studio-runtime-${CACHE_VERSION}`;
 
@@ -22,6 +22,8 @@ const APP_SHELL = [
   './modules/history.js',
   './modules/profile.js',
   './modules/studio.js',
+  './modules/ui.js',
+  './modules/uiQueue.js',
   './modules/review.js',
   './modules/feed.js',
   './modules/admin.js',
